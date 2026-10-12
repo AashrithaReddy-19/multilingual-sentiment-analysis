@@ -72,7 +72,7 @@ from google.colab import drive, files
 drive.mount("/content/drive")
 DRIVE = Path("/content/drive/MyDrive/NLP_sentiment"); DRIVE.mkdir(parents=True, exist_ok=True)
 PKG_ZIP = DRIVE / "transformer_package.zip"
-print("Choose transformer_package.zip (D:\\NLP\\sentiment_app\\artifacts\\colab_package_phase3)" if not PKG_ZIP.exists()
+print("Choose transformer_package.zip (D:/NLP/sentiment_app/artifacts/colab_package_phase3)" if not PKG_ZIP.exists()
       else f"Using {PKG_ZIP} (delete it from Drive to upload a newer package)")
 if not PKG_ZIP.exists():
     up = files.upload()
