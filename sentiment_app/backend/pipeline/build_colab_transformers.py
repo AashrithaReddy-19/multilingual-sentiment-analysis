@@ -107,8 +107,14 @@ with zipfile.ZipFile(res_zip, "w", zipfile.ZIP_DEFLATED) as z:
             z.write(p, p.relative_to(RUNS).as_posix())
 print("Saved on Drive:", res_zip, f"({res_zip.stat().st_size / 1e6:.1f} MB)")
 files.download(str(res_zip))     # metrics/predictions/plots only (small) -> your Downloads folder"""),
-    ("code", """# Weights for the web app (~1.1 GB per model). Needed only if a Transformer or the ensemble is selected as the final model.
-DOWNLOAD_MODELS = []             # e.g. ["xlmr"] or ["xlmr", "muril"]
+    ("code", """# Weights for the web app (~1.1 GB per model). Chosen on VALIDATION only: the (up to) two best families whose
+# validation macro F1 beats A+ (0.6962) — enough for the app and a 2-model ensemble. Set a list to override.
+A_PLUS_VAL_MACRO_F1 = 0.6962040371748555
+DOWNLOAD_MODELS = None           # None = automatic; e.g. ["xlmr"] or [] to skip
+if DOWNLOAD_MODELS is None:
+    val = {f: json.loads((RUNS / e / "validation_metrics.json").read_text())["macro_f1"] for f, e in selected.items()}
+    DOWNLOAD_MODELS = [f for f in sorted(val, key=val.get, reverse=True) if val[f] > A_PLUS_VAL_MACRO_F1][:2]
+    print("Validation macro F1 per family:", {f: round(v, 4) for f, v in val.items()}, "-> downloading", DOWNLOAD_MODELS)
 for fam in DOWNLOAD_MODELS:
     best = RUNS / f"_best_model_{fam}" / "model"
     mz = DRIVE / f"phase3_model_{fam}_{RUN_ID}.zip"
