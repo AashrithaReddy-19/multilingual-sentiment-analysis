@@ -268,6 +268,25 @@ def main(argv=None) -> dict:
         label = "Best alternative Transformer" if i == 0 else "Other alternative Transformer"
         cands.append({**a, "name": f"{label} ({FAMILY_LABEL[a['family']]})"})
 
+    # ---- validation-only comparison of every family winner with A+ (Neutral boundary + English focus)
+    vrows = []
+    for c in [next(c for c in cands if c["id"] == "model_a_plus")] + [c for c in cands if c.get("kind") == "transformer"]:
+        pv = c["val"].argmax(1)
+        m = full_metrics(yv, pv, val_df["language_type"])
+        en = m["per_language"]["english"]
+        row = {"model": c["name"], "experiment_id": c["id"], "val_accuracy": m["accuracy"],
+               "val_macro_precision": m["macro_precision"], "val_macro_recall": m["macro_recall"],
+               "val_macro_f1": m["macro_f1"], "val_weighted_f1": m["weighted_f1"],
+               **{f"val_{k}_{s}": m["per_class"][k][s] for k in CLASS_NAMES for s in ("precision", "recall", "f1")},
+               "val_english_accuracy": en["accuracy"], "val_english_macro_precision": en["macro_precision"],
+               "val_english_macro_recall": en["macro_recall"], "val_english_macro_f1": en["macro_f1"],
+               "val_telugu_macro_f1": m["per_language"]["telugu"]["macro_f1"],
+               "val_code_mixed_macro_f1": m["per_language"]["code_mixed"]["macro_f1"]}
+        for a, b in (("Negative", "Neutral"), ("Neutral", "Negative"), ("Neutral", "Positive"), ("Positive", "Neutral")):
+            row[f"val {a}->{b}"] = int(((yv == CLASS_NAMES.index(a)) & (pv == CLASS_NAMES.index(b))).sum())
+        vrows.append(row)
+    pd.DataFrame(vrows).to_csv(EXP / "validation_family_winners_vs_a_plus.csv", index=False, encoding="utf-8-sig")
+
     # ---- Step 20: ensemble (small rational grid, validation only; promoted only if it beats every member)
     ensemble_cfg = None
     xl = next((c for c in cands if c["id"] == fam_best.get("xlmr", {}).get("id")), None)

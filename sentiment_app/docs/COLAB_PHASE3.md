@@ -5,19 +5,19 @@ Full Transformer training is GPU-only (`train_transformer.py` refuses to run on 
 ## 1. Files
 - Notebook: `D:\NLP\sentiment_app\artifacts\colab_package_phase3\colab_phase3_transformers.ipynb`
 - Package (upload when asked): `D:\NLP\sentiment_app\artifacts\colab_package_phase3\transformer_package.zip`
-  (the exact local train/validation/test CSVs + code, checked against `MANIFEST.json`; `VERSION.txt` = phase3-v2)
+  (the exact local train/validation/test CSVs + code, checked against `MANIFEST.json`; `VERSION.txt` = phase3-v3)
 - If you uploaded an older package before, delete `MyDrive/NLP_sentiment/transformer_package.zip` so the new one is used.
 
 ## 2. Run
 1. https://colab.research.google.com → File → Upload notebook → the notebook above.
 2. Runtime → Change runtime type → **T4 GPU** → Save.
 3. Runtime → **Run all**. Allow Google Drive access; choose `transformer_package.zip` when asked.
-4. Default `STAGES = colab_runner.TIER1` (~10 runs, ~5 h on a T4): learning rate {1e-5, 2e-5, 3e-5}; loss (weighted CE
-   from train frequencies, focal γ 1.5/2.0 + 1.0 or 2.5); language tokens; MuRIL.
+4. Default `STAGES = colab_runner.TIER1` (~12 runs, ~6 h on a T4), run in this order: learning rate
+   {1e-5, 2e-5, 3e-5} → epochs (3, and 8 with patience 3; 10 only if epoch 8 was still improving) → loss (weighted CE
+   from train frequencies, focal γ 1.5/2.0 + 1.0 or 2.5) → language tokens → MuRIL.
    Later sessions: `STAGES = colab_runner.TIER1 + colab_runner.TIER2` (lr 1.5e-5/2.5e-5, label smoothing 0.05/0.1,
-   epochs 3 and 8 with patience 3, 10 only if epoch 8 was still improving), then `+ colab_runner.TIER3`
-   (batch 32/8, weight decay 0/0.02, warmup 0.05, IndicBERTv2, mDeBERTa-v3 in fp32, lower-layer freezing, max_len 192).
-   Finished runs are skipped, so every *Run all* continues where the last one stopped.
+   IndicBERTv2), then `+ colab_runner.TIER3` (batch 32/8, weight decay 0/0.02, warmup 0.05, mDeBERTa-v3 in fp32,
+   lower-layer freezing, max_len 192). Finished runs are skipped, so every *Run all* continues where it stopped.
 5. Each stage changes one factor of the current best XLM-R recipe; a change is kept only if validation macro F1
    (then macro recall, then accuracy) improves. Per-epoch validation loss, accuracy, macro P/R/F1, weighted F1, per-class
    P/R/F1 and training loss are saved in `validation_history.csv`; `config.json` flags overfitting

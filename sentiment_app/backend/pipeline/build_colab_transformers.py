@@ -19,7 +19,7 @@ from pipeline import paths  # noqa: E402
 BACKEND = Path(__file__).resolve().parents[1]
 OUT = paths.APP_ROOT / "artifacts" / "colab_package_phase3"
 PKG_NAME = "transformer_package.zip"
-PACKAGE_VERSION = "phase3-v2 (staged tiers, smoothing/wd/warmup/epochs/batch, IndicBERTv2, mDeBERTa)"
+PACKAGE_VERSION = "phase3-v3 (ordered stages lr->epochs->loss->...; per-language P/R; IndicBERTv2, mDeBERTa)"
 
 
 def sha(p: Path) -> str:
@@ -54,11 +54,11 @@ CELLS = [
 - Per epoch: validation loss, accuracy, macro P/R/F1, weighted F1, per-class P/R/F1 and training loss (`validation_history.csv`).
 - Model C: Skipped — no real conversation_id/message_order available.
 
-| Tier | Stages | Runs | T4 time (approx.) |
+| Tier | Stages (run in this order) | Runs | T4 time (approx.) |
 |---|---|---|---|
-| 1 (core) | 1 lr {1e-5,2e-5,3e-5} · 3 loss (WCE, focal 1.5/2.0 + 1.0 or 2.5) · 8 language tokens · 9 MuRIL | ~10 | ~5 h |
-| 2 (refine) | 2 lr 1.5e-5/2.5e-5 · 4 label smoothing 0.05/0.1 · 5 epochs 3 / 8 (10 only if still improving) | ~6 | ~3–4 h |
-| 3 (optional) | 6 batch 32/8 · 7 weight decay 0/0.02, warmup 0.05 · 10 IndicBERTv2 · 11 mDeBERTa · 12 layer freezing · 13 max_len 192 | ~11 | ~6 h |
+| 1 (core) | lr {1e-5,2e-5,3e-5} → epochs 3 / 8 (10 only if still improving) → loss (WCE, focal 1.5/2.0 + 1.0 or 2.5) → language tokens → MuRIL | ~12 | ~6 h |
+| 2 (refine) | lr 1.5e-5/2.5e-5 · label smoothing 0.05/0.1 · IndicBERTv2 | ~6 | ~3 h |
+| 3 (optional) | batch 32/8 · weight decay 0/0.02, warmup 0.05 · mDeBERTa (fp32) · layer freezing · max_len 192 | ~9 | ~5 h |
 
 Start with Tier 1; add tiers in later sessions by editing `STAGES` (finished runs are reused)."""),
     ("code", """import sys, json, hashlib, zipfile, shutil

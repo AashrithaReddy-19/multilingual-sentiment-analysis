@@ -5,13 +5,15 @@ Staged (coordinate) search: every stage changes ONE factor of the current best X
 highest VALIDATION macro F1 (ties: validation macro recall, then validation accuracy). test.csv is never opened here
 except by final_test(), which scores only the best validation run of each model family.
 
-  Tier 1 (core)      1 lr {1e-5, 2e-5, 3e-5}      3 loss: weighted CE, focal 1.5/2.0 (+1.0 or 2.5 toward the better side)
+  Stages run in ORDER: lr -> (lr refine) -> epochs -> loss -> (smoothing) -> (batch) -> (wd/warmup) -> language
+  tokens -> MuRIL -> (IndicBERTv2) -> (mDeBERTa) -> (freezing) -> (max_len 192).
+  Tier 1 (core)      1 lr {1e-5, 2e-5, 3e-5}      5 epochs: 3, and 8 with patience 3 (10 only if 8 was still improving)
+                     3 loss: weighted CE, focal 1.5/2.0 (+1.0 or 2.5 toward the better side)
                      8 language tokens             9 MuRIL (best recipe, lr 2e-5 / 3e-5)
   Tier 2 (refine)    2 lr refinement (1.5e-5 / 2.5e-5 next to the best lr)
-                     4 label smoothing 0.05 / 0.1 (CE/WCE recipes only)
-                     5 epochs: 3, and 8 with patience 3 (10 only if epoch 8 was still the best)
+                     4 label smoothing 0.05 / 0.1 (CE/WCE recipes only)     10 IndicBERTv2 (lr 2e-5 / 3e-5)
   Tier 3 (optional)  6 effective batch 32 and 8    7 weight decay 0.0 / 0.02, warmup 0.05
-                     10 IndicBERTv2   11 mDeBERTa-v3 (fp32)   12 freeze lower 6 layers in epoch 1   13 max_length 192
+                     11 mDeBERTa-v3 (fp32)   12 freeze lower 6 layers in epoch 1   13 max_length 192
 """
 from __future__ import annotations
 
@@ -25,7 +27,10 @@ import train_transformer as tt
 MODELS = {"xlmr": "xlm-roberta-base", "muril": "google/muril-base-cased",
           "indicbert": "ai4bharat/IndicBERTv2-MLM-only", "mdeberta": "microsoft/mdeberta-v3-base"}
 FAMILY_OF = {v: k for k, v in MODELS.items()}
-TIER1, TIER2, TIER3 = (1, 3, 8, 9), (2, 4, 5), (6, 7, 10, 11, 12, 13)
+# Execution order (stage numbers are ids): lr -> lr refine -> epochs -> loss -> label smoothing -> batch ->
+# weight decay / warmup -> language tokens -> MuRIL -> IndicBERTv2 -> mDeBERTa -> layer freezing -> max_len 192
+ORDER = (1, 2, 5, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13)
+TIER1, TIER2, TIER3 = (1, 5, 3, 8, 9), (2, 4, 10), (6, 7, 11, 12, 13)
 LR_LADDER = [1e-5, 1.5e-5, 2e-5, 2.5e-5, 3e-5]
 DEFAULT = {"family": "xlmr", "lr": 2e-5, "epochs": 5, "max_length": 128, "loss": "ce", "gamma": 2.0,
            "label_smoothing": 0.0, "weight_decay": 0.01, "warmup_ratio": 0.1, "batch_size": 16, "grad_accum": 1,
@@ -161,7 +166,7 @@ class Runner:
     # ------------------------------------------------------------ stages
     def plan(self, stages=TIER1) -> None:
         stages = set(stages)
-        for st in sorted(stages):
+        for st in [x for x in ORDER if x in stages]:
             before = self.best_id("xlmr")
             b = self.best_cfg("xlmr")
             if st == 1:
@@ -221,7 +226,8 @@ class Runner:
             pc = m["per_class"]
             print(f"  {eid:<62} F1 {m['macro_f1']:.4f} R {m['macro_recall']:.4f} acc {m['accuracy']:.4f} "
                   f"P {m['macro_precision']:.4f} | F1 neg/neu/pos {pc['Negative']['f1']:.3f}/{pc['Neutral']['f1']:.3f}/"
-                  f"{pc['Positive']['f1']:.3f} | Neutral P/R {pc['Neutral']['precision']:.3f}/{pc['Neutral']['recall']:.3f}")
+                  f"{pc['Positive']['f1']:.3f} | Neutral P/R {pc['Neutral']['precision']:.3f}/{pc['Neutral']['recall']:.3f}"
+                  + (f" | English F1 {m['per_language']['english']['macro_f1']:.3f}" if m.get("per_language", {}).get("english") else ""))
         top = self.finished()
         if top:
             print(f"DONE: {title}\nCURRENT BEST VALIDATION MACRO F1: {top[0][1]['macro_f1']:.4f}\n"
