@@ -1,0 +1,28 @@
+{
+  "model_a_original": {
+    "accuracy": 0.6635149431367363,
+    "macro_f1": 0.6637316192319691,
+    "weighted_f1": 0.6639410029080934
+  },
+  "model_a_plus": {
+    "accuracy": 0.6994181433483205,
+    "macro_f1": 0.7000937519862452,
+    "weighted_f1": 0.6996443601948771
+  },
+  "per_language_macro_f1": {
+    "telugu": {
+      "original": 0.6008288156780645,
+      "plus": 0.6710222259349695
+    },
+    "english": {
+      "original": 0.628057402886904,
+      "plus": 0.6616974404824569
+    },
+    "code_mixed": {
+      "original": 0.7660025411432855,
+      "plus": 0.7774098072316981
+    }
+  },
+  "model_a_plus_beats_original_on_test_macro_f1": true,
+  "ui_updated": true
+}

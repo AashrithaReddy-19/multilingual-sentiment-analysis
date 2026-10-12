@@ -1,0 +1,39 @@
+{
+  "experiment_id": "s4_svc_bal_C0.5",
+  "stage": "S4",
+  "config": {
+    "prep": "v1_current",
+    "lowercase": true,
+    "signals": 0.0,
+    "word": {
+      "ngram": [
+        1,
+        2
+      ],
+      "min_df": 1,
+      "max_df": 1.0,
+      "max_features": 20000,
+      "sublinear_tf": true
+    },
+    "char": {
+      "ngram": [
+        3,
+        5
+      ],
+      "min_df": 2,
+      "max_features": null
+    },
+    "clf": {
+      "type": "svc",
+      "C": 0.5,
+      "class_weight": "balanced"
+    }
+  },
+  "n_features": 315999,
+  "fit_seconds": 15.5,
+  "converged": true,
+  "probability_source": "softmax of decision_function (uncalibrated pseudo-probability)",
+  "trained_on": "train.csv",
+  "scored_on": "validation.csv",
+  "test_used": false
+}

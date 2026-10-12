@@ -1,0 +1,14 @@
+{
+  "sentiment_core/__init__.py": "4e805c611886a44f9df497be51158767df90aca9616ee3745394b1372c645c4f",
+  "sentiment_core/cleaning.py": "03ea2d6a5407d3abf3ecffbd3c76b8474e00616891f5c00dc7456530a62a34d8",
+  "sentiment_core/context.py": "f4288cdc31419118fe6fd28ae107275e750355bf5db3d5f4ccac746064dd0202",
+  "sentiment_core/evaluation.py": "eb836e54e355f721708800f1fb7e6b67db16badd1c2151b1691149eee96d02d6",
+  "sentiment_core/labels.py": "b28337bbd876a395da8ddf26742f497565ee35a460191fe85e135ce8a8cdeda8",
+  "sentiment_core/loaders.py": "e440189937fa9fa23dde31eda7c57e9d6ab499889cab35e6af5de2e5ba11e84e",
+  "sentiment_core/splitting.py": "ee547a63e38723ff90dcd6e2c20a6f098ddf4ab932e48d05e0cc5205a367eaad",
+  "train_model_b.py": "0f68c44990939734a092bdda53a65cd0ac9b774bc90d304bacc5f67c3946b029",
+  "data/train.csv": "e0835f566132bda8355b32401c23026ca0037a450b245140f4d02bbf48ca3fcb",
+  "data/validation.csv": "427fe31b3b1873045c12423de5c9a6469968840a8506c452aef8f5e08e027d7e",
+  "data/test.csv": "935b3185c808c840e672654e770eeda4d70bfe1ac1c2fbd186a308c61eeef468",
+  "data/label_mapping.json": "ebf43b0c09f70d56693b2e8222067bcb7a3c5fe9c8ec52ec36706e3f9f4b6dbf"
+}

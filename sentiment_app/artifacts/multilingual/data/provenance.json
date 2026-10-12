@@ -1,0 +1,51 @@
+{
+  "TeSent": {
+    "folder": "D:\\NLP\\multilingual_inputs\\telugu_tesent",
+    "all_match": true,
+    "files": {
+      "README.md": true,
+      "Tesent.csv": true
+    },
+    "source": "local copy of D:\\NLP\\Telugu Datset-20260930T040514Z-1-001\\Telugu Datset (dataset card: DSL-13-SRMAP/TeSent_Benchmark-Dataset)",
+    "commit": null,
+    "licence_note": "CC BY 4.0 (stated in TeSent README front matter). Attribution required.",
+    "citation": [
+      "TeSent_Benchmark-Dataset, DSL-13-SRMAP (see README)."
+    ]
+  },
+  "TweetEval": {
+    "folder": "D:\\NLP\\multilingual_inputs\\english_tweeteval",
+    "all_match": true,
+    "files": {
+      "mapping.txt": true,
+      "README.md": true,
+      "test_labels.txt": true,
+      "test_text.txt": true,
+      "train_labels.txt": true,
+      "train_text.txt": true,
+      "val_labels.txt": true,
+      "val_text.txt": true
+    },
+    "source": "https://github.com/cardiffnlp/tweeteval/tree/main/datasets/sentiment",
+    "commit": "4fbd22cd78421f05b1ecdb4fc5725bc7a7bd8f66",
+    "licence_note": "TweetEval README: 'released without any restrictions but restrictions may apply to individual tasks (which are derived from existing datasets) or Twitter (main data source)'. Follow SemEval-2017 Task 4 terms and Twitter/X rules; research use with citation.",
+    "citation": [
+      "Barbieri et al. 2020. TweetEval: Unified Benchmark and Comparative Evaluation for Tweet Classification. Findings of EMNLP.",
+      "Rosenthal, Farra, Nakov. 2017. SemEval-2017 Task 4: Sentiment Analysis in Twitter."
+    ]
+  },
+  "CMTET": {
+    "folder": "D:\\NLP\\multilingual_inputs\\code_mixed_cmtet",
+    "all_match": true,
+    "files": {
+      "codemix_sentiment_data.txt": true,
+      "README.md": true
+    },
+    "source": "https://github.com/ksubbu199/cmtet-sentiment",
+    "commit": "ae383eeebc3582a1ed3aac63c0229c4e58f2dff2",
+    "licence_note": "No licence file or licence statement in the repository; the paper describes the data as 'open-sourced'. Treat as research use with citation; redistribution terms are not specified.",
+    "citation": [
+      "Kusampudi, Sathineni, Mamidi. 2021. Sentiment Analysis in Code-Mixed Telugu-English Text with Unsupervised Data Normalization. RANLP 2021, pp. 753-760. https://doi.org/10.26615/978-954-452-072-4_086"
+    ]
+  }
+}

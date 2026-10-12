@@ -1,0 +1,4 @@
+﻿language_type,n,errors,error_rate,accuracy,share_of_all_errors,Negative -> Neutral,Negative -> Positive,Neutral -> Negative,Neutral -> Positive,Positive -> Negative,Positive -> Neutral
+code_mixed,2976,589,0.1979,0.8021,0.1296,62,73,118,122,99,115
+english,8981,2933,0.3266,0.6734,0.6452,522,154,548,762,145,802
+telugu,3167,1024,0.3233,0.6767,0.2253,238,48,257,143,82,256

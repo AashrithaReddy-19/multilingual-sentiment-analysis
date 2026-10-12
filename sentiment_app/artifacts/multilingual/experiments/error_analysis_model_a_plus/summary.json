@@ -1,0 +1,16 @@
+{
+  "model": "Multilingual A+",
+  "split": "test (read-only analysis, not used for selection)",
+  "n": 15124,
+  "errors": 4546,
+  "error_rate": 0.3006,
+  "class_pair_errors": {
+    "Negative -> Neutral": 822,
+    "Negative -> Positive": 275,
+    "Neutral -> Negative": 923,
+    "Neutral -> Positive": 1027,
+    "Positive -> Negative": 326,
+    "Positive -> Neutral": 1173
+  },
+  "heuristic_note": "HEURISTIC (rule-based guess, not ground truth)"
+}

@@ -1,0 +1,29 @@
+{
+  "target": {
+    "0": "Negative",
+    "1": "Neutral",
+    "2": "Positive"
+  },
+  "documented_mappings": {
+    "TeSent": {
+      "Negative": "Negative",
+      "Neutral": "Neutral",
+      "Positive": "Positive"
+    },
+    "TweetEval": {
+      "0": "Negative",
+      "1": "Neutral",
+      "2": "Positive"
+    },
+    "CMTET": {
+      "NEG": "Negative",
+      "NTL": "Neutral",
+      "POS": "Positive"
+    }
+  },
+  "sources": {
+    "TeSent": "README.md: classes Positive/Negative/Neutral",
+    "TweetEval": "mapping.txt (cardiffnlp/tweeteval)",
+    "CMTET": "README.md tags NEG/NTL/POS + Kusampudi et al. RANLP 2021 Sec. 3.3"
+  }
+}

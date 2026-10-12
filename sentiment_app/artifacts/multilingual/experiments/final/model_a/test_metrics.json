@@ -1,0 +1,109 @@
+{
+  "n": 15124,
+  "accuracy": 0.6635149431367363,
+  "macro_precision": 0.6623897383693905,
+  "macro_recall": 0.6662402144181191,
+  "macro_f1": 0.6637316192319691,
+  "weighted_precision": 0.665338841557148,
+  "weighted_recall": 0.6635149431367363,
+  "weighted_f1": 0.6639410029080934,
+  "per_class": {
+    "Negative": {
+      "precision": 0.6223639038744483,
+      "recall": 0.6784282277465918,
+      "f1": 0.6491878756874281,
+      "support": 3741
+    },
+    "Neutral": {
+      "precision": 0.6488337954656663,
+      "recall": 0.6426494345718902,
+      "f1": 0.6457268078889701,
+      "support": 6190
+    },
+    "Positive": {
+      "precision": 0.715971515768057,
+      "recall": 0.6776429809358753,
+      "f1": 0.6962801741195093,
+      "support": 5193
+    }
+  },
+  "per_language": {
+    "telugu": {
+      "n": 3167,
+      "accuracy": 0.6084622671297758,
+      "macro_f1": 0.6008288156780645
+    },
+    "english": {
+      "n": 8981,
+      "accuracy": 0.640463200089077,
+      "macro_f1": 0.628057402886904
+    },
+    "code_mixed": {
+      "n": 2976,
+      "accuracy": 0.7916666666666666,
+      "macro_f1": 0.7660025411432855
+    }
+  },
+  "calibration_test": {
+    "buckets": [
+      {
+        "bucket": "0.00-0.50",
+        "n": 3669,
+        "accuracy": 0.4625238484600709,
+        "mean_confidence": 0.44405102411870734
+      },
+      {
+        "bucket": "0.50-0.60",
+        "n": 3577,
+        "accuracy": 0.5725468269499581,
+        "mean_confidence": 0.5465210464121177
+      },
+      {
+        "bucket": "0.60-0.70",
+        "n": 2825,
+        "accuracy": 0.6853097345132744,
+        "mean_confidence": 0.6486198378467646
+      },
+      {
+        "bucket": "0.70-0.80",
+        "n": 2114,
+        "accuracy": 0.7715231788079471,
+        "mean_confidence": 0.7478567536067671
+      },
+      {
+        "bucket": "0.80-0.90",
+        "n": 1536,
+        "accuracy": 0.8860677083333334,
+        "mean_confidence": 0.8476205403337351
+      },
+      {
+        "bucket": "0.90-1.00",
+        "n": 1403,
+        "accuracy": 0.9707769066286529,
+        "mean_confidence": 0.9490229516452015
+      }
+    ],
+    "ece_10_bins": 0.026720870096513295,
+    "mean_confidence": 0.6367940730402231,
+    "accuracy": 0.6635149431367363
+  },
+  "best_validation_macro_f1": 0.660939516801886,
+  "notes": "Word TF-IDF (1,2) 20k + LogisticRegression balanced (original baseline)",
+  "confusion_matrix": [
+    [
+      2538,
+      904,
+      299
+    ],
+    [
+      1115,
+      3978,
+      1097
+    ],
+    [
+      425,
+      1249,
+      3519
+    ]
+  ]
+}

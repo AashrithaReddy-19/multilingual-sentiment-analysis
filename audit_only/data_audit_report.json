@@ -1,0 +1,215 @@
+{
+  "TeSent (Telugu)": {
+    "files": [
+      "Tesent.csv",
+      "README.md"
+    ],
+    "shape": [
+      21119,
+      4
+    ],
+    "columns": {
+      "Content": "str",
+      "Annotations": "str",
+      "Rationale": "str",
+      "Label": "str"
+    },
+    "missing_values": {
+      "Content": 0,
+      "Annotations": 0,
+      "Rationale": 0,
+      "Label": 0
+    },
+    "duplicate_text_label_pairs": 0,
+    "same_text_conflicting_labels": 0,
+    "text_column": "Content",
+    "label_column": "Label",
+    "original_label_counts": {
+      "Neutral": 9593,
+      "Negative": 5857,
+      "Positive": 5669
+    },
+    "documented_mapping": "string labels: Negative, Neutral, Positive (no numeric mapping needed)",
+    "mapping_source": "TeSent README.md: 'Sentiment Classes: Positive, Negative, Neutral'",
+    "conversation_id": false,
+    "message_order": false,
+    "valid_for_3class_training": true,
+    "reasons": [
+      "labels are the strings Negative/Neutral/Positive",
+      "README documents the three sentiment classes",
+      "single sentences, no conversation_id/message_order: usable for Models A/B, not as context data"
+    ],
+    "rows": 21119,
+    "source": "local copy of D:\\NLP\\Telugu Datset-20260930T040514Z-1-001\\Telugu Datset (dataset card: DSL-13-SRMAP/TeSent_Benchmark-Dataset)",
+    "licence_note": "CC BY 4.0 (stated in TeSent README front matter). Attribution required.",
+    "provenance_file": "D:\\NLP\\multilingual_inputs\\telugu_tesent\\SOURCE.json",
+    "file_sha256": {
+      "README.md": "3e05bcf571abf0cf0ffa0c769d66f89c746bea8c14cdfd26641e7580e960471f",
+      "Tesent.csv": "ca532a16d7150ce18b5139ce055998390ec7a748cc1f1bb941dba69c44a1a50a"
+    }
+  },
+  "TweetEval (English)": {
+    "files": [
+      "train_text.txt",
+      "train_labels.txt",
+      "val_text.txt",
+      "val_labels.txt",
+      "test_text.txt",
+      "test_labels.txt",
+      "mapping.txt"
+    ],
+    "shape": [
+      59899,
+      3
+    ],
+    "columns": {
+      "text": "str",
+      "label": "str",
+      "split": "str"
+    },
+    "missing_values": {
+      "text": 0,
+      "label": 0,
+      "split": 0
+    },
+    "duplicate_text_label_pairs": 25,
+    "same_text_conflicting_labels": 3,
+    "text_column": "text",
+    "label_column": "label",
+    "original_label_counts": {
+      "1": 27479,
+      "2": 21043,
+      "0": 11377
+    },
+    "documented_mapping": {
+      "0": "Negative",
+      "1": "Neutral",
+      "2": "Positive"
+    },
+    "mapping_source": "TweetEval mapping.txt (cardiffnlp/tweeteval)",
+    "conversation_id": false,
+    "message_order": false,
+    "valid_for_3class_training": true,
+    "reasons": [
+      "text/label files aligned in every split",
+      "mapping.txt documents every numeric label: {'0': 'negative', '1': 'neutral', '2': 'positive'}",
+      "tweets, no conversation_id/message_order: usable for Models A/B, not as context data"
+    ],
+    "file_alignment": {
+      "train": {
+        "text_lines": 45615,
+        "label_lines": 45615,
+        "aligned": true
+      },
+      "val": {
+        "text_lines": 2000,
+        "label_lines": 2000,
+        "aligned": true
+      },
+      "test": {
+        "text_lines": 12284,
+        "label_lines": 12284,
+        "aligned": true
+      }
+    },
+    "rows_per_split": {
+      "train": 45615,
+      "test": 12284,
+      "val": 2000
+    },
+    "empty_texts": 0,
+    "source": "https://github.com/cardiffnlp/tweeteval/tree/main/datasets/sentiment @ 4fbd22c",
+    "licence_note": "TweetEval README: 'released without any restrictions but restrictions may apply to individual tasks (which are derived from existing datasets) or Twitter (main data source)'. Follow SemEval-2017 Task 4 terms and Twitter/X rules; research use with citation.",
+    "provenance_file": "D:\\NLP\\multilingual_inputs\\english_tweeteval\\SOURCE.json",
+    "file_sha256": {
+      "mapping.txt": "c0572796fbe261d8ea5fd16c5061076fbba49bc69fc865d6abccaf60daacee24",
+      "README.md": "cf91d41af5748a4a9eb6914327cdcc6585113c8c1caf16bc39a1b93500450b6b",
+      "test_labels.txt": "6afb4afe9374d1f983bcf9a7c79b108d0f37fdf020a83f30488309bed215db9d",
+      "test_text.txt": "09a93a55c63fd93f97485ef7302889d7edb4091cd49733aa37da094f0bfa0675",
+      "train_labels.txt": "122bfb1732fb6995b0e5c5f726c0ba457c469c3b6e60513007ce5037f23e65d4",
+      "train_text.txt": "368f01052ea6fd8ffc408a2a2e6ac9669e31542581a0396ef16591ea26eb98a6",
+      "val_labels.txt": "b4566926c72e2e4e2916c864def94e76c4cdde52446af2c7ba4fc2006e057e51",
+      "val_text.txt": "e5b021e6fc45064c260b09814b803d8f56cada519c4d952d72f43d48a350a964"
+    }
+  },
+  "CMTET (code-mixed)": {
+    "files": [
+      "codemix_sentiment_data.txt",
+      "README.md"
+    ],
+    "shape": [
+      19868,
+      4
+    ],
+    "columns": {
+      "line_no": "int64",
+      "text": "str",
+      "source_label": "str",
+      "language_tags": "str"
+    },
+    "missing_values": {
+      "line_no": 0,
+      "text": 0,
+      "source_label": 0,
+      "language_tags": 0
+    },
+    "duplicate_text_label_pairs": 74,
+    "same_text_conflicting_labels": 51,
+    "text_column": "text",
+    "label_column": "source_label",
+    "original_label_counts": {
+      "POS": 7929,
+      "NEG": 7717,
+      "NTL": 4222
+    },
+    "documented_mapping": {
+      "NEG": "Negative",
+      "NTL": "Neutral",
+      "POS": "Positive"
+    },
+    "mapping_source": "CMTET README.md (tags) + Kusampudi et al., RANLP 2021, Sec. 3.3 (three classes)",
+    "conversation_id": false,
+    "message_order": false,
+    "valid_for_3class_training": true,
+    "reasons": [
+      "all sentence tags are NEG/NTL/POS",
+      "no unparsed lines",
+      "README.md documents NEG/NTL/POS tags",
+      "tag meaning (negative/neutral/positive) per RANLP 2021 paper Sec. 3.3; the mapping is NOT applied in this audit",
+      "sentences only, no conversation_id/message_order: usable for Models A/B, not as context data"
+    ],
+    "parser_issues": {},
+    "unknown_tags": {},
+    "unparsed_examples": [],
+    "paper_reported_counts": {
+      "POS": 7925,
+      "NEG": 7713,
+      "NTL": 4219
+    },
+    "difference_vs_paper": {
+      "POS": 4,
+      "NEG": 4,
+      "NTL": 3
+    },
+    "source": "https://github.com/ksubbu199/cmtet-sentiment @ ae383ee",
+    "licence_note": "No licence file or licence statement in the repository; the paper describes the data as 'open-sourced'. Treat as research use with citation; redistribution terms are not specified.",
+    "provenance_file": "D:\\NLP\\multilingual_inputs\\code_mixed_cmtet\\SOURCE.json",
+    "file_sha256": {
+      "codemix_sentiment_data.txt": "ac1b59e1146530c39d42e0ea37f0d714344bf49c570c5d7ba45787f5805a144c",
+      "README.md": "ddc136003a741c549959f8a0c439b03e77b04de555cb2d9833c32a39c9aaa6fe"
+    }
+  },
+  "conversations.csv": {
+    "files": [],
+    "source": "not provided",
+    "licence_note": "n/a",
+    "conversation_id": false,
+    "message_order": false,
+    "valid_for_3class_training": false,
+    "model_c_status": "Skipped — no real conversation_id/message_order available.",
+    "reasons": [
+      "conversations.csv not provided",
+      "Model C: Skipped — no real conversation_id/message_order available."
+    ]
+  }
+}

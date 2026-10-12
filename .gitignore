@@ -1,0 +1,78 @@
+# ---------------------------------------------------------------------------------------------------------
+# What is NOT pushed, and why (see sentiment_app/docs/DATA_AND_MODELS.md for how to obtain/rebuild it)
+# ---------------------------------------------------------------------------------------------------------
+
+# Python / tooling caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+
+# Node / frontend build output
+node_modules/
+sentiment_app/frontend/dist/
+*.tsbuildinfo
+
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+
+# Hugging Face / Colab / temporary files
+.cache/
+huggingface/
+*.tmp
+*.log
+_import_tmp/
+**/_checkpoints/
+**/checkpoint-*/
+
+# Large model weights (>100 MB; GitHub limit). Obtain via Colab + pipeline.install_phase3_model.
+*.safetensors
+*.bin
+*.pt
+*.pth
+outputs/xlm_roberta_no_context/
+outputs/tokenizer_no_context/
+sentiment_app/artifacts/multilingual/model_b/
+sentiment_app/artifacts/multilingual/phase3_models/
+
+# Local backups (full copies, up to 765 MB)
+backups/
+
+# Raw third-party datasets: not redistributed (TweetEval: Twitter terms; CMTET: no licence; hate-speech and
+# fairness files: unused / unknown licence). Provenance + download instructions are kept in the docs.
+English_dataset/
+Tel_Eng_dataset/
+Fairness Analysis Dataset-*/
+Telugu Datset-*/
+TeSent Code Suite-*/
+multilingual_inputs/
+colab_upload/
+
+# Derived files that contain dataset text (rebuilt by pipeline.prepare_data from the raw inputs)
+sentiment_app/artifacts/multilingual/data/*.csv
+!sentiment_app/artifacts/multilingual/data/class_distributions.csv
+outputs/*.csv
+!outputs/model_comparison.csv
+!outputs/per_language_results.csv
+!outputs/confusion_matrix_*.csv
+**/predictions*.csv
+**/misclassified*.csv
+sentiment_app/artifacts/multilingual/experiments/error_analysis_model_a_plus/error_analysis_model_a_plus.csv
+sentiment_app/artifacts/multilingual/experiments/possible_label_ambiguity.csv
+sentiment_app/artifacts/multilingual/experiments/transformer_error_analysis.csv
+sentiment_app/artifacts/multilingual/experiments/ensemble_error_analysis.csv
+
+# Colab packages/results embed the data splits (rebuild with pipeline.build_colab_transformers)
+sentiment_app/artifacts/colab_package/*.zip
+sentiment_app/artifacts/colab_package_phase3/*.zip
+sentiment_app/artifacts/colab_results/*
+!sentiment_app/artifacts/colab_results/.gitkeep
+
+# Executed audit notebook prints sample rows (incl. tweets, Twitter terms); the audit JSON + verification table are kept
+audit_only/data_audit_executed.ipynb

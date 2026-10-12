@@ -1,0 +1,8 @@
+﻿model,language_type,n_test,status,accuracy,macro_f1,weighted_f1
+TF-IDF + Logistic Regression,telugu,3168,evaluated,0.6284722222222222,0.6232315740822059,0.6286926966227326
+TF-IDF + Logistic Regression,english,0,not available: no verified sentiment data for this language,,,
+TF-IDF + Logistic Regression,code_mixed,0,not available: no verified sentiment data for this language,,,
+XLM-RoBERTa (no context),telugu,3168,evaluated,0.6979166666666666,0.6984973816952923,0.6978669712513863
+XLM-RoBERTa (no context),english,0,not available: no verified sentiment data for this language,,,
+XLM-RoBERTa (no context),code_mixed,0,not available: no verified sentiment data for this language,,,
+XLM-RoBERTa (context-aware),all,0,"Intentionally skipped: no real conversation_id/message_order, so context_text == cleaned_text; Model C would duplicate Model B.",,,

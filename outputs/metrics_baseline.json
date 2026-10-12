@@ -1,0 +1,123 @@
+{
+  "model": "TF-IDF + Logistic Regression",
+  "input": "cleaned_text",
+  "n_test": 3168,
+  "accuracy": 0.6284722222222222,
+  "macro_f1": 0.6232315740822059,
+  "weighted_f1": 0.6286926966227326,
+  "macro_precision": 0.6223277589929298,
+  "macro_recall": 0.6251588983857135,
+  "per_class": {
+    "Negative": {
+      "precision": 0.5897703549060542,
+      "recall": 0.6427758816837316,
+      "f1": 0.6151333696243876,
+      "support": 879
+    },
+    "Neutral": {
+      "precision": 0.6642703091301222,
+      "recall": 0.6421125781792911,
+      "f1": 0.6530035335689046,
+      "support": 1439
+    },
+    "Positive": {
+      "precision": 0.612942612942613,
+      "recall": 0.5905882352941176,
+      "f1": 0.6015578190533254,
+      "support": 850
+    }
+  },
+  "classification_report": {
+    "Negative": {
+      "precision": 0.5897703549060542,
+      "recall": 0.6427758816837316,
+      "f1-score": 0.6151333696243876,
+      "support": 879.0
+    },
+    "Neutral": {
+      "precision": 0.6642703091301222,
+      "recall": 0.6421125781792911,
+      "f1-score": 0.6530035335689046,
+      "support": 1439.0
+    },
+    "Positive": {
+      "precision": 0.612942612942613,
+      "recall": 0.5905882352941176,
+      "f1-score": 0.6015578190533254,
+      "support": 850.0
+    },
+    "accuracy": 0.6284722222222222,
+    "macro avg": {
+      "precision": 0.6223277589929298,
+      "recall": 0.6251588983857135,
+      "f1-score": 0.6232315740822059,
+      "support": 3168.0
+    },
+    "weighted avg": {
+      "precision": 0.6298277581445355,
+      "recall": 0.6284722222222222,
+      "f1-score": 0.6286926966227326,
+      "support": 3168.0
+    }
+  },
+  "confidence": {
+    "mean": 0.5701138561064821,
+    "mean_when_correct": 0.601598074502638,
+    "mean_when_wrong": 0.5168555053615831
+  },
+  "best_validation_macro_f1": 0.6076879928424243,
+  "per_language": {
+    "telugu": {
+      "status": "evaluated",
+      "n": 3168,
+      "accuracy": 0.6284722222222222,
+      "macro_f1": 0.6232315740822059,
+      "weighted_f1": 0.6286926966227326,
+      "per_class": {
+        "Negative": {
+          "precision": 0.5897703549060542,
+          "recall": 0.6427758816837316,
+          "f1": 0.6151333696243876,
+          "support": 879
+        },
+        "Neutral": {
+          "precision": 0.6642703091301222,
+          "recall": 0.6421125781792911,
+          "f1": 0.6530035335689046,
+          "support": 1439
+        },
+        "Positive": {
+          "precision": 0.612942612942613,
+          "recall": 0.5905882352941176,
+          "f1": 0.6015578190533254,
+          "support": 850
+        }
+      }
+    },
+    "english": {
+      "status": "not available: no verified sentiment data for this language",
+      "n": 0,
+      "accuracy": null,
+      "macro_f1": null,
+      "weighted_f1": null
+    },
+    "code_mixed": {
+      "status": "not available: no verified sentiment data for this language",
+      "n": 0,
+      "accuracy": null,
+      "macro_f1": null,
+      "weighted_f1": null
+    }
+  },
+  "n_misclassified_total": 1177,
+  "heuristic_error_reason_counts_all_mistakes": {
+    "annotation ambiguity": 745,
+    "low confidence prediction": 634,
+    "class overlap": 113,
+    "negation handling": 111,
+    "emoji ambiguity": 99,
+    "mixed-language ambiguity": 68,
+    "insufficient conversational context": 40,
+    "sarcasm/implicit sentiment": 21
+  }
+}

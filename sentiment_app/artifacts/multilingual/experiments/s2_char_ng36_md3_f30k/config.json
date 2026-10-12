@@ -1,0 +1,30 @@
+{
+  "experiment_id": "s2_char_ng36_md3_f30k",
+  "stage": "S2",
+  "config": {
+    "prep": "v1_current",
+    "lowercase": true,
+    "signals": 0.0,
+    "clf": {
+      "type": "lr",
+      "C": 1.0,
+      "class_weight": "balanced"
+    },
+    "word": null,
+    "char": {
+      "ngram": [
+        3,
+        6
+      ],
+      "min_df": 3,
+      "max_features": 30000
+    }
+  },
+  "n_features": 30000,
+  "fit_seconds": 35.4,
+  "converged": true,
+  "probability_source": "predict_proba",
+  "trained_on": "train.csv",
+  "scored_on": "validation.csv",
+  "test_used": false
+}

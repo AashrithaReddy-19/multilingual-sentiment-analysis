@@ -1,0 +1,39 @@
+{
+  "experiment_id": "s4_lr_none_C5",
+  "stage": "S4",
+  "config": {
+    "prep": "v1_current",
+    "lowercase": true,
+    "signals": 0.0,
+    "word": {
+      "ngram": [
+        1,
+        2
+      ],
+      "min_df": 1,
+      "max_df": 1.0,
+      "max_features": 20000,
+      "sublinear_tf": true
+    },
+    "char": {
+      "ngram": [
+        3,
+        5
+      ],
+      "min_df": 2,
+      "max_features": null
+    },
+    "clf": {
+      "type": "lr",
+      "C": 5,
+      "class_weight": null
+    }
+  },
+  "n_features": 315999,
+  "fit_seconds": 49.8,
+  "converged": true,
+  "probability_source": "predict_proba",
+  "trained_on": "train.csv",
+  "scored_on": "validation.csv",
+  "test_used": false
+}

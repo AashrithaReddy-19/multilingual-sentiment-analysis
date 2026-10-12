@@ -1,0 +1,28 @@
+{
+  "Multilingual A vs Multilingual A+": {
+    "mcnemar": {
+      "a_right_b_wrong": 1181,
+      "a_wrong_b_right": 638,
+      "test": "chi-square with continuity correction",
+      "statistic": 161.49752611324905,
+      "p_value": 5.3267970150514576e-37
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.692998642873132,
+        0.7076171991936867
+      ],
+      "macro_f1_ci95_model": [
+        0.6564125371246329,
+        0.6709890348105523
+      ],
+      "macro_f1_diff_ci95": [
+        -0.04156023650484005,
+        -0.030968985973238845
+      ],
+      "macro_f1_diff_mean": -0.036354206736519,
+      "share_of_resamples_model_better": 0.0
+    }
+  }
+}

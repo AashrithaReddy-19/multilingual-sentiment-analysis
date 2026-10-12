@@ -1,0 +1,39 @@
+{
+  "experiment_id": "s3_union_large_w100k_cunlimited",
+  "stage": "S3",
+  "config": {
+    "prep": "v1_current",
+    "lowercase": true,
+    "signals": 0.0,
+    "clf": {
+      "type": "lr",
+      "C": 1.0,
+      "class_weight": "balanced"
+    },
+    "word": {
+      "ngram": [
+        1,
+        1
+      ],
+      "min_df": 2,
+      "max_df": 1.0,
+      "max_features": 100000,
+      "sublinear_tf": true
+    },
+    "char": {
+      "ngram": [
+        3,
+        5
+      ],
+      "min_df": 2,
+      "max_features": null
+    }
+  },
+  "n_features": 347631,
+  "fit_seconds": 39.9,
+  "converged": true,
+  "probability_source": "predict_proba",
+  "trained_on": "train.csv",
+  "scored_on": "validation.csv",
+  "test_used": false
+}

@@ -1,0 +1,86 @@
+{
+  "created_utc": "2026-10-01T09:09:18+00:00",
+  "per_dataset": {
+    "TeSent": {
+      "initial_rows": 21119,
+      "removed_missing_text": 0,
+      "removed_missing_label": 0,
+      "removed_empty_after_cleaning": 0,
+      "removed_exact_duplicate_text_label_pairs": 1,
+      "final_rows": 21118
+    },
+    "TweetEval": {
+      "initial_rows": 59899,
+      "removed_missing_text": 0,
+      "removed_missing_label": 0,
+      "removed_empty_after_cleaning": 0,
+      "removed_exact_duplicate_text_label_pairs": 26,
+      "final_rows": 59873
+    },
+    "CMTET": {
+      "initial_rows": 19868,
+      "removed_missing_text": 0,
+      "removed_missing_label": 0,
+      "removed_empty_after_cleaning": 0,
+      "removed_exact_duplicate_text_label_pairs": 74,
+      "final_rows": 19794
+    }
+  },
+  "cmtet_parser_audit": {
+    "parsed_sentences": 19868,
+    "issues": {},
+    "unknown_tags": {},
+    "tag_counts": {
+      "POS": 7929,
+      "NEG": 7717,
+      "NTL": 4222
+    }
+  },
+  "total_removed_exact_duplicates": 101,
+  "conflicting_labels": {
+    "texts_with_more_than_one_label": 55,
+    "rows_in_those_groups": 129,
+    "by_dataset": {
+      "CMTET": 121,
+      "TweetEval": 8
+    },
+    "decision": "Kept: the disagreement is genuine annotation ambiguity and dropping it would hide it. Every identical cleaned_text is one split group, so the same text can never appear in more than one of train/validation/test."
+  },
+  "context": {
+    "rows_with_earlier_message_context": 0,
+    "true_context_available": false,
+    "model_c": "Skipped — no real conversation_id/message_order available.",
+    "note": "No conversation_id/message_order in any dataset, so context_text = cleaned_text."
+  },
+  "split": {
+    "method": "group-level stratified split (seed 42): every identical cleaned_text is one group; groups stratified by label x language_type; 70% train, then 15/15 validation/test",
+    "sizes": {
+      "train": 70540,
+      "test": 15124,
+      "validation": 15121
+    },
+    "fractions": {
+      "train": 0.6999,
+      "test": 0.1501,
+      "validation": 0.15
+    }
+  },
+  "leakage_checks": {
+    "cleaned_text": {
+      "train&validation": 0,
+      "train&test": 0,
+      "validation&test": 0
+    },
+    "conversation_id": "not applicable",
+    "passed": true
+  },
+  "negation_words_preserved": {
+    "not": 4172,
+    "no": 2144,
+    "never": 694,
+    "ledu": 408,
+    "kaadu": 143,
+    "avvale": 7,
+    "vaddu": 25
+  }
+}

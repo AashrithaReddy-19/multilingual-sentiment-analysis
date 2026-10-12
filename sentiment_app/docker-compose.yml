@@ -1,0 +1,17 @@
+# Optional container setup (written for convenience; Docker was not available on the build machine,
+# so this file has not been run). Results and models are mounted read-only from D:\NLP.
+services:
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    volumes:
+      - ../outputs:/data/outputs:ro
+      - ./artifacts:/data/sentiment_app/artifacts:ro
+      - ../audit_only:/data/audit_only:ro
+    environment:
+      NLP_ROOT: /data
+      CORS_ORIGINS: http://localhost:8080
+    ports: ["8000:8000"]
+  frontend:
+    build: { context: ., dockerfile: frontend/Dockerfile }
+    depends_on: [backend]
+    ports: ["8080:80"]

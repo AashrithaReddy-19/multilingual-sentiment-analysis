@@ -1,0 +1,909 @@
+[
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_000"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_001"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_002"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_003"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_004"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_005"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_006"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_007"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_008"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_009"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_010"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_011"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_012"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_013"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_014"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_015"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_016"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_017"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_018"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_019"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_020"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_021"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_022"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_023"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_024"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_025"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_026"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_027"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_028"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_029"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_030"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_031"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_032"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_033"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_034"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   2
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_035"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_036"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_037"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_038"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_039"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_040"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_041"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_042"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_043"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_044"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_045"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_046"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_047"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_048"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_049"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_050"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_051"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_052"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": false,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_053"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_054"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_055"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_056"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_057"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_058"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 1,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_059"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_060"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_061"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_062"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_063"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_064"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 2,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_065"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 0.5,
+  "id": "word_lr_066"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 1.0,
+  "id": "word_lr_067"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 20000,
+  "C": 2.0,
+  "id": "word_lr_068"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 0.5,
+  "id": "word_lr_069"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 1.0,
+  "id": "word_lr_070"
+ },
+ {
+  "family": "word_lr",
+  "ngram": [
+   1,
+   3
+  ],
+  "sublinear_tf": true,
+  "min_df": 3,
+  "max_features": 50000,
+  "C": 2.0,
+  "id": "word_lr_071"
+ },
+ {
+  "family": "char_svc",
+  "char_ngram": [
+   3,
+   5
+  ],
+  "C": 1.0,
+  "id": "char_svc_072"
+ },
+ {
+  "family": "char_svc",
+  "char_ngram": [
+   3,
+   6
+  ],
+  "C": 1.0,
+  "id": "char_svc_073"
+ },
+ {
+  "family": "union_svc",
+  "C": 0.5,
+  "id": "union_svc_074"
+ },
+ {
+  "family": "union_svc",
+  "C": 1.0,
+  "id": "union_svc_075"
+ },
+ {
+  "family": "union_lr",
+  "C": 0.5,
+  "id": "union_lr_076"
+ },
+ {
+  "family": "union_lr",
+  "C": 1.0,
+  "id": "union_lr_077"
+ },
+ {
+  "family": "union_lr",
+  "C": 2.0,
+  "id": "union_lr_078"
+ }
+]

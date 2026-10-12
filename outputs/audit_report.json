@@ -1,0 +1,233 @@
+{
+  "target_classes": {
+    "0": "Negative",
+    "1": "Neutral",
+    "2": "Positive"
+  },
+  "datasets": [
+    {
+      "dataset": "telugu",
+      "file_name": "Tesent.csv",
+      "path": "D:\\NLP\\Telugu Datset-20260930T040514Z-1-001\\Telugu Datset\\Tesent.csv",
+      "language_type": "telugu",
+      "primary_file": true,
+      "shape": [
+        21119,
+        4
+      ],
+      "columns": {
+        "Content": "str",
+        "Annotations": "str",
+        "Rationale": "str",
+        "Label": "str"
+      },
+      "missing_values": {
+        "Content": 0,
+        "Annotations": 0,
+        "Rationale": 0,
+        "Label": 0
+      },
+      "duplicate_rows": 0,
+      "text_column": "Content",
+      "text_column_detection": "name match",
+      "label_column": "Label",
+      "label_column_detection": "name match",
+      "conversation_id_column": null,
+      "message_order_column": null,
+      "has_conversation_metadata": false,
+      "duplicate_text_label_pairs": 0,
+      "original_label_counts": {
+        "Neutral": 9593,
+        "Negative": 5857,
+        "Positive": 5669
+      },
+      "label_kind": "string",
+      "labels_already_valid_sentiment": true,
+      "documentation_files_found": [
+        "D:\\NLP\\Telugu Datset-20260930T040514Z-1-001\\Telugu Datset\\README.md"
+      ],
+      "label_mapping": {
+        "Negative": "Negative",
+        "Neutral": "Neutral",
+        "Positive": "Positive"
+      },
+      "eligible_for_training": true,
+      "decision": "Labels are explicit sentiment strings; mapped by name to the target scheme.",
+      "notes": "Telugu folder also contains official splits ['Test', 'Train', 'Val']; 21118 of 21119 unique sentences in Tesent.csv appear in them. The full file is used and re-split 70/15/15 as the project requires. README states 22,505 sentences; the supplied full file has 21119 rows."
+    },
+    {
+      "dataset": "english",
+      "file_name": "sentiment_data.csv",
+      "path": "D:\\NLP\\English_dataset\\sentiment_data.csv",
+      "language_type": "english",
+      "primary_file": true,
+      "shape": [
+        241145,
+        3
+      ],
+      "columns": {
+        "Unnamed: 0": "int64",
+        "Comment": "str",
+        "Sentiment": "int64"
+      },
+      "missing_values": {
+        "Unnamed: 0": 0,
+        "Comment": 217,
+        "Sentiment": 0
+      },
+      "duplicate_rows": 0,
+      "text_column": "Comment",
+      "text_column_detection": "name match",
+      "label_column": "Sentiment",
+      "label_column_detection": "name match",
+      "conversation_id_column": null,
+      "message_order_column": null,
+      "has_conversation_metadata": false,
+      "duplicate_text_label_pairs": 26809,
+      "original_label_counts": {
+        "2": 103059,
+        "1": 82972,
+        "0": 55114
+      },
+      "label_kind": "numeric",
+      "labels_already_valid_sentiment": false,
+      "documentation_files_found": [],
+      "label_mapping": null,
+      "eligible_for_training": false,
+      "decision": "TRAINING STOPPED for this dataset: labels are numeric [0, 1, 2] and no documentation in the dataset folder explicitly maps them to Negative/Neutral/Positive (no README/documentation file was supplied). Guessing a mapping (e.g. 0=Negative) would risk silently training on wrong labels."
+    },
+    {
+      "dataset": "code_mixed",
+      "file_name": "training_data_telugu-hate.xlsx",
+      "path": "D:\\NLP\\Tel_Eng_dataset\\training_data_telugu-hate.xlsx",
+      "language_type": "code_mixed",
+      "primary_file": true,
+      "sheets": [
+        "Sheet1"
+      ],
+      "sheet_used": "Sheet1",
+      "shape": [
+        4000,
+        3
+      ],
+      "columns": {
+        "S.No": "str",
+        "Comments": "str",
+        "Label": "str"
+      },
+      "missing_values": {
+        "S.No": 0,
+        "Comments": 0,
+        "Label": 0
+      },
+      "duplicate_rows": 0,
+      "text_column": "Comments",
+      "text_column_detection": "name match",
+      "label_column": "Label",
+      "label_column_detection": "name match",
+      "conversation_id_column": null,
+      "message_order_column": null,
+      "has_conversation_metadata": false,
+      "duplicate_text_label_pairs": 41,
+      "original_label_counts": {
+        "non-hate": 2061,
+        "hate": 1939
+      },
+      "label_kind": "string",
+      "labels_already_valid_sentiment": false,
+      "documentation_files_found": [],
+      "label_mapping": null,
+      "eligible_for_training": false,
+      "decision": "TRAINING STOPPED for this dataset: labels ['hate', 'non-hate'] are not a Negative/Neutral/Positive sentiment scheme. They cannot be converted to three sentiment classes without inventing semantics (e.g. 'hate' is not equivalent to 'Negative sentiment', and 'non-hate' can be positive, neutral, or negative)."
+    }
+  ],
+  "secondary_files": [
+    {
+      "dataset": "code_mixed",
+      "file_name": "telugu-english-test-data-with-labels.xlsx",
+      "path": "D:\\NLP\\Tel_Eng_dataset\\telugu-english-test-data-with-labels.xlsx",
+      "language_type": "code_mixed",
+      "primary_file": false,
+      "sheets": [
+        "Sheet1",
+        "Sheet2"
+      ],
+      "sheet_used": "Sheet1",
+      "shape": [
+        500,
+        3
+      ],
+      "columns": {
+        "S.No": "int64",
+        "Comments": "str",
+        "Label": "str"
+      },
+      "missing_values": {
+        "S.No": 0,
+        "Comments": 0,
+        "Label": 0
+      },
+      "duplicate_rows": 0,
+      "text_column": "Comments",
+      "text_column_detection": "name match",
+      "label_column": "Label",
+      "label_column_detection": "name match",
+      "conversation_id_column": null,
+      "message_order_column": null,
+      "has_conversation_metadata": false,
+      "duplicate_text_label_pairs": 11,
+      "original_label_counts": {
+        "non-hate": 250,
+        "hate": 250
+      },
+      "label_kind": "string",
+      "labels_already_valid_sentiment": false,
+      "documentation_files_found": [],
+      "label_mapping": null,
+      "eligible_for_training": false,
+      "decision": "TRAINING STOPPED for this dataset: labels ['hate', 'non-hate'] are not a Negative/Neutral/Positive sentiment scheme. They cannot be converted to three sentiment classes without inventing semantics (e.g. 'hate' is not equivalent to 'Negative sentiment', and 'non-hate' can be positive, neutral, or negative). (secondary file: audited only, not used for training)"
+    },
+    {
+      "dataset": "code_mixed",
+      "file_name": "telugu-hate-speech-test.xlsx",
+      "path": "D:\\NLP\\Tel_Eng_dataset\\telugu-hate-speech-test.xlsx",
+      "language_type": "code_mixed",
+      "primary_file": false,
+      "sheets": [
+        "Sheet1"
+      ],
+      "sheet_used": "Sheet1",
+      "shape": [
+        500,
+        2
+      ],
+      "columns": {
+        "S.No": "int64",
+        "Comments": "str"
+      },
+      "missing_values": {
+        "S.No": 0,
+        "Comments": 0
+      },
+      "duplicate_rows": 0,
+      "text_column": "Comments",
+      "text_column_detection": "name match",
+      "label_column": null,
+      "label_column_detection": "no column named like a label",
+      "conversation_id_column": null,
+      "message_order_column": null,
+      "has_conversation_metadata": false,
+      "duplicate_text_label_pairs": 11,
+      "eligible_for_training": false,
+      "label_mapping": null,
+      "decision": "No label column found; unlabeled file."
+    }
+  ],
+  "eligible_datasets": [
+    "telugu"
+  ],
+  "excluded_datasets": {
+    "english": "TRAINING STOPPED for this dataset: labels are numeric [0, 1, 2] and no documentation in the dataset folder explicitly maps them to Negative/Neutral/Positive (no README/documentation file was supplied). Guessing a mapping (e.g. 0=Negative) would risk silently training on wrong labels.",
+    "code_mixed": "TRAINING STOPPED for this dataset: labels ['hate', 'non-hate'] are not a Negative/Neutral/Positive sentiment scheme. They cannot be converted to three sentiment classes without inventing semantics (e.g. 'hate' is not equivalent to 'Negative sentiment', and 'non-hate' can be positive, neutral, or negative)."
+  }
+}

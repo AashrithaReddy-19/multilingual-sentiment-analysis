@@ -1,0 +1,20 @@
+{
+  "selected_model_name": "Multilingual A+",
+  "selected_id": "model_a_plus",
+  "served_model_id": "tfidf_plus_multilingual",
+  "class_log_bias": null,
+  "temperature": 0.9590457363847055,
+  "requires_transformer_weights": [],
+  "test": {
+    "accuracy": 0.6994181433483205,
+    "macro_precision": 0.699530442386371,
+    "macro_recall": 0.7010269521330644,
+    "macro_f1": 0.7000937519862452,
+    "weighted_f1": 0.6996443601948771
+  },
+  "validation_macro_f1": 0.6962040371748555,
+  "reasoning": [
+    "Highest validation macro F1: Multilingual A+ (0.6962)."
+  ],
+  "rule": "Final model: best VALIDATION rank, simplicity gate (needs >= 0.005 validation macro F1 to justify a more complex\n    model), then a test go/no-go against A+ (McNemar p < 0.05 AND bootstrap 95% CI of the macro F1 difference > 0)."
+}

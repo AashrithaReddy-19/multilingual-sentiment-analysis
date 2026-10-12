@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  /* Telugu falls back to Noto Sans Telugu, then Windows' Nirmala UI / Gautami, then the system font */
+  --font-sans: "Inter", "Noto Sans Telugu", "Nirmala UI", "Gautami", "Segoe UI", system-ui, sans-serif;
+  --color-neg: #e11d48;
+  --color-neu: #64748b;
+  --color-pos: #059669;
+  --color-brand: #4f46e5;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { @apply bg-slate-50 text-slate-900 antialiased; }
+.te { line-height: 1.75; }               /* extra room for Telugu vowel signs */
+:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+/* let grid/flex children shrink so wide tables scroll inside their card instead of widening the page */
+.grid > *, .flex > * { min-width: 0; }

@@ -1,0 +1,21 @@
+{
+  "target_classes": {
+    "0": "Negative",
+    "1": "Neutral",
+    "2": "Positive"
+  },
+  "per_dataset_original_to_target": {
+    "telugu": {
+      "Negative": "Negative",
+      "Neutral": "Neutral",
+      "Positive": "Positive"
+    },
+    "english": null,
+    "code_mixed": null
+  },
+  "verification": {
+    "telugu": "Labels are explicit sentiment strings; mapped by name to the target scheme.",
+    "english": "TRAINING STOPPED for this dataset: labels are numeric [0, 1, 2] and no documentation in the dataset folder explicitly maps them to Negative/Neutral/Positive (no README/documentation file was supplied). Guessing a mapping (e.g. 0=Negative) would risk silently training on wrong labels.",
+    "code_mixed": "TRAINING STOPPED for this dataset: labels ['hate', 'non-hate'] are not a Negative/Neutral/Positive sentiment scheme. They cannot be converted to three sentiment classes without inventing semantics (e.g. 'hate' is not equivalent to 'Negative sentiment', and 'non-hate' can be positive, neutral, or negative)."
+  }
+}

@@ -1,0 +1,12 @@
+﻿heuristic_category,errors_flagged,share_of_errors,note
+neutral-vs-polar ambiguity,3945,0.8678,"HEURISTIC (rule-based guess, not ground truth)"
+low-confidence prediction,1297,0.2853,"HEURISTIC (rule-based guess, not ground truth)"
+label ambiguity (annotators disagreed),657,0.1445,"HEURISTIC (rule-based guess, not ground truth)"
+code-mixed ambiguity,650,0.143,"HEURISTIC (rule-based guess, not ground truth)"
+negation handling,566,0.1245,"HEURISTIC (rule-based guess, not ground truth)"
+sarcasm or implicit sentiment,412,0.0906,"HEURISTIC (rule-based guess, not ground truth)"
+Romanized Telugu ambiguity,282,0.062,"HEURISTIC (rule-based guess, not ground truth)"
+emoji sentiment,263,0.0579,"HEURISTIC (rule-based guess, not ground truth)"
+sarcasm or implicit sentiment (cue present),77,0.0169,"HEURISTIC (rule-based guess, not ground truth)"
+very long text,43,0.0095,"HEURISTIC (rule-based guess, not ground truth)"
+short text,41,0.009,"HEURISTIC (rule-based guess, not ground truth)"

@@ -1,0 +1,118 @@
+import { useState } from "react";
+import type { BatchInspect, ModelInfo } from "../api";
+import { api } from "../api";
+import { useApi } from "../hooks";
+import { Card, EmptyState, ErrorState, Field, ModelScopeBanner, PageHeader, Spinner } from "../components/ui";
+
+export default function Batch() {
+  const models = useApi<ModelInfo[]>("/api/models");
+  const [file, setFile] = useState<File | null>(null);
+  const [info, setInfo] = useState<BatchInspect | null>(null);
+  const [column, setColumn] = useState("");
+  const [modelId, setModelId] = useState("");
+  const [busy, setBusy] = useState<"inspect" | "predict" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<{ url: string; rows: number; model: string } | null>(null);
+
+  const available = (models.data ?? []).filter((m) => m.available);
+  const selected = available.find((m) => m.id === modelId) ?? available.find((m) => m.is_default);
+
+  async function onFile(f: File | null) {
+    setFile(f); setInfo(null); setDone(null); setError(null); setColumn("");
+    if (!f) return;
+    setBusy("inspect");
+    try {
+      const i = await api.inspect(f);
+      setInfo(i);
+      setColumn(i.suggested_column ?? i.columns[0] ?? "");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function run() {
+    if (!file || !column) return;
+    setBusy("predict"); setError(null); setDone(null);
+    try {
+      const { blob, modelId: used } = await api.batchPredict(file, column, modelId || undefined);
+      setDone({ url: URL.createObjectURL(blob), rows: info?.n_rows ?? 0, model: available.find((m) => m.id === used)?.name ?? used ?? "" });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <>
+      <PageHeader title="Batch prediction" subtitle="Upload a UTF-8 CSV, pick the column that holds the text, and download the predictions as a CSV." />
+      <div className="grid gap-6 lg:grid-cols-5">
+        <Card className="space-y-4 lg:col-span-2">
+          <Field label="CSV file" htmlFor="csv" hint={`UTF-8 CSV, up to ${info?.max_rows?.toLocaleString() ?? "2,000"} rows and 5 MB.`}>
+            <input id="csv" type="file" accept=".csv,text/csv" onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100" />
+          </Field>
+          <Field label="Text column" htmlFor="column">
+            <select id="column" value={column} onChange={(e) => setColumn(e.target.value)} disabled={!info}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:bg-slate-100">
+              {!info && <option>Upload a file first</option>}
+              {info?.columns.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+          <Field label="Model" htmlFor="bmodel">
+            <select id="bmodel" value={modelId} onChange={(e) => setModelId(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+              <option value="">Default{selected && !modelId ? ` — ${selected.name}` : ""}</option>
+              {available.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </Field>
+          {selected && <ModelScopeBanner model={selected} />}
+          <button onClick={run} disabled={!info || !column || busy !== null || (info && info.n_rows > info.max_rows) === true}
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">
+            {busy === "predict" ? "Predicting…" : "Run predictions"}
+          </button>
+          {info && info.n_rows > info.max_rows && (
+            <p className="text-sm text-rose-700" role="alert">This file has {info.n_rows.toLocaleString()} rows; the limit is {info.max_rows.toLocaleString()}.</p>
+          )}
+        </Card>
+        <Card title="Preview and download" className="lg:col-span-3">
+          <div aria-live="polite" className="space-y-4">
+            {busy === "inspect" && <Spinner label="Reading the file…" />}
+            {busy === "predict" && <Spinner label="Running predictions… larger files take longer on CPU." />}
+            {error && <ErrorState message={error} />}
+            {!info && !busy && !error && <EmptyState title="No file yet">Upload a CSV to see its columns and the first rows.</EmptyState>}
+            {done && (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                <p className="font-semibold">Predictions ready for {done.rows.toLocaleString()} rows.</p>
+                <p className="mt-0.5">Generated by: {done.model}</p>
+                <a href={done.url} download="predictions.csv"
+                  className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">Download predictions.csv</a>
+              </div>
+            )}
+            {info && (
+              <>
+                <p className="text-sm text-slate-600">{info.n_rows.toLocaleString()} rows · {info.columns.length} columns · first 5 rows:</p>
+                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                  <table className="min-w-full text-left text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>{info.columns.map((c) => <th key={c} scope="col" className={`px-3 py-2 font-medium ${c === column ? "text-indigo-700" : "text-slate-600"}`}>{c}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {info.preview.map((r, i) => (
+                        <tr key={i} className="border-t border-slate-100">
+                          {info.columns.map((c) => <td key={c} className={`te max-w-xs truncate px-3 py-2 ${c === column ? "bg-indigo-50/50" : ""}`}>{r[c]}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+      </div>
+    </>
+  );
+}

@@ -1,0 +1,197 @@
+{
+  "model": "TF-IDF + Logistic Regression (multilingual)",
+  "tag": "model_a",
+  "input": "cleaned_text",
+  "n": 15124,
+  "accuracy": 0.6635149431367363,
+  "macro_f1": 0.6637316192319691,
+  "weighted_f1": 0.6639410029080934,
+  "per_class": {
+    "Negative": {
+      "precision": 0.6223639038744483,
+      "recall": 0.6784282277465918,
+      "f1": 0.6491878756874281,
+      "support": 3741
+    },
+    "Neutral": {
+      "precision": 0.6488337954656663,
+      "recall": 0.6426494345718902,
+      "f1": 0.6457268078889701,
+      "support": 6190
+    },
+    "Positive": {
+      "precision": 0.715971515768057,
+      "recall": 0.6776429809358753,
+      "f1": 0.6962801741195093,
+      "support": 5193
+    }
+  },
+  "classification_report": {
+    "Negative": {
+      "precision": 0.6223639038744483,
+      "recall": 0.6784282277465918,
+      "f1-score": 0.6491878756874281,
+      "support": 3741.0
+    },
+    "Neutral": {
+      "precision": 0.6488337954656663,
+      "recall": 0.6426494345718902,
+      "f1-score": 0.6457268078889701,
+      "support": 6190.0
+    },
+    "Positive": {
+      "precision": 0.715971515768057,
+      "recall": 0.6776429809358753,
+      "f1-score": 0.6962801741195093,
+      "support": 5193.0
+    },
+    "accuracy": 0.6635149431367363,
+    "macro avg": {
+      "precision": 0.6623897383693905,
+      "recall": 0.6662402144181191,
+      "f1-score": 0.6637316192319691,
+      "support": 15124.0
+    },
+    "weighted avg": {
+      "precision": 0.665338841557148,
+      "recall": 0.6635149431367363,
+      "f1-score": 0.6639410029080934,
+      "support": 15124.0
+    }
+  },
+  "confidence": {
+    "mean": 0.6367940730402231,
+    "mean_when_correct": 0.67832396165825,
+    "mean_when_wrong": 0.5549012783296904
+  },
+  "best_validation_macro_f1": 0.660939516801886,
+  "params": {
+    "analyzer": "word",
+    "ngram_range": [
+      1,
+      2
+    ],
+    "max_features": 20000,
+    "token_pattern": "(?u)\\S+",
+    "lowercase": true,
+    "class_weight": "balanced",
+    "max_iter": 1000,
+    "random_state": 42
+  },
+  "train_rows": 70540,
+  "train_seconds": 28.5,
+  "token_pattern_note": "\\S+ keeps Telugu words with vowel signs and emojis intact",
+  "per_language": {
+    "telugu": {
+      "status": "evaluated",
+      "n": 3167,
+      "accuracy": 0.6084622671297758,
+      "macro_f1": 0.6008288156780645,
+      "weighted_f1": 0.6083999167317008,
+      "per_class": {
+        "Negative": {
+          "precision": 0.530938123752495,
+          "recall": 0.6059225512528473,
+          "f1": 0.5659574468085107,
+          "support": 878
+        },
+        "Neutral": {
+          "precision": 0.6270627062706271,
+          "recall": 0.660180681028492,
+          "f1": 0.6431956668923493,
+          "support": 1439
+        },
+        "Positive": {
+          "precision": 0.6846153846153846,
+          "recall": 0.5235294117647059,
+          "f1": 0.5933333333333334,
+          "support": 850
+        }
+      }
+    },
+    "english": {
+      "status": "evaluated",
+      "n": 8981,
+      "accuracy": 0.640463200089077,
+      "macro_f1": 0.628057402886904,
+      "weighted_f1": 0.6409730474996288,
+      "per_class": {
+        "Negative": {
+          "precision": 0.5467706013363028,
+          "recall": 0.5752782659636789,
+          "f1": 0.5606622894661718,
+          "support": 1707
+        },
+        "Neutral": {
+          "precision": 0.6502450980392157,
+          "recall": 0.6440883709638262,
+          "f1": 0.6471520917185023,
+          "support": 4119
+        },
+        "Positive": {
+          "precision": 0.6818035426731079,
+          "recall": 0.6709984152139461,
+          "f1": 0.6763578274760383,
+          "support": 3155
+        }
+      }
+    },
+    "code_mixed": {
+      "status": "evaluated",
+      "n": 2976,
+      "accuracy": 0.7916666666666666,
+      "macro_f1": 0.7660025411432855,
+      "weighted_f1": 0.7883432086091487,
+      "per_class": {
+        "Negative": {
+          "precision": 0.8,
+          "recall": 0.8858131487889274,
+          "f1": 0.8407224958949097,
+          "support": 1156
+        },
+        "Neutral": {
+          "precision": 0.6996268656716418,
+          "recall": 0.5933544303797469,
+          "f1": 0.6421232876712328,
+          "support": 632
+        },
+        "Positive": {
+          "precision": 0.825,
+          "recall": 0.8055555555555556,
+          "f1": 0.8151618398637138,
+          "support": 1188
+        }
+      }
+    }
+  },
+  "confusion_matrix": [
+    [
+      2538,
+      904,
+      299
+    ],
+    [
+      1115,
+      3978,
+      1097
+    ],
+    [
+      425,
+      1249,
+      3519
+    ]
+  ],
+  "n_misclassified_total": 5089,
+  "n_misclassified_saved": 30,
+  "heuristic_reason_counts_all_mistakes": {
+    "low confidence prediction": 1972,
+    "class overlap": 1760,
+    "annotation ambiguity": 758,
+    "mixed-language ambiguity": 702,
+    "negation handling": 598,
+    "emoji ambiguity": 296,
+    "sarcasm/implicit sentiment": 143,
+    "insufficient conversational context": 52
+  },
+  "heuristic_note": "HEURISTIC (rule-based guess, not ground truth)"
+}

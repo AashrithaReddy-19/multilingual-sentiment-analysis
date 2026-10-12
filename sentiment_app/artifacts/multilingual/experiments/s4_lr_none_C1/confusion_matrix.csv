@@ -1,0 +1,4 @@
+﻿,pred_Negative,pred_Neutral,pred_Positive
+true_Negative,2274,1166,302
+true_Neutral,601,4682,904
+true_Positive,232,1400,3560

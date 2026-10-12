@@ -1,0 +1,32 @@
+{
+  "experiment_id": "s1_word_ng12_md2_mx100_f100k",
+  "stage": "S1",
+  "config": {
+    "prep": "v1_current",
+    "lowercase": true,
+    "signals": 0.0,
+    "clf": {
+      "type": "lr",
+      "C": 1.0,
+      "class_weight": "balanced"
+    },
+    "word": {
+      "ngram": [
+        1,
+        2
+      ],
+      "min_df": 2,
+      "max_df": 1.0,
+      "max_features": 100000,
+      "sublinear_tf": true
+    },
+    "char": null
+  },
+  "n_features": 100000,
+  "fit_seconds": 13.3,
+  "converged": true,
+  "probability_source": "predict_proba",
+  "trained_on": "train.csv",
+  "scored_on": "validation.csv",
+  "test_used": false
+}

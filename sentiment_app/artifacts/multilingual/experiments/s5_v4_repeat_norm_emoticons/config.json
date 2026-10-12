@@ -1,0 +1,39 @@
+{
+  "experiment_id": "s5_v4_repeat_norm_emoticons",
+  "stage": "S5",
+  "config": {
+    "prep": "v4_repeat_norm_emoticons",
+    "lowercase": true,
+    "signals": 0.0,
+    "clf": {
+      "type": "lr",
+      "C": 1.0,
+      "class_weight": "balanced"
+    },
+    "word": {
+      "ngram": [
+        1,
+        2
+      ],
+      "min_df": 1,
+      "max_df": 1.0,
+      "max_features": 20000,
+      "sublinear_tf": true
+    },
+    "char": {
+      "ngram": [
+        3,
+        5
+      ],
+      "min_df": 2,
+      "max_features": null
+    }
+  },
+  "n_features": 315282,
+  "fit_seconds": 53.4,
+  "converged": true,
+  "probability_source": "predict_proba",
+  "trained_on": "train.csv",
+  "scored_on": "validation.csv",
+  "test_used": false
+}

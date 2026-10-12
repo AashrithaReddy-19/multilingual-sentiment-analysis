@@ -1,0 +1,10 @@
+pattern,rows,share_of_validation,error_rate,error_rate_rest,macro_f1
+short_text_<=3_tokens,159,0.0105,0.3648,0.3386,0.6349
+contains_emoji,1430,0.0946,0.2245,0.3508,0.7057
+contains_negation,1382,0.0914,0.419,0.3308,0.5805
+telugu_script_present,3186,0.2107,0.393,0.3244,0.6027
+"romanized_telugu (CMTET te-tags, no Telugu script)",2570,0.17,0.2039,0.3665,0.7581
+code_mixed_tags (CMTET has both en and te tags),2434,0.161,0.2071,0.3642,0.7578
+telugu_and_latin_script_mixed,251,0.0166,0.259,0.3402,0.6897
+label_conflict_group,24,0.0016,0.625,0.3384,0.3727
+low_confidence_<0.5,3675,0.243,0.5448,0.2728,0.4409

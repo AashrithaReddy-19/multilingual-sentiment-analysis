@@ -1,0 +1,207 @@
+{
+  "split": "validation",
+  "rows": 15121,
+  "macro_f1": 0.6609,
+  "accuracy": 0.6611,
+  "error_rate": 0.3389,
+  "confusion_matrix_rows_actual_cols_pred": [
+    [
+      2516,
+      886,
+      340
+    ],
+    [
+      1128,
+      3989,
+      1070
+    ],
+    [
+      424,
+      1276,
+      3492
+    ]
+  ],
+  "error_pairs": [
+    {
+      "actual": "Positive",
+      "predicted": "Neutral",
+      "count": 1276,
+      "share_of_errors": 0.249
+    },
+    {
+      "actual": "Neutral",
+      "predicted": "Negative",
+      "count": 1128,
+      "share_of_errors": 0.2201
+    },
+    {
+      "actual": "Neutral",
+      "predicted": "Positive",
+      "count": 1070,
+      "share_of_errors": 0.2088
+    },
+    {
+      "actual": "Negative",
+      "predicted": "Neutral",
+      "count": 886,
+      "share_of_errors": 0.1729
+    },
+    {
+      "actual": "Positive",
+      "predicted": "Negative",
+      "count": 424,
+      "share_of_errors": 0.0827
+    },
+    {
+      "actual": "Negative",
+      "predicted": "Positive",
+      "count": 340,
+      "share_of_errors": 0.0664
+    }
+  ],
+  "per_language": [
+    {
+      "language_type": "code_mixed",
+      "rows": 2972,
+      "error_rate": 0.2157,
+      "macro_f1": 0.7565,
+      "confusion_rows_actual_cols_pred": [
+        [
+          1010,
+          78,
+          69
+        ],
+        [
+          141,
+          366,
+          122
+        ],
+        [
+          121,
+          110,
+          955
+        ]
+      ]
+    },
+    {
+      "language_type": "english",
+      "rows": 8980,
+      "error_rate": 0.3599,
+      "macro_f1": 0.625,
+      "confusion_rows_actual_cols_pred": [
+        [
+          957,
+          529,
+          220
+        ],
+        [
+          638,
+          2708,
+          773
+        ],
+        [
+          181,
+          891,
+          2083
+        ]
+      ]
+    },
+    {
+      "language_type": "telugu",
+      "rows": 3169,
+      "error_rate": 0.3948,
+      "macro_f1": 0.6002,
+      "confusion_rows_actual_cols_pred": [
+        [
+          549,
+          279,
+          51
+        ],
+        [
+          349,
+          915,
+          175
+        ],
+        [
+          122,
+          275,
+          454
+        ]
+      ]
+    }
+  ],
+  "patterns": [
+    {
+      "pattern": "short_text_<=3_tokens",
+      "rows": 159,
+      "share_of_validation": 0.0105,
+      "error_rate": 0.3648,
+      "error_rate_rest": 0.3386,
+      "macro_f1": 0.6349
+    },
+    {
+      "pattern": "contains_emoji",
+      "rows": 1430,
+      "share_of_validation": 0.0946,
+      "error_rate": 0.2245,
+      "error_rate_rest": 0.3508,
+      "macro_f1": 0.7057
+    },
+    {
+      "pattern": "contains_negation",
+      "rows": 1382,
+      "share_of_validation": 0.0914,
+      "error_rate": 0.419,
+      "error_rate_rest": 0.3308,
+      "macro_f1": 0.5805
+    },
+    {
+      "pattern": "telugu_script_present",
+      "rows": 3186,
+      "share_of_validation": 0.2107,
+      "error_rate": 0.393,
+      "error_rate_rest": 0.3244,
+      "macro_f1": 0.6027
+    },
+    {
+      "pattern": "romanized_telugu (CMTET te-tags, no Telugu script)",
+      "rows": 2570,
+      "share_of_validation": 0.17,
+      "error_rate": 0.2039,
+      "error_rate_rest": 0.3665,
+      "macro_f1": 0.7581
+    },
+    {
+      "pattern": "code_mixed_tags (CMTET has both en and te tags)",
+      "rows": 2434,
+      "share_of_validation": 0.161,
+      "error_rate": 0.2071,
+      "error_rate_rest": 0.3642,
+      "macro_f1": 0.7578
+    },
+    {
+      "pattern": "telugu_and_latin_script_mixed",
+      "rows": 251,
+      "share_of_validation": 0.0166,
+      "error_rate": 0.259,
+      "error_rate_rest": 0.3402,
+      "macro_f1": 0.6897
+    },
+    {
+      "pattern": "label_conflict_group",
+      "rows": 24,
+      "share_of_validation": 0.0016,
+      "error_rate": 0.625,
+      "error_rate_rest": 0.3384,
+      "macro_f1": 0.3727
+    },
+    {
+      "pattern": "low_confidence_<0.5",
+      "rows": 3675,
+      "share_of_validation": 0.243,
+      "error_rate": 0.5448,
+      "error_rate_rest": 0.2728,
+      "macro_f1": 0.4409
+    }
+  ]
+}
