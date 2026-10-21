@@ -5,33 +5,41 @@ Full Transformer training is GPU-only (`train_transformer.py` refuses to run on 
 ## 1. Files
 - Notebook: `D:\NLP\sentiment_app\artifacts\colab_package_phase3\colab_phase3_transformers.ipynb`
 - Package (upload when asked): `D:\NLP\sentiment_app\artifacts\colab_package_phase3\transformer_package.zip`
-  (the exact local train/validation/test CSVs + code, checked against `MANIFEST.json`; `VERSION.txt` = phase3-v3)
-- If you uploaded an older package before, delete `MyDrive/NLP_sentiment/transformer_package.zip` so the new one is used.
+  (the exact local train/validation/test CSVs + code, checked against `MANIFEST.json`; `VERSION.txt` = phase3-v5)
+- If an older package is on Drive, delete `MyDrive/NLP_sentiment/transformer_package.zip` so the new one is uploaded.
+- Google Drive is optional. If Drive authorization fails, the notebook uses `/content/NLP_sentiment` and downloads
+  results directly with `files.download()`.
 
 ## 2. Run
 1. https://colab.research.google.com → File → Upload notebook → the notebook above.
-2. Runtime → Change runtime type → **T4 GPU** → Save.
-3. Runtime → **Run all**. Allow Google Drive access; choose `transformer_package.zip` when asked.
-4. Default `STAGES = colab_runner.TIER1` (~12 runs, ~6 h on a T4), run in this order: learning rate
-   {1e-5, 2e-5, 3e-5} → epochs (3, and 8 with patience 3; 10 only if epoch 8 was still improving) → loss (weighted CE
-   from train frequencies, focal γ 1.5/2.0 + 1.0 or 2.5) → language tokens → MuRIL.
-   Later sessions: `STAGES = colab_runner.TIER1 + colab_runner.TIER2` (lr 1.5e-5/2.5e-5, label smoothing 0.05/0.1,
-   IndicBERTv2), then `+ colab_runner.TIER3` (batch 32/8, weight decay 0/0.02, warmup 0.05, mDeBERTa-v3 in fp32,
-   lower-layer freezing, max_len 192). Finished runs are skipped, so every *Run all* continues where it stopped.
-5. Each stage changes one factor of the current best XLM-R recipe; a change is kept only if validation macro F1
-   (then macro recall, then accuracy) improves. Per-epoch validation loss, accuracy, macro P/R/F1, weighted F1, per-class
-   P/R/F1 and training loss are saved in `validation_history.csv`; `config.json` flags overfitting
-   (validation macro F1 falling while training loss falls).
-6. *Final test* scores only the best validation run of each model family on the test split.
-7. The next cell downloads **`phase3_results_<time>.zip`** (metrics, predictions, plots — no weights).
-8. Only if a Transformer or the ensemble is later selected for the web app: set `DOWNLOAD_MODELS = ["xlmr"]`
-   (add e.g. `"muril"` for an ensemble member) and run the last cell to download `phase3_model_<family>_<time>.zip` (~1.1 GB each).
+2. Runtime → Change runtime type → **GPU** (L4 or A100 preferred; T4 works but is ~2–3× slower) → Save.
+3. Runtime → **Run all**. Allow Google Drive access; choose `transformer_package.zip` when asked. The first cell prints
+   the GPU name, VRAM, CUDA version and `torch.cuda.is_available()`.
+4. `PLAN = colab_runner.PLAN` runs, in order (each step = one family + tier, see the table in the notebook):
+   E5 core → XLM-R core → MuRIL core → IndicBERTv2 core → E5 extra → XLM-R refine → MuRIL/IndicBERTv2 refine →
+   mDeBERTa core → XLM-R extra. Finished runs are skipped, so every *Run all* continues where it stopped; use e.g.
+   `PLAN = colab_runner.PLAN[:2]` for a shorter session.
+5. Inside a family every stage changes ONE factor of its current best run (validation macro F1, then macro recall, then
+   accuracy): learning rate → epochs (4 → 5 → 6 → 8 only while still improving; early stopping patience 2, 3 from 6
+   epochs) → max length → loss (CE / weighted CE / focal γ 1.0–2.5) → class-weight scheme (inverse, sqrt-inverse,
+   effective number) → label smoothing (0.03/0.05/0.10) → language tokens → language-reweighted training sampler
+   (sqrt / balanced; validation and test are never resampled) → text variants → weight decay / warmup / cosine →
+   layer freezing (3/6 permanent, 6 gradual) → batch 32. MuRIL / IndicBERTv2 / mDeBERTa start from the best XLM-R
+   recipe and search their own learning rate and epochs. Per-epoch validation metrics (incl. per-language accuracy and
+   macro F1) are in `validation_history.csv`; the best epoch's weights are kept, not the last.
+6. Runs with language tokens also save validation/test predictions where the token comes from the app's heuristic
+   language detector (`detected_lang/`), because the web app has no dataset metadata. Both numbers are reported.
+7. *Final test* scores only the best validation run of each model family on the test split.
+8. The next cell downloads **`phase3_results_<time>.zip`** (metrics, predictions, plots — no weights).
+9. The last cell downloads `phase3_model_<family>_<time>.zip` for every family whose best validation macro F1 beats
+   A+ (0.6962) — chosen on validation only (`DOWNLOAD_MODELS = None`), or set a list / `[]`.
 
 ## 3. Bring results back
 Copy the zip(s) to **`D:\NLP\sentiment_app\artifacts\colab_results\`** (or leave them in Downloads), then:
 ```
 cd D:\NLP\sentiment_app\backend
-py -3.11 -m pipeline.finalize_phase3 --import      :: import (real runs on this split only), ensembles, final test tables, selection
+py -3.11 -m pipeline.finalize_phase3 --import      :: import (real runs on this split only), validation leaderboard, pair/triple + language-aware
+                                                   :: ensembles (validation), calibration, final test, significance, selection
 py -3.11 -m pipeline.install_phase3_model          :: only if model zips were downloaded; checks + CPU load test
 py -3.11 -m pipeline.write_phase3_report           :: docs\final_report_phase3.md
 py -3.11 -m pipeline.build_status_notebook         :: refresh D:\NLP\context_aware_sentiment_analysis.ipynb

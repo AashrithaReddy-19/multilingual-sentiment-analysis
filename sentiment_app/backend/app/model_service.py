@@ -20,6 +20,7 @@ import numpy as np
 from sentiment_core.cleaning import clean_text
 from sentiment_core.labels import CLASS_NAMES
 from sentiment_core.language import detect_language
+from sentiment_core.text_variants import apply_variant
 
 from .config import Settings
 
@@ -40,7 +41,7 @@ def _json(p: Path) -> dict | None:
 class ModelSpec:
     id: str
     name: str
-    kind: str          # "transformer" | "tfidf" | "ensemble"
+    kind: str          # "transformer" | "tfidf" | "ensemble" (weights global or per detected language)
     scope: str         # "multilingual" | "telugu_only"
     path: Path
     extra: dict = field(default_factory=dict)   # transformer: max_length/lang_tokens; ensemble: members/weights
@@ -73,17 +74,25 @@ class ModelService:
         for fam, label in (("xlmr", "XLM-RoBERTa (best validation run, multilingual)"),
                            ("muril", "MuRIL (best validation run, multilingual)"),
                            ("indicbert", "IndicBERTv2 (best validation run, multilingual)"),
-                           ("mdeberta", "mDeBERTa-v3 (best validation run, multilingual)")):
+                           ("mdeberta", "mDeBERTa-v3 (best validation run, multilingual)"),
+                           ("e5", "multilingual-e5-small (best validation run, multilingual)")):
             cfg = _json(p3 / fam / "phase3_config.json") or {}
             specs.append(ModelSpec(f"{fam}_phase3", label + (f" — {cfg['experiment_id']}" if cfg.get("experiment_id") else ""),
                                    "transformer", "multilingual", p3 / fam,
                                    {"max_length": cfg.get("max_length", 128), "lang_tokens": cfg.get("lang_tokens", False),
+                                    "input_prefix": cfg.get("input_prefix", ""),
+                                    "text_variant": cfg.get("text_variant", "v1_current"),
                                     "experiment_id": cfg.get("experiment_id")}))
         ens = _json(s.multi / "experiments" / "ensemble_validation_tuned" / "config.json")
         if ens:
             specs.append(ModelSpec("ensemble_phase3", "Validation-tuned ensemble (" + ", ".join(ens["members"]) + ")",
                                    "ensemble", "multilingual", s.multi / "experiments" / "ensemble_validation_tuned",
                                    {"member_ids": ens["member_ids"], "weights": ens["weights"]}))
+        lens = _json(s.multi / "experiments" / "lang_ensemble_validation_tuned" / "config.json")
+        if lens:
+            specs.append(ModelSpec("lang_ensemble_phase3", "Language-aware ensemble (" + ", ".join(lens["members"]) + ")",
+                                   "ensemble", "multilingual", s.multi / "experiments" / "lang_ensemble_validation_tuned",
+                                   {"member_ids": lens["member_ids"], "weights_by_language": lens["weights_by_language"]}))
         self.specs: dict[str, ModelSpec] = {m.id: m for m in specs}
         self._loaded: dict[str, object] = {}
         self._lock = threading.RLock()
@@ -95,7 +104,7 @@ class ModelService:
         """Map an ensemble member (experiment id) to a served model id."""
         if member_id == "model_a_plus":
             return "tfidf_plus_multilingual"
-        for sid in ("xlmr_phase3", "muril_phase3", "indicbert_phase3", "mdeberta_phase3"):
+        for sid in ("xlmr_phase3", "muril_phase3", "indicbert_phase3", "mdeberta_phase3", "e5_phase3"):
             if self.specs[sid].extra.get("experiment_id") == member_id:
                 return sid
         return None
@@ -180,11 +189,19 @@ class ModelService:
         if spec.kind == "tfidf":
             return obj.predict_proba(cleaned)[:, np.argsort(obj.classes_)]
         if spec.kind == "ensemble":
-            return sum(w * self._proba(m, cleaned, langs) for w, m in zip(spec.extra["weights"], obj))
+            member_probs = [self._proba(m, cleaned, langs) for m in obj]
+            if "weights_by_language" not in spec.extra:
+                return sum(w * p for w, p in zip(spec.extra["weights"], member_probs))
+            wbl = spec.extra["weights_by_language"]      # routed by the heuristic language of each text
+            w = np.array([wbl.get(lg, wbl["english"]) for lg in langs])          # (n, members)
+            return sum(w[:, [j]] * p for j, p in enumerate(member_probs))
         tok, model, torch = obj
-        texts = cleaned
+        # same input as training: [prefix][language token ]text-variant(cleaned)
+        texts = apply_variant(cleaned, spec.extra.get("text_variant", "v1_current"))
         if spec.extra.get("lang_tokens"):
-            texts = [f"{LANG_TOKENS.get(lg, LANG_TOKENS['english'])} {t}" for t, lg in zip(cleaned, langs)]
+            texts = [f"{LANG_TOKENS.get(lg, LANG_TOKENS['english'])} {t}" for t, lg in zip(texts, langs)]
+        if spec.extra.get("input_prefix"):
+            texts = [spec.extra["input_prefix"] + t for t in texts]
         out = []
         with torch.no_grad():
             for i in range(0, len(texts), 32):

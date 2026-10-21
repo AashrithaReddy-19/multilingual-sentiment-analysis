@@ -12,7 +12,7 @@ Every metric shown anywhere comes from saved, executed results. Pending experime
 | Multilingual A (word TF-IDF + LR) | trained — test macro F1 0.6637 |
 | **Multilingual A+** (word + char TF-IDF + LR) | **trained — best completed multilingual model**, test macro F1 0.7001, accuracy 0.6994 |
 | Classical search (177 validation-only configs) | done — nothing beat A+ on validation; classical phase closed |
-| XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, ensemble | **Not trained / pending GPU run** (Colab package ready) |
+| multilingual-e5-small, XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, pair/triple and language-aware ensembles | **Not trained / pending GPU run** (Colab package phase3-v5 ready: staged per-family search) |
 | Model C (context-aware) | Skipped — no real conversation_id/message_order available. |
 | Telugu-only run (`D:\NLP\outputs`, different test split) | A 0.6232 / XLM-R 0.6985 test macro F1 |
 
@@ -53,7 +53,7 @@ run_tests.bat              :: pytest (backend) + frontend type-check and build
 | metrics | `recompute_metrics` | exact F1 etc. from saved predictions |
 | error analysis | `error_analysis_a_plus` | A+ test errors (analysis only) |
 | classical search | `classical_search` | S0–S6, validation only, `experiments\experiment_leaderboard.csv` |
-| Colab package | `build_colab_transformers` | `artifacts\colab_package_phase3\` |
+| Colab package | `build_colab_transformers` | `artifacts\colab_package_phase3\` (staged plan in `colab_runner.PLAN`) |
 | import + final evaluation | `finalize_phase3 --import` | ensembles, calibration, McNemar/bootstrap, final tables, `final_selection.json` |
 | app weights | `install_phase3_model` | installs downloaded Transformer weights for the web app |
 | notebook | `build_status_notebook` | rebuilds and executes `D:\NLP\context_aware_sentiment_analysis.ipynb` |

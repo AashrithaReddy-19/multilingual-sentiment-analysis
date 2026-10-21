@@ -63,9 +63,12 @@ def main() -> None:
           "- **A+** word TF-IDF + character `char_wb` (3–5) TF-IDF + Logistic Regression (balanced).",
           "- **Classical search** (177 configs): word / char / union TF-IDF grids; LR, LinearSVC, SGD; preprocessing "
           "variants (casing, repeated characters, emoticon tokens); label-free signal features.",
-          "- **Transformers (Colab GPU)**: XLM-RoBERTa base (Model B) with staged tuning (learning rate, loss: CE / weighted "
-          "CE / focal, label smoothing, epochs, batch, weight decay, warmup, language tokens), MuRIL, IndicBERTv2, mDeBERTa-v3.",
-          "- **Ensemble** of A+ and the best Transformers, weights tuned on validation.",
+          "- **Transformers (Colab GPU)**: multilingual-e5-small, XLM-RoBERTa base (Model B), MuRIL, IndicBERTv2, "
+          "mDeBERTa-v3, each with a staged one-factor-at-a-time search on validation (learning rate, epochs with early "
+          "stopping, max length, loss: CE / weighted CE / focal, class-weight scheme, label smoothing, language tokens, "
+          "language-reweighted training sampler, text variants, weight decay / warmup / cosine, layer freezing, batch).",
+          "- **Ensembles**: probability averages of A+ and the family winners (all pairs, then best pair + 1), and a "
+          "language-aware variant with per-language weights; all weights tuned on validation.",
           f"- **Model C (context-aware)**: {MODEL_C_SKIP}", ""]
 
     cls = lb[lb["experiment_id"].str.match(r"s[0-6]_")].sort_values("validation_macro_f1", ascending=False)
@@ -76,7 +79,16 @@ def main() -> None:
           "No configuration beat the A+ configuration by a meaningful margin (differences ≤ 0.0002 validation macro F1), "
           "so **A+ remains the best classical model**; the classical phase is closed.", ""]
 
-    L += ["## 5. Transformer experiments", ""]
+    L += ["## 5. Transformer experiments (validation only)", ""]
+    vlb = EXP / "validation_leaderboard_phase3.csv"
+    if t_runs and vlb.exists():
+        v = pd.read_csv(vlb, encoding="utf-8-sig")
+        cols = [c for c in ("model", "experiment_id", "best_epoch", "val_accuracy", "val_macro_precision",
+                            "val_macro_recall", "val_macro_f1", "val_weighted_f1", "val_Negative_f1", "val_Neutral_f1",
+                            "val_Positive_f1", "val_english_macro_f1", "val_telugu_macro_f1", "val_code_mixed_macro_f1")
+                if c in v]
+        L += [f"Validation leaderboard ({len(v)} entries, written before any test comparison; full configuration "
+              "columns in `experiments/validation_leaderboard_phase3.csv`):", "", table(v[cols]), ""]
     if not t_runs:
         L += ["**Not trained / pending GPU run.** The resumable Colab package is ready "
               "(`artifacts/colab_package_phase3/`, instructions in `docs/COLAB_PHASE3.md`). No Transformer result is "
@@ -97,6 +109,14 @@ def main() -> None:
             "Best Validation Macro F1"]
     L += ["## 6. Final comparison (multilingual test split, n = 15,124)", "",
           table(comp[comp["Macro F1"].notna()][show]), ""]
+    srv = "As-served Macro F1 (detected language)"
+    if srv in comp and (comp[srv].notna() & (comp[srv] != comp["Macro F1"])).any():
+        L += ["Models that use the language (language tokens, language-aware ensemble) are scored with the dataset's "
+              "language labels; with the app's heuristic detector (as served) they score:", "",
+              table(comp[comp[srv].notna() & (comp[srv] != comp["Macro F1"])][["Model", "Macro F1", srv]]), ""]
+    pl = EXP / "final_per_language_test.csv"
+    if pl.exists():
+        L += ["Per language (test):", "", table(pd.read_csv(pl, encoding="utf-8-sig")), ""]
     for _, r in comp[comp["Macro F1"].isna()].iterrows():
         L.append(f"- **{r['Model']}**: {r['Notes']}")
     imp = EXP / "improvements_over_a_plus.csv"
@@ -117,12 +137,14 @@ def main() -> None:
     L += ["High-confidence validation mistakes are listed in `experiments/possible_label_ambiguity.csv` "
           "(possible annotation ambiguity; nothing was relabelled). Error categories are heuristic, not ground truth.", ""]
 
-    L += ["## 8. Statistical comparison (same test examples)", "", "| Comparison | McNemar p | Macro F1 diff | 95% bootstrap CI |",
-          "|---|---|---|---|"]
+    L += ["## 8. Statistical comparison (same test examples)", "",
+          "| Comparison | McNemar p | Macro F1 diff | 95% CI | Accuracy diff | 95% CI |", "|---|---|---|---|---|---|"]
     for k, v in stats.items():
         bs = v["bootstrap"]
+        acc = (f"{bs['accuracy_diff_mean']:+.4f} | [{bs['accuracy_diff_ci95'][0]:+.4f}, {bs['accuracy_diff_ci95'][1]:+.4f}]"
+               if "accuracy_diff_ci95" in bs else "— | —")
         L.append(f"| {k} | {v['mcnemar']['p_value']:.3g} | {bs['macro_f1_diff_mean']:+.4f} | "
-                 f"[{bs['macro_f1_diff_ci95'][0]:+.4f}, {bs['macro_f1_diff_ci95'][1]:+.4f}] |")
+                 f"[{bs['macro_f1_diff_ci95'][0]:+.4f}, {bs['macro_f1_diff_ci95'][1]:+.4f}] | {acc} |")
     L += ["", "For a row 'X vs Y' the macro F1 difference is X − Y. A difference counts as meaningful only if "
               "McNemar p < 0.05 and the bootstrap CI excludes 0.", ""]
 
@@ -147,8 +169,11 @@ def main() -> None:
               f"Test: accuracy {t['accuracy']:.4f}, macro precision {t['macro_precision']:.4f}, macro recall "
               f"{t['macro_recall']:.4f}, macro F1 {t['macro_f1']:.4f}, weighted F1 {t['weighted_f1']:.4f}.", "",
               "Selection rule: " + " ".join(sel["rule"].split()), ""] + [f"- {x}" for x in sel["reasoning"]]
-        L += ["", f"Target ≥ 0.75 macro F1: **{'ACHIEVED' if t['macro_f1'] >= 0.75 else 'NOT ACHIEVED'}** "
-                  f"(actual {t['macro_f1']:.4f})."]
+        tg = j(EXP / "performance_targets.json")
+        if tg:
+            L += ["", "| Target | Met | Actual |", "|---|---|---|"] +                  [f"| {c['target']} | {'YES' if c['met'] else 'NO'} | {c['actual']:.4f} |" for c in tg["checks"]]
+            L += ["", f"Limiting class: **{tg['limiting_class']}** (F1 {tg['per_class_f1'][tg['limiting_class']]:.4f}); "
+                      f"limiting language: **{tg['limiting_language']}**."]
     L += [""]
 
     L += ["## 11. Limitations", "",

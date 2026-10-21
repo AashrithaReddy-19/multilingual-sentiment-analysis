@@ -70,12 +70,16 @@ class Artifacts:
         sel = _json(exp / "transformers" / "_selected_for_test.json") or {}
         rows = []
         for fam, mid, name in (("xlmr", "B", "XLM-RoBERTa (no context, best validation run)"),
-                               ("muril", "B2", "MuRIL (alternative Transformer, best validation run)")):
+                               ("e5", "B-E5", "multilingual-e5-small (best validation run)"),
+                               ("muril", "B2", "MuRIL (best validation run)"),
+                               ("indicbert", "B-IndicBERT", "IndicBERTv2 (best validation run)"),
+                               ("mdeberta", "B-mDeBERTa", "mDeBERTa-v3 (best validation run)")):
             eid = sel.get(fam)
             if eid and (exp / "final" / eid / f"metrics_{eid}.json").exists():
                 rows.append({"id": mid, "name": f"{name}: {eid}", "input": "cleaned_text",
                              "metrics": exp / "final" / eid / f"metrics_{eid}.json", "tag": eid,
-                             "dir": exp / "final" / eid, "pending_note": MODEL_B_PENDING})
+                             "dir": exp / "final" / eid, "pending_note": MODEL_B_PENDING,
+                             "baseline_note": self._served_note(exp / "final" / eid)})
             elif fam == "xlmr" and (self.s.multi / "model_b" / "metrics_model_b.json").exists():   # Phase-2 import
                 rows.append({"id": "B", "name": "XLM-RoBERTa (no context)", "input": "cleaned_text",
                              "metrics": self.s.multi / "model_b" / "metrics_model_b.json", "tag": "model_b",
@@ -83,11 +87,24 @@ class Artifacts:
             else:
                 rows.append({"id": mid, "name": name, "input": "cleaned_text", "metrics": exp / "_none.json",
                              "tag": f"pending_{fam}", "dir": exp / "final", "pending_note": MODEL_B_PENDING})
-        ens = exp / "final" / "ensemble_validation_tuned"
-        rows.append({"id": "E", "name": "Ensemble (weights tuned on validation)", "input": "cleaned_text",
-                     "metrics": ens / "metrics_ensemble_validation_tuned.json", "tag": "ensemble_validation_tuned",
-                     "dir": ens, "pending_note": "Not trained / pending GPU run (needs the Transformer results)."})
+        for mid, tag, name in (("E", "ensemble_validation_tuned", "Ensemble (weights tuned on validation)"),
+                               ("E-lang", "lang_ensemble_validation_tuned",
+                                "Language-aware ensemble (per-language weights tuned on validation)")):
+            d = exp / "final" / tag
+            rows.append({"id": mid, "name": name, "input": "cleaned_text", "metrics": d / f"metrics_{tag}.json",
+                         "tag": tag, "dir": d, "baseline_note": self._served_note(d),
+                         "pending_note": "Not trained / not promoted (needs Transformer results and a validation gain)."})
         return rows
+
+    @staticmethod
+    def _served_note(d: Path) -> str | None:
+        """Language-dependent models: the test score uses the dataset language labels; the app uses its heuristic."""
+        tm = _json(d / "test_metrics.json") or {}
+        srv = tm.get("as_served_detected_language")
+        if not srv:
+            return None
+        return (f"Test score uses the dataset's language labels. With the app's heuristic language detector (as served): "
+                f"accuracy {srv['accuracy']:.4f}, macro F1 {srv['macro_f1']:.4f}.")
 
     def comparison(self) -> list[dict]:
         out = []

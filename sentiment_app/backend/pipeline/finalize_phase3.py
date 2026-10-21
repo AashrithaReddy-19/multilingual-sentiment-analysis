@@ -7,6 +7,9 @@ evaluation of the validation-selected models, calibration, McNemar + bootstrap, 
 Rules enforced here:
 - Transformer runs are imported only if they are real (not smoke) runs on exactly this project's split (SHA-256).
 - Ensemble weights are chosen on validation only; the ensemble is scored on test once.
+- Language-aware ensembles are tuned with the dataset language_type (validation). Their test score is reported with
+  that metadata AND "as served" (language from the app's heuristic detector), which is what the web app can do.
+- The validation leaderboard (experiments/validation_leaderboard_phase3.csv) is written before any test file is read.
 - A/A+ originals are read, never rewritten; derived files go to experiments/final/.
 """
 from __future__ import annotations
@@ -33,16 +36,24 @@ from pipeline.exp_common import (EXP, full_metrics, labels_from_names, leaderboa
                                  save_eval_files, stage_banner, upsert_leaderboard)
 from sentiment_core.evaluation import evaluate_and_save  # noqa: E402
 from sentiment_core.labels import CLASS_NAMES, MODEL_C_SKIP  # noqa: E402
+from sentiment_core.language import detect_language  # noqa: E402
 
 TRANS = EXP / "transformers"
 FINAL = EXP / "final"
 PROB_COLS = ["prob_Negative", "prob_Neutral", "prob_Positive"]
 CONF_BINS = [0.0, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0001]
 CONF_LABELS = ["0.00-0.50", "0.50-0.60", "0.60-0.70", "0.70-0.80", "0.80-0.90", "0.90-1.00"]
-FAMILY_LABEL = {"xlmr": "XLM-RoBERTa", "muril": "MuRIL", "indicbert": "IndicBERTv2", "mdeberta": "mDeBERTa-v3"}
+FAMILY_LABEL = {"xlmr": "XLM-RoBERTa", "muril": "MuRIL", "indicbert": "IndicBERTv2",
+                "mdeberta": "mDeBERTa-v3", "e5": "multilingual-e5-small"}
 FAMILY_OF_MODEL = {"xlm-roberta-base": "xlmr", "google/muril-base-cased": "muril",
-                   "ai4bharat/IndicBERTv2-MLM-only": "indicbert", "microsoft/mdeberta-v3-base": "mdeberta"}
+                   "ai4bharat/IndicBERTv2-MLM-only": "indicbert", "microsoft/mdeberta-v3-base": "mdeberta",
+                   "intfloat/multilingual-e5-small": "e5"}
 LANG_NAME = {"english": "English", "telugu": "Telugu", "code_mixed": "Code-mixed"}
+LANGS = tuple(LANG_NAME)
+ENS_W = (0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.65, 0.7, 0.8, 0.9)        # first-member weight in a 2-model ensemble
+ENS3_W = (0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8)                  # each weight of a 3-model ensemble
+TARGETS = [("Accuracy >= 0.75", "accuracy", 0.75), ("Accuracy >= 0.80", "accuracy", 0.80),
+           ("Macro F1 >= 0.75", "macro_f1", 0.75), ("Macro F1 >= 0.80", "macro_f1", 0.80)]
 MODEL_C_MESSAGE = ("True context-aware sentiment training could not be performed because the available datasets do "
                    "not contain reliable conversation structure.")
 
@@ -172,15 +183,17 @@ def mcnemar(y, pa, pb) -> dict:
 
 def bootstrap(y, pa, pb, n=2000, seed=42) -> dict:
     rng = np.random.default_rng(seed)
-    fa, fb, d = [], [], []
+    fa, fb, d, da = [], [], [], []
+    ok_a, ok_b = (pa == y), (pb == y)
     for _ in range(n):
         i = rng.integers(0, len(y), len(y))
         a, b = fast_macro_f1(y[i], pa[i]), fast_macro_f1(y[i], pb[i])
-        fa.append(a); fb.append(b); d.append(b - a)
+        fa.append(a); fb.append(b); d.append(b - a); da.append(ok_b[i].mean() - ok_a[i].mean())
     q = lambda v: [float(np.percentile(v, 2.5)), float(np.percentile(v, 97.5))]  # noqa: E731
     return {"resamples": n, "macro_f1_ci95_reference": q(fa), "macro_f1_ci95_model": q(fb),
             "macro_f1_diff_ci95": q(d), "macro_f1_diff_mean": float(np.mean(d)),
-            "share_of_resamples_model_better": float(np.mean(np.array(d) > 0))}
+            "share_of_resamples_model_better": float(np.mean(np.array(d) > 0)),
+            "accuracy_diff_ci95": q(da), "accuracy_diff_mean": float(np.mean(da))}
 
 
 def save_normalized_cm(y, pred, folder: Path, title: str) -> None:
@@ -256,8 +269,16 @@ def main(argv=None) -> dict:
         tp = pd.read_csv(best["dir"] / "predictions_test.csv", encoding="utf-8-sig")
         check_rows(vp, val_df, f"{best['id']} validation"); check_rows(tp, test_df, f"{best['id']} test")
         c = best["cfg"]
-        fam_best[fam] = {"input": c["input"], "val": probs_of(vp), "test": probs_of(tp), "best_val": best["val"]["macro_f1"],
-                         "val_metrics": best["val"], "id": best["id"], "family": fam, "kind": "transformer",
+        served = probs_of(tp)
+        det = best["dir"] / "detected_lang" / "predictions_test.csv"
+        if c["lang_tokens"]:
+            if not det.exists():
+                raise SystemExit(f"{best['id']} uses language tokens but has no detected-language test predictions.")
+            dp = pd.read_csv(det, encoding="utf-8-sig"); check_rows(dp, test_df, f"{best['id']} detected-language test")
+            served = probs_of(dp)
+        fam_best[fam] = {"input": c["input"], "val": probs_of(vp), "test": probs_of(tp), "test_served": served,
+                         "best_val": best["val"]["macro_f1"], "val_metrics": best["val"], "id": best["id"],
+                         "family": fam, "kind": "transformer", "cfg": c, "n_runs": len(fam_runs),
                          "notes": transformer_note(c, len(fam_runs), fam)}
     if "xlmr" in fam_best:
         cands.append({**fam_best["xlmr"], "name": "Multilingual XLM-R Model B"})
@@ -267,6 +288,8 @@ def main(argv=None) -> dict:
     for i, a in enumerate(alts):
         label = "Best alternative Transformer" if i == 0 else "Other alternative Transformer"
         cands.append({**a, "name": f"{label} ({FAMILY_LABEL[a['family']]})"})
+
+    write_validation_leaderboard(runs, cands, val_df, yv)
 
     # ---- validation-only comparison of every family winner with A+ (Neutral boundary + English focus)
     vrows = []
@@ -287,54 +310,74 @@ def main(argv=None) -> dict:
         vrows.append(row)
     pd.DataFrame(vrows).to_csv(EXP / "validation_family_winners_vs_a_plus.csv", index=False, encoding="utf-8-sig")
 
-    # ---- Step 20: ensemble (small rational grid, validation only; promoted only if it beats every member)
-    ensemble_cfg = None
-    xl = next((c for c in cands if c["id"] == fam_best.get("xlmr", {}).get("id")), None)
-    alt = next((c for c in cands if alts and c["id"] == alts[0]["id"]), None)
+    # ---- Step 20: probability ensembles (validation only): all pairs, then best pair + 1 if validation improves
     a_plus = next(c for c in cands if c["id"] == "model_a_plus")
-    if xl is not None:
-        members = [a_plus, xl]
-        if alt is not None and alt["best_val"] >= xl["best_val"] - 0.02:      # "competitive" alternative
-            members.append(alt)
-        grid = ensemble_grid(len(members))
-        scored = []
-        for w in grid:
-            pv = sum(wi * c["val"] for wi, c in zip(w, members))
-            m = full_metrics(yv, pv.argmax(1))
-            scored.append((rank_key(m), w, m))
-        scored.sort(key=lambda x: x[0], reverse=True)
-        best_key, best_w, best_m = scored[0]
+    a_plus["test_served"] = a_plus["test"]
+    xl = next((c for c in cands if c["id"] == fam_best.get("xlmr", {}).get("id")), None)
+    ensemble_cfg = None
+    pool = [a_plus] + [c for c in cands if c.get("kind") == "transformer"]
+    ens_dir = EXP / "ensemble_validation_tuned"
+    for f in ("config.json", "NOT_PROMOTED.json"):
+        (ens_dir / f).unlink(missing_ok=True)
+    if len(pool) >= 2:
+        ens = search_ensembles(pool, yv)
+        members, best_w, best_m = ens["members"], ens["weights"], ens["val_metrics"]
         best_single = max(fast_macro_f1(yv, c["val"].argmax(1)) for c in members)
         promoted = best_m["macro_f1"] > best_single
         names = [c["name"] for c in members]
-        ens_dir = EXP / "ensemble_validation_tuned"
-        ens_dir.mkdir(parents=True, exist_ok=True)
         pv = sum(wi * c["val"] for wi, c in zip(best_w, members))
         vm = save_eval_files(ens_dir, yv, pv, val_df, "validation", "Validation-tuned ensemble")
         ensemble_cfg = {"members": names, "member_ids": [c["id"] for c in members], "weights": list(map(float, best_w)),
-                        "grid": [list(map(float, w)) for w in grid], "selected_on": "validation macro F1 (then recall, accuracy)",
+                        "selected_on": "validation macro F1 (then recall, accuracy)",
+                        "pair_grid": list(ENS_W), "triple_grid": list(ENS3_W),
                         "best_single_member_val_macro_f1": best_single, "val_macro_f1": best_m["macro_f1"],
-                        "promoted": bool(promoted),
-                        "top5_validation": [{"weights": list(map(float, w)), "val_macro_f1": m["macro_f1"]}
-                                            for _, w, m in scored[:5]]}
-        (ens_dir / "config.json").write_text(json.dumps(ensemble_cfg, indent=2), encoding="utf-8")
-        print(f"\nEnsemble grid ({len(grid)} weightings, validation only): best {ensemble_cfg['weights']} for {names} "
-              f"-> val macro F1 {best_m['macro_f1']:.4f} vs best single member {best_single:.4f}: "
+                        "promoted": bool(promoted), "search": ens["log"]}
+        (ens_dir / ("config.json" if promoted else "NOT_PROMOTED.json")).write_text(
+            json.dumps(ensemble_cfg, indent=2), encoding="utf-8")
+        print(f"\nEnsemble search (validation only): best {names} weights {ensemble_cfg['weights']} -> val macro F1 "
+              f"{best_m['macro_f1']:.4f} vs best single member {best_single:.4f}: "
               f"{'PROMOTED' if promoted else 'not promoted (no validation gain); not tested'}")
         if promoted:
             cands.append({"name": "Ensemble (validation-tuned weights)", "input": "cleaned_text (all members)",
                           "val": pv, "test": sum(wi * c["test"] for wi, c in zip(best_w, members)),
+                          "test_served": sum(wi * c["test_served"] for wi, c in zip(best_w, members)),
                           "best_val": vm["macro_f1"], "id": "ensemble_validation_tuned", "kind": "ensemble",
                           "notes": "weights " + ", ".join(f"{n} {w:.2f}" for n, w in zip(names, best_w))})
-        else:
-            (ens_dir / "config.json").unlink()        # nothing for the app to serve
-            (ens_dir / "NOT_PROMOTED.json").write_text(json.dumps(ensemble_cfg, indent=2), encoding="utf-8")
+
+        # ---- Step 21: language-aware weights over the same members (coordinate ascent on overall val macro F1)
+        lw, lm = search_language_weights(members, best_w, yv, val_df["language_type"].to_numpy())
+        lens_dir = EXP / "lang_ensemble_validation_tuned"
+        lens_dir.mkdir(parents=True, exist_ok=True)
+        for f in ("config.json", "NOT_PROMOTED.json"):
+            (lens_dir / f).unlink(missing_ok=True)
+        lang_promoted = lm["macro_f1"] > max(best_m["macro_f1"], best_single)
+        lcfg = {"members": names, "member_ids": [c["id"] for c in members],
+                "weights_by_language": {lg: list(map(float, w)) for lg, w in lw.items()},
+                "tuned_with": "dataset language_type on validation", "served_with": "heuristic detect_language",
+                "val_macro_f1": lm["macro_f1"], "global_ensemble_val_macro_f1": best_m["macro_f1"],
+                "promoted": bool(lang_promoted)}
+        (lens_dir / ("config.json" if lang_promoted else "NOT_PROMOTED.json")).write_text(
+            json.dumps(lcfg, indent=2), encoding="utf-8")
+        print(f"Language-aware ensemble (validation): {lcfg['weights_by_language']} -> val macro F1 "
+              f"{lm['macro_f1']:.4f}: {'PROMOTED' if lang_promoted else 'not promoted'}")
+        if lang_promoted:
+            det_test = test_df["cleaned_text"].astype(str).map(detect_language).to_numpy()
+            lv = routed(members, lw, val_df["language_type"].to_numpy(), "val")
+            save_eval_files(lens_dir, yv, lv, val_df, "validation", "Language-aware ensemble")
+            cands.append({"name": "Language-aware ensemble (validation-tuned weights)",
+                          "input": "cleaned_text (all members)", "val": lv,
+                          "test": routed(members, lw, test_df["language_type"].to_numpy(), "test"),
+                          "test_served": routed(members, lw, det_test, "test_served"),
+                          "best_val": lm["macro_f1"], "id": "lang_ensemble_validation_tuned", "kind": "lang_ensemble",
+                          "notes": "; ".join(f"{LANG_NAME[lg]}: " + ", ".join(f"{n} {w:.2f}" for n, w in zip(names, ws))
+                                             for lg, ws in lw.items())})
     else:
-        print("\nEnsemble: skipped (needs the imported XLM-R results).")
+        print("\nEnsemble: skipped (needs imported Transformer results).")
 
     # ---- Step 21: validation-learned class bias on the best validation model (optional, promoted only on a clear gain)
     pool = [c for c in cands if c["val"] is not None]
     top = max(pool, key=lambda c: rank_key(full_metrics(yv, c["val"].argmax(1))))
+    top.setdefault("test_served", top["test"])
     bias, gain = fit_class_bias(yv, top["val"])
     bias_info = {"base_model": top["name"], "log_bias": bias, "val_macro_f1_gain": gain, "min_gain_to_promote": 0.003,
                  "promoted": gain >= 0.003}
@@ -343,6 +386,7 @@ def main(argv=None) -> dict:
     if bias_info["promoted"]:
         cands.append({"name": f"{top['name']} + validation-tuned class bias", "input": top["input"],
                       "val": apply_bias(top["val"], bias), "test": apply_bias(top["test"], bias),
+                      "test_served": apply_bias(top["test_served"], bias),
                       "best_val": fast_macro_f1(yv, apply_bias(top["val"], bias).argmax(1)),
                       "id": f"{top['id']}_classbias", "kind": "bias", "base_id": top["id"], "log_bias": bias,
                       "notes": f"per-class log-probability offsets {bias} learned on validation"})
@@ -361,6 +405,9 @@ def main(argv=None) -> dict:
         save_normalized_cm(yt, c["test"].argmax(1), folder, c["name"])
         out = {**fm, "calibration_test": cal, "best_validation_macro_f1": c["best_val"], "notes": c["notes"],
                "confusion_matrix": m_eval["confusion_matrix"]}
+        served = c.get("test_served")
+        if served is not None and not np.array_equal(served, c["test"]):
+            out["as_served_detected_language"] = full_metrics(yt, served.argmax(1), test_df["language_type"])
         if c["val"] is not None:
             T = fit_temperature(yv, c["val"])
             out["calibration_validation"] = calibration(yv, c["val"])
@@ -380,7 +427,10 @@ def main(argv=None) -> dict:
                      "English Accuracy": pl["english"]["accuracy"], "English Macro F1": pl["english"]["macro_f1"],
                      "Telugu Accuracy": pl["telugu"]["accuracy"], "Telugu Macro F1": pl["telugu"]["macro_f1"],
                      "Code-mixed Accuracy": pl["code_mixed"]["accuracy"],
-                     "Code-mixed Macro F1": pl["code_mixed"]["macro_f1"], "ECE (test)": cal["ece_10_bins"],
+                     "Code-mixed Macro F1": pl["code_mixed"]["macro_f1"],
+                     **{f"{LANG_NAME[lg]} {k} F1": pl[lg]["per_class"][k]["f1"] for lg in LANGS for k in CLASS_NAMES},
+                     "As-served Macro F1 (detected language)": out.get("as_served_detected_language", fm)["macro_f1"],
+                     "ECE (test)": cal["ece_10_bins"],
                      "Best Validation Macro F1": c["best_val"], "Notes": c["notes"]})
         if tag == "ensemble_validation_tuned":
             upsert_leaderboard(leaderboard_row_from(tag, "weighted probability ensemble", c["notes"], "cleaned_text",
@@ -426,7 +476,7 @@ def main(argv=None) -> dict:
         pb = r["cand"]["test"].argmax(1)
         stats[f"{r['cand']['name']} vs Multilingual A+"] = {"mcnemar": mcnemar(yt, pa, pb),
                                                              "bootstrap": bootstrap(yt, pa, pb)}
-    if "ensemble_validation_tuned" in results and xl is not None:
+    if "ensemble_validation_tuned" in results and fam_best:
         best_t = max([results[c["id"]] for c in cands if c.get("kind") == "transformer"],
                      key=lambda r: rank_key(r["cand"]["val_metrics"]))
         pt = best_t["cand"]["test"].argmax(1)
@@ -434,6 +484,7 @@ def main(argv=None) -> dict:
             "mcnemar": mcnemar(yt, pt, results["ensemble_validation_tuned"]["cand"]["test"].argmax(1)),
             "bootstrap": bootstrap(yt, pt, results["ensemble_validation_tuned"]["cand"]["test"].argmax(1))}
     (EXP / "statistical_comparison.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
+    per_language_table(results).to_csv(EXP / "final_per_language_test.csv", index=False, encoding="utf-8-sig")
 
     # ---- Step 25: Transformer / ensemble error analysis vs A+
     trans_rows, ens_rows, transitions = [], [], []
@@ -471,6 +522,8 @@ def main(argv=None) -> dict:
     # ---- final model selection (written for the web app)
     selection = select_final(cands, results, stats, yv)
     (paths.MULTI / "final_selection.json").write_text(json.dumps(selection, indent=2), encoding="utf-8")
+    targets = target_check(results[selection["selected_id"]]["m"], selection["selected_model_name"])
+    (EXP / "performance_targets.json").write_text(json.dumps(targets, indent=2), encoding="utf-8")
 
     # ---- plots
     plot = comp.dropna(subset=["Macro F1"])
@@ -504,6 +557,8 @@ def main(argv=None) -> dict:
               f"reference wrong/other right {mc['a_wrong_b_right']}); macro F1 diff {bs['macro_f1_diff_mean']:+.4f} "
               f"95% CI [{bs['macro_f1_diff_ci95'][0]:+.4f}, {bs['macro_f1_diff_ci95'][1]:+.4f}]")
     print(f"\nFINAL SELECTED MODEL: {selection['selected_model_name']} (served id {selection['served_model_id']})")
+    for t in targets["checks"]:
+        print(f"  {t['target']}: {'YES' if t['met'] else 'NO'} (actual {t['actual']:.4f})")
     for line in selection["reasoning"]:
         print("  -", line)
     print(f"\nModel C: {MODEL_C_SKIP}\n{MODEL_C_MESSAGE}")
@@ -527,14 +582,123 @@ def transformer_note(c: dict, n_runs: int, fam: str) -> str:
             f"best of {n_runs} {fam} runs by validation macro F1")
 
 
-def ensemble_grid(k: int) -> list[tuple]:
+def ensemble_grid(k: int, with_zero: bool = False) -> list[tuple]:
+    """Weight vectors summing to 1. k=2: first weight from ENS_W; k=3: every weight from ENS3_W.
+    with_zero (language-aware search) also allows a member weight of 0 (and a single member at 1)."""
     if k == 2:
-        return [(a, round(1 - a, 2)) for a in (0.1, 0.2, 0.3, 0.4, 0.5)]
-    grid = [(0.0, x, round(1 - x, 2)) for x in (0.3, 0.4, 0.5, 0.6, 0.7)]          # Transformers only
-    for a in (0.1, 0.2, 0.3):
-        for x in np.round(np.arange(0.1, 1 - a - 0.1 + 1e-9, 0.1), 2):
-            grid.append((a, float(x), round(1 - a - float(x), 2)))
-    return grid
+        ws = ((0.0,) if with_zero else ()) + ENS_W + ((1.0,) if with_zero else ())
+        return [(a, round(1 - a, 2)) for a in ws]
+    ws = ((0.0,) if with_zero else ()) + ENS3_W + ((1.0,) if with_zero else ())
+    return [(a, b, round(1 - a - b, 2)) for a in ws for b in ws
+            if any(abs(1 - a - b - c) < 1e-9 for c in ws)]
+
+
+def score_weights(members, w, y, key="val") -> tuple:
+    p = sum(wi * c[key] for wi, c in zip(w, members)).argmax(1)
+    return rank_key(full_metrics(y, p)), w
+
+
+def search_ensembles(pool: list[dict], y) -> dict:
+    """All 2-model ensembles on the ENS_W grid; then the best pair + each other model on the 3-model grid, kept only
+    if it beats the best pair on validation."""
+    import itertools
+    log, best = [], None
+    for a, b in itertools.combinations(pool, 2):
+        key, w = max(score_weights([a, b], w, y) for w in ensemble_grid(2))
+        log.append({"members": [a["id"], b["id"]], "weights": list(w), "val_macro_f1": key[0]})
+        if best is None or key > best[0]:
+            best = (key, [a, b], w)
+    pair = best
+    for c in pool:
+        if any(c is m for m in pair[1]):
+            continue
+        trio = pair[1] + [c]
+        key, w = max(score_weights(trio, w, y) for w in ensemble_grid(3))
+        log.append({"members": [m["id"] for m in trio], "weights": list(w), "val_macro_f1": key[0]})
+        if key > best[0]:
+            best = (key, trio, w)
+    members, w = best[1], best[2]
+    pv = sum(wi * c["val"] for wi, c in zip(w, members))
+    return {"members": members, "weights": w, "val_metrics": full_metrics(y, pv.argmax(1)),
+            "log": sorted(log, key=lambda r: -r["val_macro_f1"])}
+
+
+def routed(members, weights_by_lang: dict, langs, key: str) -> np.ndarray:
+    """Probabilities of a language-aware ensemble: each row uses the weights of its language."""
+    out = np.zeros_like(members[0][key])
+    for lg, w in weights_by_lang.items():
+        m = langs == lg
+        out[m] = sum(wi * c[key][m] for wi, c in zip(w, members))
+    return out
+
+
+def search_language_weights(members, global_w, y, langs, rounds: int = 2):
+    """Per-language weights (from the same grid, zeros allowed) by coordinate ascent on OVERALL validation macro F1."""
+    lw = {lg: tuple(global_w) for lg in LANGS}
+    grid = ensemble_grid(len(members), with_zero=True)
+    for _ in range(rounds):
+        for lg in LANGS:
+            lw[lg] = max(grid, key=lambda w: rank_key(full_metrics(y, routed(members, {**lw, lg: w}, langs, "val")
+                                                                   .argmax(1))))
+    return lw, full_metrics(y, routed(members, lw, langs, "val").argmax(1))
+
+
+def write_validation_leaderboard(runs, cands, val_df, yv) -> None:
+    """Step 23: every Transformer run + A+, validation metrics only (written before test files are compared)."""
+    rows = []
+    a_plus = next(c for c in cands if c["id"] == "model_a_plus")
+    entries = [("Multilingual A+", "model_a_plus", {"configuration": a_plus["notes"]}, a_plus["val"].argmax(1))]
+    for r in runs:
+        c = r["cfg"]
+        vp = pd.read_csv(r["dir"] / "predictions.csv", encoding="utf-8-sig")
+        check_rows(vp, val_df, f"{r['id']} validation")
+        loss = c["loss"] + (f" gamma {c['focal_gamma']:g}" if c["loss"] == "focal" else "") + \
+            (f" ({c.get('class_weight_scheme')})" if c["loss"] == "wce" else "")
+        entries.append((FAMILY_LABEL[r["family"]], r["id"], {
+            "learning_rate": c["learning_rate"], "best_epoch": c["best_epoch"], "epochs_max": c["epochs_max"],
+            "loss": loss, "label_smoothing": c.get("label_smoothing", 0.0),
+            "batch_size": c["batch_size"], "grad_accum": c["grad_accum"], "weight_decay": c.get("weight_decay"),
+            "warmup_ratio": c.get("warmup_ratio"), "scheduler": c.get("scheduler", "linear"),
+            "max_length": c["max_length"], "lang_tokens": c["lang_tokens"], "sampler": c.get("sampler", "random"),
+            "text_variant": c.get("text_variant", "v1_current"),
+            "freezing": f"{c.get('freeze_lower_layers_epoch1', 0)} ({c.get('freeze_mode') or '-'})"},
+            probs_of(vp).argmax(1)))
+    for model, eid, conf, pv in entries:
+        m = full_metrics(yv, pv, val_df["language_type"])
+        rows.append({"model": model, "experiment_id": eid, **conf, "val_accuracy": m["accuracy"],
+                     "val_macro_precision": m["macro_precision"], "val_macro_recall": m["macro_recall"],
+                     "val_macro_f1": m["macro_f1"], "val_weighted_f1": m["weighted_f1"],
+                     **{f"val_{k}_f1": m["per_class"][k]["f1"] for k in CLASS_NAMES},
+                     "val_neutral_precision": m["per_class"]["Neutral"]["precision"],
+                     "val_neutral_recall": m["per_class"]["Neutral"]["recall"],
+                     **{f"val_{lg}_macro_f1": m["per_language"][lg]["macro_f1"] for lg in LANGS},
+                     "val_english_accuracy": m["per_language"]["english"]["accuracy"]})
+    lb = pd.DataFrame(rows).sort_values(["val_macro_f1", "val_macro_recall", "val_accuracy"], ascending=False)
+    lb.to_csv(EXP / "validation_leaderboard_phase3.csv", index=False, encoding="utf-8-sig")
+    print(f"\nVALIDATION LEADERBOARD ({len(lb)} entries, validation only) -> validation_leaderboard_phase3.csv")
+    print(lb[["experiment_id", "val_accuracy", "val_macro_f1", "val_Negative_f1", "val_Neutral_f1", "val_Positive_f1",
+              "val_english_macro_f1", "val_telugu_macro_f1", "val_code_mixed_macro_f1"]].head(15).round(4)
+          .to_string(index=False))
+
+
+def per_language_table(results: dict) -> pd.DataFrame:
+    rows = []
+    for r in results.values():
+        for lg in LANGS:
+            pl = r["m"]["per_language"][lg]
+            rows.append({"Model": r["cand"]["name"], "Language": LANG_NAME[lg], "n": pl["n"], "Accuracy": pl["accuracy"],
+                         "Macro Precision": pl["macro_precision"], "Macro Recall": pl["macro_recall"],
+                         "Macro F1": pl["macro_f1"], **{f"{k} F1": pl["per_class"][k]["f1"] for k in CLASS_NAMES}})
+    return pd.DataFrame(rows)
+
+
+def target_check(m: dict, name: str) -> dict:
+    checks = [{"target": t, "actual": m[k], "met": bool(m[k] >= v)} for t, k, v in TARGETS]
+    pc = {k: m["per_class"][k]["f1"] for k in CLASS_NAMES}
+    checks.append({"target": "All class F1 >= 0.80", "actual": min(pc.values()), "met": min(pc.values()) >= 0.80})
+    pl = {lg: m["per_language"][lg]["macro_f1"] for lg in LANGS}
+    return {"model": name, "checks": checks, "per_class_f1": pc, "per_language_macro_f1": pl,
+            "limiting_class": min(pc, key=pc.get), "limiting_language": LANG_NAME[min(pl, key=pl.get)]}
 
 
 def apply_bias(p: np.ndarray, bias) -> np.ndarray:
@@ -603,7 +767,7 @@ def select_final(cands, results, stats, yv) -> dict:
     reasons = []
     pool = [c for c in cands if c["val"] is not None]
     ranked = sorted(pool, key=lambda c: rank_key(full_metrics(yv, c["val"].argmax(1))), reverse=True)
-    complexity = {"tfidf": 0, None: 0, "transformer": 1, "ensemble": 2, "bias": 2}
+    complexity = {"tfidf": 0, None: 0, "transformer": 1, "ensemble": 2, "bias": 2, "lang_ensemble": 3}
     choice = ranked[0]
     reasons.append(f"Highest validation macro F1: {choice['name']} ({choice['best_val']:.4f}).")
     for c in ranked[1:]:
@@ -625,23 +789,30 @@ def select_final(cands, results, stats, yv) -> dict:
     kind = choice.get("kind")
     if kind == "transformer":
         served = f"{choice['family']}_phase3"
-    elif kind == "ensemble":
-        served = "ensemble_phase3"
+    elif kind in ("ensemble", "lang_ensemble"):
+        served = "ensemble_phase3" if kind == "ensemble" else "lang_ensemble_phase3"
     elif kind == "bias":
         base = next(c for c in cands if c["id"] == choice["base_id"])
         served = SERVED_ID.get(base["id"]) or (f"{base['family']}_phase3" if base.get("kind") == "transformer"
-                                               else "ensemble_phase3")
+                                               else {"ensemble": "ensemble_phase3",
+                                                     "lang_ensemble": "lang_ensemble_phase3"}[base["kind"]])
     else:
         served = SERVED_ID.get(choice["id"], "tfidf_plus_multilingual")
     m = results[choice["id"]]["m"]
+    ens_cfg = {"ensemble_phase3": EXP / "ensemble_validation_tuned" / "config.json",
+               "lang_ensemble_phase3": EXP / "lang_ensemble_validation_tuned" / "config.json"}.get(served)
+    member_ids = json.loads(ens_cfg.read_text())["member_ids"] if ens_cfg and ens_cfg.exists() else []
     needs = sorted({c["family"] for c in cands if c.get("kind") == "transformer"
-                    and (served == f"{c['family']}_phase3" or (served == "ensemble_phase3"
-                                                               and c["id"] in (json.loads((EXP / "ensemble_validation_tuned" / "config.json").read_text())["member_ids"]
-                                                                               if (EXP / "ensemble_validation_tuned" / "config.json").exists() else [])))})
+                    and (served == f"{c['family']}_phase3" or c["id"] in member_ids)})
     return {"selected_model_name": choice["name"], "selected_id": choice["id"], "served_model_id": served,
             "class_log_bias": choice.get("log_bias"), "temperature": choice.get("temperature"),
             "requires_transformer_weights": needs,
-            "test": {k: m[k] for k in ("accuracy", "macro_precision", "macro_recall", "macro_f1", "weighted_f1")},
+            "test": {k: m[k] for k in ("accuracy", "macro_precision", "macro_recall", "macro_f1", "weighted_precision",
+                                       "weighted_recall", "weighted_f1")},
+            "test_per_class_f1": {k: m["per_class"][k]["f1"] for k in CLASS_NAMES},
+            "test_per_language_macro_f1": {lg: m["per_language"][lg]["macro_f1"] for lg in LANGS},
+            "test_as_served": {k: results[choice["id"]]["out"].get("as_served_detected_language", m)[k]
+                               for k in ("accuracy", "macro_f1")},
             "validation_macro_f1": choice["best_val"], "reasoning": reasons,
             "rule": select_final.__doc__.strip()}
 

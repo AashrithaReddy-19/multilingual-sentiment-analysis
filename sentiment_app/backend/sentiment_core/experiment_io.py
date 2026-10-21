@@ -33,9 +33,12 @@ def full_metrics(y, pred, lang: pd.Series | np.ndarray | None = None) -> dict:
             if m.any():
                 mp, mr, mf, _ = precision_recall_fscore_support(y[m], pred[m], labels=LABELS, average="macro",
                                                                 zero_division=0)
+                cp, cr, cf, _ = precision_recall_fscore_support(y[m], pred[m], labels=LABELS, zero_division=0)
                 out["per_language"][lt] = {"n": int(m.sum()), "accuracy": float(accuracy_score(y[m], pred[m])),
                                            "macro_precision": float(mp), "macro_recall": float(mr),
-                                           "macro_f1": float(mf)}
+                                           "macro_f1": float(mf),
+                                           "per_class": {ID2LABEL[i]: {"precision": float(cp[i]), "recall": float(cr[i]),
+                                                                       "f1": float(cf[i])} for i in LABELS}}
     return out
 
 

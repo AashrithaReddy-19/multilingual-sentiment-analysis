@@ -19,7 +19,8 @@ from pipeline import paths  # noqa: E402
 BACKEND = Path(__file__).resolve().parents[1]
 OUT = paths.APP_ROOT / "artifacts" / "colab_package_phase3"
 PKG_NAME = "transformer_package.zip"
-PACKAGE_VERSION = "phase3-v3 (ordered stages lr->epochs->loss->...; per-language P/R; IndicBERTv2, mDeBERTa)"
+PACKAGE_VERSION = ("phase3-v5 (staged per-family search: E5 deep, XLM-R, MuRIL, IndicBERTv2, mDeBERTa; class-weight "
+                   "schemes, language sampler, text variants, freezing, cosine; as-served language tokens)")
 
 
 def sha(p: Path) -> str:
@@ -43,38 +44,53 @@ def build_zip(dest: Path) -> dict:
 
 
 CELLS = [
-    ("md", """# Phase 3 — multilingual Transformer study (XLM-R Model B, losses, tuning, MuRIL / IndicBERTv2 / mDeBERTa, language tokens)
+    ("md", """# Phase 3 — full multilingual Transformer study (E5, XLM-R, MuRIL, IndicBERTv2, mDeBERTa)
 
-**Before starting:** Runtime → Change runtime type → **T4 GPU** (or better). Then **Runtime → Run all**.
+**Before starting:** Runtime → Change runtime type → **GPU** (L4 or A100 preferred, T4 works). Then **Runtime → Run all**.
 
-- Data: the exact local split (train 70,540 / validation 15,121 / test 15,124), verified against `MANIFEST.json`. No new split is created.
-- Selection: **validation macro F1** (ties: macro recall, then accuracy). Each stage changes one factor of the current best XLM-R recipe.
+- Data: the exact local split (train 70,540 / validation 15,121 / test 15,124), verified against `MANIFEST.json` (SHA-256). No new split, no removed samples, no test rebalancing.
+- Selection: **validation macro F1** (ties: macro recall, then accuracy). Every stage changes ONE factor of the family's current best run; the best epoch of each run is kept (early stopping on validation macro F1).
 - `test.csv` is opened only in the *Final test* cell, and only for the best validation run of each model family.
-- Resumable: runs are stored in `MyDrive/NLP_sentiment/phase3_runs/` and skipped on the next *Run all*. Reconnect and *Run all* after a disconnect.
-- Per epoch: validation loss, accuracy, macro P/R/F1, weighted F1, per-class P/R/F1 and training loss (`validation_history.csv`).
+- Resumable: runs are stored on Drive when available (otherwise `/content/NLP_sentiment/phase3_runs/`) and skipped on the next *Run all*.
+- Per epoch: validation loss, accuracy, macro P/R/F1, weighted F1, per-class P/R/F1, per-language accuracy / macro F1, training loss (`validation_history.csv`).
 - Model C: Skipped — no real conversation_id/message_order available.
 
-| Tier | Stages (run in this order) | Runs | T4 time (approx.) |
+| Step of `PLAN` | Stages (one factor at a time) | Runs (approx.) | T4 / L4 / A100 (rough estimate, not measured) |
 |---|---|---|---|
-| 1 (core) | lr {1e-5,2e-5,3e-5} → epochs 3 / 8 (10 only if still improving) → loss (WCE, focal 1.5/2.0 + 1.0 or 2.5) → language tokens → MuRIL | ~12 | ~6 h |
-| 2 (refine) | lr 1.5e-5/2.5e-5 · label smoothing 0.05/0.1 · IndicBERTv2 | ~6 | ~3 h |
-| 3 (optional) | batch 32/8 · weight decay 0/0.02, warmup 0.05 · mDeBERTa (fp32) · layer freezing · max_len 192 | ~9 | ~5 h |
+| E5 core | lr 2e-5/3e-5/5e-5 @3 ep (+1e-5) → epochs 4→5→6→8 while improving → max_len 64/96/192 → loss (WCE, focal 1.0–2.5) → class weights (sqrt-inverse, effective-number) → label smoothing 0.03/0.05/0.10 → language tokens → language sampler | ~22 | 4 h / 2.5 h / 1.3 h |
+| XLM-R core | lr 1e-5/2e-5/3e-5 @3 ep → epochs → loss → language tokens → sampler | ~14 | 7 h / 4 h / 2 h |
+| MuRIL core, IndicBERTv2 core | best XLM-R recipe; lr 2e-5/3e-5 → epochs | ~5 each | 3 h each / 1.7 h / 0.9 h |
+| E5 extra | text variants → wd/warmup/cosine → freezing 3/6 (+gradual) → batch 32 | ~12 | 2 h / 1.2 h / 0.6 h |
+| XLM-R refine | lr 1.5e-5/2.5e-5 → class weights → label smoothing → text variants | ~9 | 5 h / 3 h / 1.5 h |
+| MuRIL / IndicBERTv2 refine | loss → language tokens → sampler | ~6 each | 3 h each |
+| mDeBERTa core (fp32) | lr 2e-5/3e-5 → epochs | ~5 | 8 h / 4 h / 2 h |
+| XLM-R extra | wd/warmup/cosine → batch 32 → freezing → max_len 192 | ~9 | 5 h / 3 h / 1.5 h |
 
-Start with Tier 1; add tiers in later sessions by editing `STAGES` (finished runs are reused)."""),
+Cut `PLAN` short for a session and resume later: finished runs are reused, so nothing is retrained."""),
     ("code", """import sys, json, hashlib, zipfile, shutil
 from pathlib import Path
 from datetime import datetime
 import torch
+print("torch.cuda.is_available():", torch.cuda.is_available())
 if not torch.cuda.is_available():
-    raise RuntimeError("GPU runtime required: Runtime -> Change runtime type -> T4 GPU, then Run all again.")
-!nvidia-smi -L
-from google.colab import drive, files
-drive.mount("/content/drive")
-DRIVE = Path("/content/drive/MyDrive/NLP_sentiment"); DRIVE.mkdir(parents=True, exist_ok=True)
+    raise RuntimeError("GPU runtime required: select an L4 / A100 / T4 runtime, then run all again.")
+props = torch.cuda.get_device_properties(0)
+print(f"GPU: {props.name} | VRAM {props.total_memory / 2**30:.1f} GiB | CUDA (torch build) {torch.version.cuda} | torch {torch.__version__}")
+!nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
+from google.colab import files
+try:
+    from google.colab import drive
+    drive.mount("/content/drive", force_remount=False)
+    DRIVE = Path("/content/drive/MyDrive/NLP_sentiment")
+    DRIVE.mkdir(parents=True, exist_ok=True)
+    print("Google Drive enabled:", DRIVE)
+except Exception as exc:
+    DRIVE = Path("/content/NLP_sentiment")
+    DRIVE.mkdir(parents=True, exist_ok=True)
+    print("Google Drive unavailable; using local Colab storage:", exc)
 PKG_ZIP = DRIVE / "transformer_package.zip"
-print("Choose transformer_package.zip (D:/NLP/sentiment_app/artifacts/colab_package_phase3)" if not PKG_ZIP.exists()
-      else f"Using {PKG_ZIP} (delete it from Drive to upload a newer package)")
 if not PKG_ZIP.exists():
+    print("Upload transformer_package.zip from D:/NLP/sentiment_app/artifacts/colab_package_phase3")
     up = files.upload()
     PKG_ZIP.write_bytes(up[next(iter(up))])
 PKG = Path("/content/pkg"); shutil.rmtree(PKG, ignore_errors=True)
@@ -87,10 +103,10 @@ print(f"All {len(manifest)} package files verified. Package: {(PKG / 'VERSION.tx
     ("code", """# ---- settings ----
 sys.path.insert(0, str(PKG))
 import colab_runner
-STAGES = colab_runner.TIER1                  # later: colab_runner.TIER1 + colab_runner.TIER2 (+ colab_runner.TIER3)
+PLAN = colab_runner.PLAN          # full order (see the table above); e.g. PLAN[:2] = E5 core + XLM-R core only
 RUNS = DRIVE / "phase3_runs"
 runner = colab_runner.Runner(PKG / "data", RUNS)
-runner.plan(stages=STAGES)
+runner.plan(PLAN)
 runner.report("all planned stages")"""),
     ("md", """## Final test (validation-selected configurations only)
 For each model family the run with the best validation macro F1 is scored once on `test.csv`."""),
@@ -107,13 +123,13 @@ with zipfile.ZipFile(res_zip, "w", zipfile.ZIP_DEFLATED) as z:
             z.write(p, p.relative_to(RUNS).as_posix())
 print("Saved on Drive:", res_zip, f"({res_zip.stat().st_size / 1e6:.1f} MB)")
 files.download(str(res_zip))     # metrics/predictions/plots only (small) -> your Downloads folder"""),
-    ("code", """# Weights for the web app (~1.1 GB per model). Chosen on VALIDATION only: the (up to) two best families whose
-# validation macro F1 beats A+ (0.6962) — enough for the app and a 2-model ensemble. Set a list to override.
+    ("code", """# Weights for the web app and ensembles (E5 ~0.5 GB, the base models ~1.1 GB each). Chosen on VALIDATION only:
+# every family whose best validation macro F1 beats A+ (0.6962). Set a list to override, [] to skip.
 A_PLUS_VAL_MACRO_F1 = 0.6962040371748555
 DOWNLOAD_MODELS = None           # None = automatic; e.g. ["xlmr"] or [] to skip
 if DOWNLOAD_MODELS is None:
     val = {f: json.loads((RUNS / e / "validation_metrics.json").read_text())["macro_f1"] for f, e in selected.items()}
-    DOWNLOAD_MODELS = [f for f in sorted(val, key=val.get, reverse=True) if val[f] > A_PLUS_VAL_MACRO_F1][:2]
+    DOWNLOAD_MODELS = [f for f in sorted(val, key=val.get, reverse=True) if val[f] > A_PLUS_VAL_MACRO_F1]
     print("Validation macro F1 per family:", {f: round(v, 4) for f, v in val.items()}, "-> downloading", DOWNLOAD_MODELS)
 for fam in DOWNLOAD_MODELS:
     best = RUNS / f"_best_model_{fam}" / "model"

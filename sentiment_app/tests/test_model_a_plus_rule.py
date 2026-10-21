@@ -28,4 +28,4 @@ def test_a_plus_listed_only_when_it_beats_baseline(tmp_path, plus, shown):
 def test_a_plus_absent_without_results(tmp_path):
     _write(tmp_path, "model_a", 0.66)
     ids = [m["id"] for m in Artifacts(Settings(nlp_root=tmp_path)).runs()["multilingual"]["models"]]
-    assert ids == ["A", "B", "B2", "E"]                    # Phase-3 rows are listed as pending
+    assert ids == ["A", "B", "B-E5", "B2", "B-IndicBERT", "B-mDeBERTa", "E", "E-lang"]                    # Phase-3 rows are listed as pending

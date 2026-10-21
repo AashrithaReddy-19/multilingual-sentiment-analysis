@@ -155,7 +155,7 @@ def test_comparison_uses_only_saved_results_and_exact_status_texts(client):
     if sel.exists() or (settings.multi / "model_b" / "metrics_model_b.json").exists():   # real imported Colab run
         assert multi["B"]["status"] == "trained" and isinstance(multi["B"]["macro_f1"], float)
     else:
-        for mid in ("B", "B2", "E"):
+        for mid in ("B", "B-E5", "B2", "B-IndicBERT", "B-mDeBERTa", "E", "E-lang"):
             assert multi[mid]["status"] == "pending" and "macro_f1" not in multi[mid]
         assert multi["B"]["note"] == "Not trained / pending GPU run."
     assert multi["A+"]["macro_precision"] is not None and multi["A+"]["macro_recall"] is not None
