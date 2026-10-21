@@ -2,6 +2,9 @@
     // One environment for VS Code, Pylance, Jupyter, backend and training: Python 3.11 (see sentiment_app/README.md).
     "python.defaultInterpreterPath": "C:\\Users\\sresh\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
     "python.analysis.extraPaths": ["${workspaceFolder}/sentiment_app/backend"],
+    // Colab-in-VS Code training: save notebook outputs to disk automatically (pipeline.import_vscode_results reads them).
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 30000,
     "jupyter.kernels.excludePythonEnvironments": [
         "C:\\Users\\sresh\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
         "C:\\Users\\sresh\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"

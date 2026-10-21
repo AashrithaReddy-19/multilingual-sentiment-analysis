@@ -71,6 +71,7 @@ sentiment_app/artifacts/multilingual/experiments/ensemble_error_analysis.csv
 # Colab packages/results embed the data splits (rebuild with pipeline.build_colab_transformers)
 sentiment_app/artifacts/colab_package/*.zip
 sentiment_app/artifacts/colab_package_phase3/*.zip
+sentiment_app/artifacts/colab_package_phase3/colab_vscode_phase3.ipynb
 sentiment_app/artifacts/colab_results/*
 !sentiment_app/artifacts/colab_results/.gitkeep
 
