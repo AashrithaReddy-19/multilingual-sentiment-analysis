@@ -108,3 +108,9 @@ def test_service_language_aware_ensemble_routes_by_detected_language(tmp_path):
                                               else svc._proba_orig(mid, cleaned, langs))
     p = svc._proba_orig(spec.id, ["x", "y", "z"], ["english", "telugu", "code_mixed"])
     assert np.allclose(p, [[1, 0, 0], [0, 0, 1], [0.5, 0, 0.5]])
+
+
+def test_pair_grid_contains_the_requested_a_plus_weights():
+    pairs = fp.ensemble_grid(2)
+    for a in (0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5):
+        assert (a, round(1 - a, 2)) in pairs

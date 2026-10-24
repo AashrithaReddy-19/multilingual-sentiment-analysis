@@ -1,4 +1,5 @@
 """API tests with a small fake model (no real weights are loaded)."""
+import json
 import io
 
 import numpy as np
@@ -151,13 +152,23 @@ def test_comparison_uses_only_saved_results_and_exact_status_texts(client):
     runs = {r["run"]: r for r in client.get("/api/comparison").json()}
     multi = {m["id"]: m for m in runs["multilingual"]["models"]}
     from app.config import settings
-    sel = settings.multi / "experiments" / "transformers" / "_selected_for_test.json"
-    if sel.exists() or (settings.multi / "model_b" / "metrics_model_b.json").exists():   # real imported Colab run
-        assert multi["B"]["status"] == "trained" and isinstance(multi["B"]["macro_f1"], float)
-    else:
-        for mid in ("B", "B-E5", "B2", "B-IndicBERT", "B-mDeBERTa", "E", "E-lang"):
+    exp = settings.multi / "experiments"
+    sel_file = exp / "transformers" / "_selected_for_test.json"
+    sel = json.loads(sel_file.read_text(encoding="utf-8")) if sel_file.exists() else {}
+    # each family row is "trained" exactly when its validation-selected run has real final test metrics
+    for fam, mid in (("xlmr", "B"), ("e5", "B-E5"), ("muril", "B2"), ("indicbert", "B-IndicBERT"),
+                     ("mdeberta", "B-mDeBERTa")):
+        done = bool(sel.get(fam)) and (exp / "final" / sel[fam] / f"metrics_{sel[fam]}.json").exists()
+        if fam == "xlmr":
+            done = done or (settings.multi / "model_b" / "metrics_model_b.json").exists()   # Phase-2 import
+        if done:
+            assert multi[mid]["status"] == "trained" and isinstance(multi[mid]["macro_f1"], float)
+        else:
             assert multi[mid]["status"] == "pending" and "macro_f1" not in multi[mid]
-        assert multi["B"]["note"] == "Not trained / pending GPU run."
+            assert multi[mid]["note"] == "Not trained / pending GPU run."
+    for mid, tag in (("E", "ensemble_validation_tuned"), ("E-lang", "lang_ensemble_validation_tuned")):
+        done = (exp / "final" / tag / f"metrics_{tag}.json").exists()
+        assert (multi[mid]["status"] == "trained") == done and (("macro_f1" in multi[mid]) == done)
     assert multi["A+"]["macro_precision"] is not None and multi["A+"]["macro_recall"] is not None
     for run in runs.values():
         c = next(m for m in run["models"] if m["id"] == "C")

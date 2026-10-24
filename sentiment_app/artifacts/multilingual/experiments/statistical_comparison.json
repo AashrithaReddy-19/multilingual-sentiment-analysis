@@ -22,7 +22,136 @@
         -0.030968985973238845
       ],
       "macro_f1_diff_mean": -0.036354206736519,
-      "share_of_resamples_model_better": 0.0
+      "share_of_resamples_model_better": 0.0,
+      "accuracy_diff_ci95": [
+        -0.04106056598783392,
+        -0.030545821211319706
+      ],
+      "accuracy_diff_mean": -0.03589086881777308
+    }
+  },
+  "Best alternative Transformer (multilingual-e5-small) vs Multilingual A+": {
+    "mcnemar": {
+      "a_right_b_wrong": 1273,
+      "a_wrong_b_right": 1944,
+      "test": "chi-square with continuity correction",
+      "statistic": 139.53994404724898,
+      "p_value": 3.355973246353923e-32
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.692998642873132,
+        0.7076171991936867
+      ],
+      "macro_f1_ci95_model": [
+        0.7380446680164366,
+        0.7518742688692824
+      ],
+      "macro_f1_diff_ci95": [
+        0.037817286965308686,
+        0.05282137051773382
+      ],
+      "macro_f1_diff_mean": 0.04517128089958878,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.03709170854271353,
+        0.05190425813276911
+      ],
+      "accuracy_diff_mean": 0.044379694525257876
+    }
+  },
+  "Ensemble (validation-tuned weights) vs Multilingual A+": {
+    "mcnemar": {
+      "a_right_b_wrong": 667,
+      "a_wrong_b_right": 1406,
+      "test": "chi-square with continuity correction",
+      "statistic": 262.73227206946456,
+      "p_value": 4.3546956812348315e-59
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.692998642873132,
+        0.7076171991936867
+      ],
+      "macro_f1_ci95_model": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_diff_ci95": [
+        0.0439688096764493,
+        0.05570165195274901
+      ],
+      "macro_f1_diff_mean": 0.04981072097878848,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.04304251520761707,
+        0.05487966146522083
+      ],
+      "accuracy_diff_mean": 0.04890726659613859
+    }
+  },
+  "Language-aware ensemble (validation-tuned weights) vs Multilingual A+": {
+    "mcnemar": {
+      "a_right_b_wrong": 833,
+      "a_wrong_b_right": 1612,
+      "test": "chi-square with continuity correction",
+      "statistic": 247.559918200409,
+      "p_value": 8.839134880228403e-56
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.692998642873132,
+        0.7076171991936867
+      ],
+      "macro_f1_ci95_model": [
+        0.7457164591482468,
+        0.759541872458485
+      ],
+      "macro_f1_diff_ci95": [
+        0.04608784588400279,
+        0.05932621925056618
+      ],
+      "macro_f1_diff_mean": 0.0526384848563157,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.04502611742925148,
+        0.05812119809574186
+      ],
+      "accuracy_diff_mean": 0.051569690558053424
+    }
+  },
+  "Ensemble vs Best alternative Transformer (multilingual-e5-small)": {
+    "mcnemar": {
+      "a_right_b_wrong": 563,
+      "a_wrong_b_right": 631,
+      "test": "chi-square with continuity correction",
+      "statistic": 3.7596314907872697,
+      "p_value": 0.052504148760608625
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.7380446680164366,
+        0.7518742688692824
+      ],
+      "macro_f1_ci95_model": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_diff_ci95": [
+        0.00016617310109507405,
+        0.009238669148366511
+      ],
+      "macro_f1_diff_mean": 0.0046394400791996936,
+      "share_of_resamples_model_better": 0.979,
+      "accuracy_diff_ci95": [
+        -6.612007405437937e-05,
+        0.009190690293573115
+      ],
+      "accuracy_diff_mean": 0.004527572070880721
     }
   }
 }

@@ -129,6 +129,10 @@ def parse(argv):
     ap.add_argument("--keep-model", action="store_true", help="keep the best model in OUT/EXP/model")
     ap.add_argument("--predict-test", type=Path, default=None, help="MODEL_DIR of a validation-selected model")
     ap.add_argument("--smoke-rows", type=int, default=0)
+    ap.add_argument("--allow-cpu", action="store_true",
+                    help="allow a full (non-smoke) run without CUDA; slow (hours) but gives real results")
+    ap.add_argument("--resume-from-checkpoint", type=Path, default=None,
+                    help="continue an interrupted run of the SAME config from a Trainer checkpoint (keeps checkpoints)")
     return ap.parse_args(argv)
 
 
@@ -241,7 +245,7 @@ def run_train(args) -> dict:
                               Trainer, TrainingArguments, set_seed)
 
     use_cuda = torch.cuda.is_available()
-    if not use_cuda and not args.smoke_rows:
+    if not use_cuda and not args.smoke_rows and not args.allow_cpu:
         raise SystemExit("No CUDA GPU: full Transformer runs are GPU-only (use Colab).")
     set_seed(SEED)
     run = args.out_dir / args.exp_id
@@ -250,7 +254,10 @@ def run_train(args) -> dict:
         return json.loads((run / "validation_metrics.json").read_text(encoding="utf-8"))
     run.mkdir(parents=True, exist_ok=True)
     ckpt = args.checkpoint_dir or (run / "_checkpoints")
-    shutil.rmtree(ckpt, ignore_errors=True)
+    if args.resume_from_checkpoint is None:
+        shutil.rmtree(ckpt, ignore_errors=True)
+    elif not (args.resume_from_checkpoint / "trainer_state.json").exists():
+        raise SystemExit(f"{args.resume_from_checkpoint} is not a Trainer checkpoint.")
 
     train, val = read(args.data_dir, "train"), read(args.data_dir, "validation")
     split_hashes = {s: sha256(args.data_dir / f"{s}.csv") for s in ("train", "validation", "test")}
@@ -273,15 +280,16 @@ def run_train(args) -> dict:
     va = to_dataset(val, tok, args.max_length, args.lang_tokens, input_col=args.input_col, prefix=prefix, variant=tv)
 
     class_w = class_weights(train["label"], args.class_weight_scheme)     # from TRAINING frequencies only
-    val_lang = val["language_type"].to_numpy()
 
     def compute_metrics(ev):
-        logits, labels = ev                      # eval order == validation.csv order (sequential eval sampler)
-        m = full_metrics(labels, np.argmax(logits, axis=-1), val_lang)
+        # Only order-invariant metrics here: transformers 5 can length-group eval batches, so the eval order is not
+        # validation.csv order and per-language scores would be misattributed. Per-language validation metrics come
+        # from predict_probs (sequential, row-aligned) in validation_metrics.json.
+        logits, labels = ev
+        m = full_metrics(labels, np.argmax(logits, axis=-1))
         return {"accuracy": m["accuracy"], "macro_f1": m["macro_f1"], "weighted_f1": m["weighted_f1"],
                 "macro_precision": m["macro_precision"], "macro_recall": m["macro_recall"],
-                **{f"{k}_{c}": v[k] for c, v in m["per_class"].items() for k in ("precision", "recall", "f1")},
-                **{f"{lt}_{k}": v[k] for lt, v in m["per_language"].items() for k in ("accuracy", "macro_f1")}}
+                **{f"{k}_{c}": v[k] for c, v in m["per_class"].items() for k in ("precision", "recall", "f1")}}
 
     loss_kind, gamma, smoothing = args.loss, args.gamma, args.label_smoothing
     if loss_kind == "focal" and smoothing:
@@ -350,7 +358,7 @@ def run_train(args) -> dict:
                           data_collator=DataCollatorWithPadding(tok), compute_metrics=compute_metrics,
                           callbacks=callbacks, **tok_kw)
     t0 = time.time()
-    trainer.train()
+    trainer.train(resume_from_checkpoint=str(args.resume_from_checkpoint) if args.resume_from_checkpoint else None)
     secs = round(time.time() - t0, 1)
     hist = pd.DataFrame([h for h in trainer.state.log_history if "eval_macro_f1" in h])
     train_loss = {round(h["epoch"]): h["loss"] for h in trainer.state.log_history if "loss" in h and "eval_loss" not in h}
@@ -385,6 +393,7 @@ def run_train(args) -> dict:
            "no_fp16_flag": bool(args.no_fp16),
            "group_by_length": row_w is None, "input_col": args.input_col,
            "input_prefix": prefix,
+           "resumed_from_checkpoint": args.resume_from_checkpoint.name if args.resume_from_checkpoint else None,
            "input": args.input_col + (" with language token" if args.lang_tokens else ""),
            "best_epoch": best_epoch, "epochs_run": float(trainer.state.epoch), "train_seconds": secs,
            "best_checkpoint": f"epoch {best_epoch:g} ({trainer.state.best_model_checkpoint}); intermediate checkpoints "

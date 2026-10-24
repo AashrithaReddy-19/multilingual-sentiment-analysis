@@ -18,6 +18,24 @@ EXP = paths.MULTI / "experiments"
 OUT = paths.APP_ROOT / "docs" / "final_report_phase3.md"
 
 
+def transformer_runs_text() -> str:
+    """What was actually trained (from experiments/transformers/*/config.json), not what the GPU plan covers."""
+    runs = []
+    for f in sorted((EXP / "transformers").glob("*/config.json")):
+        c = json.loads(f.read_text(encoding="utf-8"))
+        if (f.parent / "validation_metrics.json").exists() and not c.get("smoke_test"):
+            where = "local CPU" if c.get("device") == "cpu" else f"Colab {c.get('device', 'GPU')}"
+            runs.append(f"`{c['experiment_id']}` ({c['model']}, {where}, lr {c['learning_rate']:g}, batch "
+                        f"{c.get('effective_batch_size', c['batch_size'])}, max_len {c['max_length']}, loss {c['loss']}, "
+                        f"best epoch {c['best_epoch']:g}/{c['epochs_max']} by validation macro F1"
+                        + (f", resumed from {c['resumed_from_checkpoint']} after an interruption"
+                           if c.get("resumed_from_checkpoint") else "") + ")")
+    if not runs:
+        return "none trained yet (Colab GPU package phase3-v5 is ready)."
+    return ("; ".join(runs) + ". Not trained yet (GPU needed): XLM-RoBERTa base (Model B), MuRIL, IndicBERTv2, "
+            "mDeBERTa-v3 and the rest of the staged E5 search.")
+
+
 def f4(v) -> str:
     return "—" if v is None or (isinstance(v, float) and pd.isna(v)) else f"{v:.4f}"
 
@@ -63,10 +81,7 @@ def main() -> None:
           "- **A+** word TF-IDF + character `char_wb` (3–5) TF-IDF + Logistic Regression (balanced).",
           "- **Classical search** (177 configs): word / char / union TF-IDF grids; LR, LinearSVC, SGD; preprocessing "
           "variants (casing, repeated characters, emoticon tokens); label-free signal features.",
-          "- **Transformers (Colab GPU)**: multilingual-e5-small, XLM-RoBERTa base (Model B), MuRIL, IndicBERTv2, "
-          "mDeBERTa-v3, each with a staged one-factor-at-a-time search on validation (learning rate, epochs with early "
-          "stopping, max length, loss: CE / weighted CE / focal, class-weight scheme, label smoothing, language tokens, "
-          "language-reweighted training sampler, text variants, weight decay / warmup / cosine, layer freezing, batch).",
+          "- **Transformers**: " + transformer_runs_text(),
           "- **Ensembles**: probability averages of A+ and the family winners (all pairs, then best pair + 1), and a "
           "language-aware variant with per-language weights; all weights tuned on validation.",
           f"- **Model C (context-aware)**: {MODEL_C_SKIP}", ""]
@@ -182,7 +197,9 @@ def main() -> None:
           "- Datasets differ in domain (literary/news Telugu, tweets, social-media code-mix); scores are not directly "
           "comparable across languages, and the Telugu-only run uses a different test split.",
           "- Some labels are ambiguous (TeSent annotator disagreement; 55 texts with conflicting labels were kept).",
-          "- Transformer results depend on a Colab GPU run; until imported, A+ is served.", ""]
+          "- Only the Transformer runs listed in section 3 were trained; XLM-R, MuRIL, IndicBERTv2 and mDeBERTa (and a "
+          "wider E5 search) still need a GPU (Colab package phase3-v5). If the selected model's weights are missing, "
+          "the app falls back to A+.", ""]
 
     L += ["## 12. Future context-aware Model C", "",
           f"Status: **{MODEL_C_SKIP}** No real conversation metadata was available, therefore genuine context-aware "

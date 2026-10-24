@@ -1,0 +1,42 @@
+{
+  "model": "Ensemble (validation-tuned weights)",
+  "checks": [
+    {
+      "target": "Accuracy >= 0.75",
+      "actual": 0.7482808780745834,
+      "met": false
+    },
+    {
+      "target": "Accuracy >= 0.80",
+      "actual": 0.7482808780745834,
+      "met": false
+    },
+    {
+      "target": "Macro F1 >= 0.75",
+      "actual": 0.7498642680877716,
+      "met": false
+    },
+    {
+      "target": "Macro F1 >= 0.80",
+      "actual": 0.7498642680877716,
+      "met": false
+    },
+    {
+      "target": "All class F1 >= 0.80",
+      "actual": 0.7301462494102846,
+      "met": false
+    }
+  ],
+  "per_class_f1": {
+    "Negative": 0.7490820073439413,
+    "Neutral": 0.7301462494102846,
+    "Positive": 0.7703645475090891
+  },
+  "per_language_macro_f1": {
+    "english": 0.7270607132558422,
+    "telugu": 0.7241844704300905,
+    "code_mixed": 0.7928814809219314
+  },
+  "limiting_class": "Neutral",
+  "limiting_language": "Telugu"
+}

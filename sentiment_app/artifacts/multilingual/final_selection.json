@@ -1,20 +1,40 @@
 {
-  "selected_model_name": "Multilingual A+",
-  "selected_id": "model_a_plus",
-  "served_model_id": "tfidf_plus_multilingual",
+  "selected_model_name": "Ensemble (validation-tuned weights)",
+  "selected_id": "ensemble_validation_tuned",
+  "served_model_id": "ensemble_phase3",
   "class_log_bias": null,
-  "temperature": 0.9590457363847055,
-  "requires_transformer_weights": [],
+  "temperature": 0.8498782304327254,
+  "requires_transformer_weights": [
+    "e5"
+  ],
   "test": {
-    "accuracy": 0.6994181433483205,
-    "macro_precision": 0.699530442386371,
-    "macro_recall": 0.7010269521330644,
-    "macro_f1": 0.7000937519862452,
-    "weighted_f1": 0.6996443601948771
+    "accuracy": 0.7482808780745834,
+    "macro_precision": 0.7534063994141338,
+    "macro_recall": 0.7470366301397924,
+    "macro_f1": 0.7498642680877716,
+    "weighted_precision": 0.7497579169801298,
+    "weighted_recall": 0.7482808780745834,
+    "weighted_f1": 0.748639524500003
   },
-  "validation_macro_f1": 0.6962040371748555,
+  "test_per_class_f1": {
+    "Negative": 0.7490820073439413,
+    "Neutral": 0.7301462494102846,
+    "Positive": 0.7703645475090891
+  },
+  "test_per_language_macro_f1": {
+    "english": 0.7270607132558422,
+    "telugu": 0.7241844704300905,
+    "code_mixed": 0.7928814809219314
+  },
+  "test_as_served": {
+    "accuracy": 0.7482808780745834,
+    "macro_f1": 0.7498642680877716
+  },
+  "validation_macro_f1": 0.7462601139690407,
   "reasoning": [
-    "Highest validation macro F1: Multilingual A+ (0.6962)."
+    "Highest validation macro F1: Language-aware ensemble (validation-tuned weights) (0.7474).",
+    "Language-aware ensemble (validation-tuned weights) beats the simpler Ensemble (validation-tuned weights) by < 0.005 validation macro F1 -> prefer the simpler model.",
+    "Significantly better than A+ on test: McNemar p=4.35e-59, macro F1 difference 95% CI [+0.0440, +0.0557]."
   ],
   "rule": "Final model: best VALIDATION rank, simplicity gate (needs >= 0.005 validation macro F1 to justify a more complex\n    model), then a test go/no-go against A+ (McNemar p < 0.05 AND bootstrap 95% CI of the macro F1 difference > 0)."
 }

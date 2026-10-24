@@ -50,7 +50,7 @@ FAMILY_OF_MODEL = {"xlm-roberta-base": "xlmr", "google/muril-base-cased": "muril
                    "intfloat/multilingual-e5-small": "e5"}
 LANG_NAME = {"english": "English", "telugu": "Telugu", "code_mixed": "Code-mixed"}
 LANGS = tuple(LANG_NAME)
-ENS_W = (0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.65, 0.7, 0.8, 0.9)        # first-member weight in a 2-model ensemble
+ENS_W = (0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9)        # first-member weight in a 2-model ensemble
 ENS3_W = (0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8)                  # each weight of a 3-model ensemble
 TARGETS = [("Accuracy >= 0.75", "accuracy", 0.75), ("Accuracy >= 0.80", "accuracy", 0.80),
            ("Macro F1 >= 0.75", "macro_f1", 0.75), ("Macro F1 >= 0.80", "macro_f1", 0.80)]
@@ -125,7 +125,8 @@ def register_transformers(runs: list[dict]) -> None:
         upsert_leaderboard(leaderboard_row_from(
             r["id"], c["model"], "fine-tuned Transformer" + (" + language tokens" if c["lang_tokens"] else ""),
             c["input"], hyper, r["val"], test=r["test"],
-            notes=f"Colab {c.get('device', '')}, {c.get('train_seconds', 0) / 60:.0f} min"
+            notes=(f"local CPU{' (resumed from ' + c['resumed_from_checkpoint'] + ')' if c.get('resumed_from_checkpoint') else ''}"
+                   if c.get("device") == "cpu" else f"Colab {c.get('device', '')}, {c.get('train_seconds', 0) / 60:.0f} min")
                   + ("; SELECTED for test (best validation macro F1 in family)" if r["test"] else "")))
 
 
@@ -350,16 +351,22 @@ def main(argv=None) -> dict:
         lens_dir.mkdir(parents=True, exist_ok=True)
         for f in ("config.json", "NOT_PROMOTED.json"):
             (lens_dir / f).unlink(missing_ok=True)
-        lang_promoted = lm["macro_f1"] > max(best_m["macro_f1"], best_single)
+        # the app routes by its heuristic detector, so the weights must also win on validation when routed that way
+        det_val = val_df["cleaned_text"].astype(str).map(detect_language).to_numpy()
+        lm_served = full_metrics(yv, routed(members, lw, det_val, "val").argmax(1))
+        lang_promoted = lm["macro_f1"] > max(best_m["macro_f1"], best_single) and             lm_served["macro_f1"] > max(best_m["macro_f1"], best_single)
         lcfg = {"members": names, "member_ids": [c["id"] for c in members],
                 "weights_by_language": {lg: list(map(float, w)) for lg, w in lw.items()},
                 "tuned_with": "dataset language_type on validation", "served_with": "heuristic detect_language",
-                "val_macro_f1": lm["macro_f1"], "global_ensemble_val_macro_f1": best_m["macro_f1"],
-                "promoted": bool(lang_promoted)}
+                "val_macro_f1": lm["macro_f1"], "val_macro_f1_as_served_detected_language": lm_served["macro_f1"],
+                "global_ensemble_val_macro_f1": best_m["macro_f1"],
+                "promoted": bool(lang_promoted),
+                "promotion_rule": "beats the global ensemble and best single member on validation with BOTH dataset "
+                                  "and detected languages"}
         (lens_dir / ("config.json" if lang_promoted else "NOT_PROMOTED.json")).write_text(
             json.dumps(lcfg, indent=2), encoding="utf-8")
         print(f"Language-aware ensemble (validation): {lcfg['weights_by_language']} -> val macro F1 "
-              f"{lm['macro_f1']:.4f}: {'PROMOTED' if lang_promoted else 'not promoted'}")
+              f"{lm['macro_f1']:.4f} (as served {lm_served['macro_f1']:.4f}): {'PROMOTED' if lang_promoted else 'not promoted'}")
         if lang_promoted:
             det_test = test_df["cleaned_text"].astype(str).map(detect_language).to_numpy()
             lv = routed(members, lw, val_df["language_type"].to_numpy(), "val")

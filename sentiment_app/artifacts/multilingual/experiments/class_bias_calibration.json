@@ -1,11 +1,11 @@
 {
-  "base_model": "Multilingual A+",
+  "base_model": "Language-aware ensemble (validation-tuned weights)",
   "log_bias": [
-    -0.2,
-    -0.1,
+    0.1,
+    0.1,
     0.0
   ],
-  "val_macro_f1_gain": 0.00026559631665734607,
+  "val_macro_f1_gain": 0.0009644484575460632,
   "min_gain_to_promote": 0.003,
   "promoted": false
 }

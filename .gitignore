@@ -77,3 +77,6 @@ sentiment_app/artifacts/colab_results/*
 
 # Executed audit notebook prints sample rows (incl. tweets, Twitter terms); the audit JSON + verification table are kept
 audit_only/data_audit_executed.ipynb
+
+# local CPU Transformer working runs (weights, tokenizer, checkpoints, progress logs); the run record is in experiments/transformers/
+sentiment_app/artifacts/multilingual/experiments/transformers_cpu/

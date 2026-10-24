@@ -10,9 +10,12 @@ Every metric shown anywhere comes from saved, executed results. Pending experime
 | Run | Status |
 |---|---|
 | Multilingual A (word TF-IDF + LR) | trained — test macro F1 0.6637 |
-| **Multilingual A+** (word + char TF-IDF + LR) | **trained — best completed multilingual model**, test macro F1 0.7001, accuracy 0.6994 |
+| Multilingual A+ (word + char TF-IDF + LR) | trained — test macro F1 0.7001, accuracy 0.6994 (kept as the app's fallback) |
 | Classical search (177 validation-only configs) | done — nothing beat A+ on validation; classical phase closed |
-| multilingual-e5-small, XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, pair/triple and language-aware ensembles | **Not trained / pending GPU run** (Colab package phase3-v5 ready: staged per-family search) |
+| multilingual-e5-small (`e5_lr5e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3 on validation) | trained — validation macro F1 0.7390; test macro F1 0.7453, accuracy 0.7438 |
+| **Ensemble A+ 0.5 / E5 0.5** (weights tuned on validation) | **final selected model, served by the app** — test macro F1 **0.7499**, accuracy **0.7483**; vs A+ McNemar p = 4.4e-59, macro F1 diff 95% CI [+0.044, +0.056] |
+| Language-aware ensemble | evaluated (test macro F1 0.7527, as served 0.7522) but not selected: only +0.0011 validation macro F1 over the simpler ensemble (< 0.005 gate) |
+| XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, wider E5 search | **Not trained / pending GPU run** (Colab package phase3-v5) |
 | Model C (context-aware) | Skipped — no real conversation_id/message_order available. |
 | Telugu-only run (`D:\NLP\outputs`, different test split) | A 0.6232 / XLM-R 0.6985 test macro F1 |
 
@@ -34,8 +37,8 @@ start_all.bat              :: both servers + browser
 start_backend.bat          :: API on http://127.0.0.1:8000 (docs: /docs) — uses py -3.11
 start_frontend.bat         :: web app on http://localhost:5173 (npm install on first run)
 ```
-**Which model answers predictions:** the model named in `artifacts\multilingual\final_selection.json` if its files are
-on this machine; otherwise **Multilingual A+**. Telugu-only models are only a last resort and are labelled
+**Which model answers predictions:** the model named in `artifacts\multilingual\final_selection.json` (currently the
+A+ / E5 ensemble; E5 weights in `artifacts\multilingual\phase3_models\e5\`) if its files are on this machine; otherwise **Multilingual A+**. Telugu-only models are only a last resort and are labelled
 "Telugu-only model currently loaded". Every prediction shows the model, all three class probabilities, a heuristic
 language guess and a low-confidence warning (< 50%). Predictions use the current message only — they are **not**
 context-aware.
@@ -55,6 +58,7 @@ run_tests.bat              :: pytest (backend) + frontend type-check and build
 | classical search | `classical_search` | S0–S6, validation only, `experiments\experiment_leaderboard.csv` |
 | Colab package | `build_colab_transformers` | `artifacts\colab_package_phase3\` (staged plan in `colab_runner.PLAN`) |
 | import + final evaluation | `finalize_phase3 --import` | ensembles, calibration, McNemar/bootstrap, final tables, `final_selection.json` |
+| local CPU run | `train_transformer --allow-cpu [--resume-from-checkpoint DIR]`, then `local_cpu_phase3 EXP_ID` | real (slow) CPU training; test once, hand-off to finalize/install |
 | app weights | `install_phase3_model` | installs downloaded Transformer weights for the web app |
 | notebook | `build_status_notebook` | rebuilds and executes `D:\NLP\context_aware_sentiment_analysis.ipynb` |
 | report | `write_phase3_report` | `docs\final_report_phase3.md` |

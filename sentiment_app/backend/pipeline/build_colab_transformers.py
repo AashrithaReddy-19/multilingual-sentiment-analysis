@@ -52,7 +52,7 @@ CELLS = [
 - Selection: **validation macro F1** (ties: macro recall, then accuracy). Every stage changes ONE factor of the family's current best run; the best epoch of each run is kept (early stopping on validation macro F1).
 - `test.csv` is opened only in the *Final test* cell, and only for the best validation run of each model family.
 - Resumable: runs are stored on Drive when available (otherwise `/content/NLP_sentiment/phase3_runs/`) and skipped on the next *Run all*.
-- Per epoch: validation loss, accuracy, macro P/R/F1, weighted F1, per-class P/R/F1, per-language accuracy / macro F1, training loss (`validation_history.csv`).
+- Per epoch: validation loss, accuracy, macro P/R/F1, weighted F1, per-class P/R/F1, training loss (per-language metrics: best epoch only, in `validation_metrics.json`) (`validation_history.csv`).
 - Model C: Skipped — no real conversation_id/message_order available.
 
 | Step of `PLAN` | Stages (one factor at a time) | Runs (approx.) | T4 / L4 / A100 (rough estimate, not measured) |

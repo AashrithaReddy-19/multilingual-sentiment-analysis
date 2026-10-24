@@ -65,3 +65,21 @@ def test_language_heuristic():
     assert detect_language("movie asalu bagaledu, time waste") == "code_mixed"
     assert detect_language("నాకు ఈ movie నచ్చింది") == "code_mixed"
     assert detect_language("👍👍") == "unknown"
+
+
+def test_installed_e5_serves_with_passage_prefix_and_valid_probabilities():
+    """Real installed weights (skipped on machines without them): the E5 spec keeps the training input format, and the
+    selected model answers with proper probabilities. A+ stays available as the fallback."""
+    import numpy as np
+    import pytest
+    s = Settings()
+    svc = ModelService(s)
+    spec = svc.specs["e5_phase3"]
+    if not spec.files_present():
+        pytest.skip("E5 weights not installed on this machine")
+    assert spec.extra["input_prefix"] == "passage: " and spec.extra["max_length"] == 128
+    assert svc.available("tfidf_plus_multilingual")
+    probs, _, mid, langs = svc.predict_full(["This movie was really good!", "ఈ సినిమా చాలా బాగుంది",
+                                             "movie chala worst ga undi"])
+    assert mid == svc.default_id and probs.shape == (3, 3) and np.allclose(probs.sum(1), 1)
+    assert langs[1] == "telugu"

@@ -1,0 +1,13 @@
+﻿model,confusion,A+ count,model count,A+ errors fixed by model
+Best alternative Transformer (multilingual-e5-small),Positive -> Neutral,1173,1100,442
+Best alternative Transformer (multilingual-e5-small),Neutral -> Positive,1027,908,464
+Best alternative Transformer (multilingual-e5-small),Neutral -> Negative,923,664,458
+Best alternative Transformer (multilingual-e5-small),Negative -> Neutral,822,847,336
+Best alternative Transformer (multilingual-e5-small),Negative -> Positive,275,203,101
+Best alternative Transformer (multilingual-e5-small),Positive -> Negative,326,153,143
+Ensemble (validation-tuned weights),Positive -> Neutral,1173,1096,294
+Ensemble (validation-tuned weights),Neutral -> Positive,1027,866,321
+Ensemble (validation-tuned weights),Neutral -> Negative,923,681,348
+Ensemble (validation-tuned weights),Negative -> Neutral,822,789,242
+Ensemble (validation-tuned weights),Negative -> Positive,275,198,83
+Ensemble (validation-tuned weights),Positive -> Negative,326,177,118
