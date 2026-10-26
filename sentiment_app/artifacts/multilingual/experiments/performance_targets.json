@@ -1,5 +1,5 @@
 {
-  "model": "Ensemble (validation-tuned weights)",
+  "model": "Current production ensemble (A+ 0.50 / E5 0.50)",
   "checks": [
     {
       "target": "Accuracy >= 0.75",

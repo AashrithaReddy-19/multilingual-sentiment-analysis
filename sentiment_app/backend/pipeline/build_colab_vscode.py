@@ -118,9 +118,16 @@ for fam, eid in selected.items():
     print(f"  {fam}: {eid}  TEST macro F1 {t['macro_f1']:.4f}  acc {t['accuracy']:.4f}")
 runner.report("final")
 export("final", set(selected))
-for fam in selected:            # weights stay on Drive (too large for notebook outputs)
+import zipfile
+for fam in selected:            # weights are too large for notebook outputs: one zip per family winner on Drive
     best = RUNS / f"_best_model_{fam}" / "model"
-    print(fam, "weights on Drive:", best, f"{sum(f.stat().st_size for f in best.rglob('*') if f.is_file()) / 1e9:.2f} GB")"""
+    mz = BASE / f"phase3_model_{fam}.zip"     # contains phase3_config.json, as pipeline.install_phase3_model expects
+    with zipfile.ZipFile(mz, "w", zipfile.ZIP_STORED) as z:
+        for f in sorted(best.iterdir()):
+            if f.is_file():
+                z.write(f, f.name)
+    print(f"{fam}: {mz} ({mz.stat().st_size / 1e9:.2f} GB) - download it only if finalize_phase3 selects a model "
+          f"that uses {fam}")"""
 
 
 def package_chunks() -> list[str]:

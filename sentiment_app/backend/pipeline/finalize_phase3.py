@@ -100,7 +100,12 @@ def import_results(arg: str | None) -> None:
         n += 1
     sel = tmp / "_selected_for_test.json"
     if sel.exists() and n:
-        shutil.copy(sel, TRANS / "_selected_for_test.json")
+        # merge per family: an imported family replaces its own entry; families trained elsewhere (e.g. the local CPU
+        # E5 run) keep theirs
+        cur_file = TRANS / "_selected_for_test.json"
+        cur = json.loads(cur_file.read_text(encoding="utf-8")) if cur_file.exists() else {}
+        cur.update(json.loads(sel.read_text(encoding="utf-8")))
+        cur_file.write_text(json.dumps(cur, indent=2), encoding="utf-8")
     shutil.rmtree(tmp, ignore_errors=True)
     print(f"Imported {n} Transformer runs from {src.name} -> {TRANS}")
 
@@ -343,6 +348,7 @@ def main(argv=None) -> dict:
                           "val": pv, "test": sum(wi * c["test"] for wi, c in zip(best_w, members)),
                           "test_served": sum(wi * c["test_served"] for wi, c in zip(best_w, members)),
                           "best_val": vm["macro_f1"], "id": "ensemble_validation_tuned", "kind": "ensemble",
+                          "member_ids": [c["id"] for c in members],
                           "notes": "weights " + ", ".join(f"{n} {w:.2f}" for n, w in zip(names, best_w))})
 
         # ---- Step 21: language-aware weights over the same members (coordinate ascent on overall val macro F1)
@@ -376,13 +382,21 @@ def main(argv=None) -> dict:
                           "test": routed(members, lw, test_df["language_type"].to_numpy(), "test"),
                           "test_served": routed(members, lw, det_test, "test_served"),
                           "best_val": lm["macro_f1"], "id": "lang_ensemble_validation_tuned", "kind": "lang_ensemble",
+                          "member_ids": [c["id"] for c in members],
                           "notes": "; ".join(f"{LANG_NAME[lg]}: " + ", ".join(f"{n} {w:.2f}" for n, w in zip(names, ws))
                                              for lg, ws in lw.items())})
     else:
         print("\nEnsemble: skipped (needs imported Transformer results).")
 
+    # ---- the current production model as a FROZEN candidate (same members and weights as when it was promoted)
+    incumbent = load_incumbent(cands, fam_best)
+    if incumbent:
+        cands.append(incumbent)
+        print(f"\nIncumbent: {incumbent['name']} (val macro F1 {incumbent['best_val']:.4f}); a challenger must also be "
+              f"significantly better than it on test to replace it.")
+
     # ---- Step 21: validation-learned class bias on the best validation model (optional, promoted only on a clear gain)
-    pool = [c for c in cands if c["val"] is not None]
+    pool = [c for c in cands if c["val"] is not None and c.get("kind") != "incumbent"]
     top = max(pool, key=lambda c: rank_key(full_metrics(yv, c["val"].argmax(1))))
     top.setdefault("test_served", top["test"])
     bias, gain = fit_class_bias(yv, top["val"])
@@ -490,6 +504,13 @@ def main(argv=None) -> dict:
         stats[f"Ensemble vs {best_t['cand']['name']}"] = {
             "mcnemar": mcnemar(yt, pt, results["ensemble_validation_tuned"]["cand"]["test"].argmax(1)),
             "bootstrap": bootstrap(yt, pt, results["ensemble_validation_tuned"]["cand"]["test"].argmax(1))}
+    if incumbent:
+        pi = results[incumbent["id"]]["cand"]["test"].argmax(1)
+        for tag, r in results.items():
+            if tag not in (incumbent["id"], "model_a") and r["cand"]["val"] is not None:
+                pb = r["cand"]["test"].argmax(1)
+                stats[f"{r['cand']['name']} vs {incumbent['name']}"] = {"mcnemar": mcnemar(yt, pi, pb),
+                                                                       "bootstrap": bootstrap(yt, pi, pb)}
     (EXP / "statistical_comparison.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
     per_language_table(results).to_csv(EXP / "final_per_language_test.csv", index=False, encoding="utf-8-sig")
 
@@ -766,6 +787,48 @@ def error_vs_a_plus(test_df, y, pa, conf_a, probs, name):
 
 
 SERVED_ID = {"model_a_plus": "tfidf_plus_multilingual", "model_a": "tfidf_multilingual"}
+INCUMBENT = EXP / "production_incumbent" / "config.json"
+
+
+def load_incumbent(cands, fam_best) -> dict | None:
+    """The production ensemble frozen at its promotion (experiments/production_incumbent/config.json), rebuilt from its
+    members' saved validation/test probabilities. Members are looked up among the candidates, then in
+    experiments/transformers/<id>/ (so a member that is no longer its family's winner still works)."""
+    if not INCUMBENT.exists():
+        return None
+    cfg = json.loads(INCUMBENT.read_text(encoding="utf-8"))
+    members = []
+    for mid in cfg["member_ids"]:
+        c = next((c for c in cands if c["id"] == mid), None) or \
+            next((v for v in fam_best.values() if v["id"] == mid), None)
+        if c is None:
+            run = TRANS / mid
+            if not (run / "predictions_test.csv").exists():
+                raise SystemExit(f"Incumbent member {mid} has no saved predictions; cannot compare with production.")
+            c = {"id": mid, "val": probs_of(pd.read_csv(run / "predictions.csv", encoding="utf-8-sig")),
+                 "test": probs_of(pd.read_csv(run / "predictions_test.csv", encoding="utf-8-sig"))}
+        members.append(c)
+    w = cfg["weights"]
+    return {"name": cfg["name"], "input": "cleaned_text (all members)", "id": "production_incumbent",
+            "kind": "incumbent", "member_ids": cfg["member_ids"], "best_val": cfg["val_macro_f1"],
+            "val": sum(wi * c["val"] for wi, c in zip(w, members)),
+            "test": sum(wi * c["test"] for wi, c in zip(w, members)),
+            "test_served": sum(wi * c.get("test_served", c["test"]) for wi, c in zip(w, members)),
+            "notes": "frozen production ensemble: " + ", ".join(f"{n} {x:.2f}" for n, x in zip(cfg["members"], w))}
+
+
+def complexity(c: dict, cands: list[dict]) -> float:
+    """Serving cost for the simplicity gate: one point per Transformer, +0.5 for ensembling, +0.5 for language
+    routing, +0.25 for class offsets. A+ = 0, one Transformer = 1, A+ / E5 = 1.5, E5 + XLM-R + MuRIL = 3.5."""
+    kind = c.get("kind")
+    if kind in (None, "tfidf"):
+        return 0.0
+    if kind == "transformer":
+        return 1.0
+    if kind == "bias":
+        return complexity(next(b for b in cands if b["id"] == c["base_id"]), cands) + 0.25
+    n_tr = sum(1 for i in c.get("member_ids") or [] if i not in ("model_a_plus", "model_a"))
+    return n_tr + 0.5 + (0.5 if kind == "lang_ensemble" else 0.0)
 
 
 def select_final(cands, results, stats, yv) -> dict:
@@ -774,16 +837,28 @@ def select_final(cands, results, stats, yv) -> dict:
     reasons = []
     pool = [c for c in cands if c["val"] is not None]
     ranked = sorted(pool, key=lambda c: rank_key(full_metrics(yv, c["val"].argmax(1))), reverse=True)
-    complexity = {"tfidf": 0, None: 0, "transformer": 1, "ensemble": 2, "bias": 2, "lang_ensemble": 3}
     choice = ranked[0]
     reasons.append(f"Highest validation macro F1: {choice['name']} ({choice['best_val']:.4f}).")
     for c in ranked[1:]:
-        if complexity[c.get("kind")] < complexity[choice.get("kind")] and \
+        if complexity(c, cands) < complexity(choice, cands) and \
                 fast_macro_f1(yv, choice["val"].argmax(1)) - fast_macro_f1(yv, c["val"].argmax(1)) < 0.005:
             reasons.append(f"{choice['name']} beats the simpler {c['name']} by < 0.005 validation macro F1 -> prefer "
                            f"the simpler model.")
             choice = c
-    if choice["id"] != "model_a_plus":
+    incumbent = next((c for c in cands if c.get("kind") == "incumbent"), None)
+    if incumbent and choice is not incumbent:
+        st = stats.get(f"{choice['name']} vs {incumbent['name']}")
+        ok = st and st["mcnemar"]["p_value"] < 0.05 and st["bootstrap"]["macro_f1_diff_ci95"][0] > 0
+        if not ok:
+            reasons.append(f"{choice['name']} is not significantly better than the current production model on test "
+                           f"(McNemar / bootstrap) -> keep {incumbent['name']}.")
+            choice = incumbent
+        else:
+            reasons.append(f"Significantly better than the current production model on test: McNemar "
+                           f"p={st['mcnemar']['p_value']:.3g}, macro F1 difference 95% CI "
+                           f"[{st['bootstrap']['macro_f1_diff_ci95'][0]:+.4f}, "
+                           f"{st['bootstrap']['macro_f1_diff_ci95'][1]:+.4f}].")
+    elif not incumbent and choice["id"] != "model_a_plus":
         st = stats.get(f"{choice['name']} vs Multilingual A+")
         ok = st and st["mcnemar"]["p_value"] < 0.05 and st["bootstrap"]["macro_f1_diff_ci95"][0] > 0
         if not ok:
@@ -794,7 +869,9 @@ def select_final(cands, results, stats, yv) -> dict:
                            f"difference 95% CI [{st['bootstrap']['macro_f1_diff_ci95'][0]:+.4f}, "
                            f"{st['bootstrap']['macro_f1_diff_ci95'][1]:+.4f}].")
     kind = choice.get("kind")
-    if kind == "transformer":
+    if kind == "incumbent":
+        served = "production_ensemble"
+    elif kind == "transformer":
         served = f"{choice['family']}_phase3"
     elif kind in ("ensemble", "lang_ensemble"):
         served = "ensemble_phase3" if kind == "ensemble" else "lang_ensemble_phase3"
@@ -807,7 +884,8 @@ def select_final(cands, results, stats, yv) -> dict:
         served = SERVED_ID.get(choice["id"], "tfidf_plus_multilingual")
     m = results[choice["id"]]["m"]
     ens_cfg = {"ensemble_phase3": EXP / "ensemble_validation_tuned" / "config.json",
-               "lang_ensemble_phase3": EXP / "lang_ensemble_validation_tuned" / "config.json"}.get(served)
+               "lang_ensemble_phase3": EXP / "lang_ensemble_validation_tuned" / "config.json",
+               "production_ensemble": INCUMBENT}.get(served)
     member_ids = json.loads(ens_cfg.read_text())["member_ids"] if ens_cfg and ens_cfg.exists() else []
     needs = sorted({c["family"] for c in cands if c.get("kind") == "transformer"
                     and (served == f"{c['family']}_phase3" or c["id"] in member_ids)})

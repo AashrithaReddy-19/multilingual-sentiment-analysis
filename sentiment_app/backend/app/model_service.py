@@ -88,6 +88,11 @@ class ModelService:
             specs.append(ModelSpec("ensemble_phase3", "Validation-tuned ensemble (" + ", ".join(ens["members"]) + ")",
                                    "ensemble", "multilingual", s.multi / "experiments" / "ensemble_validation_tuned",
                                    {"member_ids": ens["member_ids"], "weights": ens["weights"]}))
+        inc = _json(s.multi / "experiments" / "production_incumbent" / "config.json")
+        if inc:   # the production ensemble frozen at its promotion (kept even when a later search re-tunes ensembles)
+            specs.append(ModelSpec("production_ensemble", inc["name"], "ensemble", "multilingual",
+                                   s.multi / "experiments" / "production_incumbent",
+                                   {"member_ids": inc["member_ids"], "weights": inc["weights"]}))
         lens = _json(s.multi / "experiments" / "lang_ensemble_validation_tuned" / "config.json")
         if lens:
             specs.append(ModelSpec("lang_ensemble_phase3", "Language-aware ensemble (" + ", ".join(lens["members"]) + ")",

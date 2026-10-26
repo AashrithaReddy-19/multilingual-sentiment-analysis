@@ -13,12 +13,13 @@ Stages (each family runs the stages listed for it in FAMILY_STAGES, tier by tier
   epochs        4 -> 5 -> 6 -> 8, continuing only while the previous run was still improving at its last epoch or set a
                 new family best (patience 2 up to 5 epochs, 3 from 6 epochs)
   max_length    E5: 64 / 96 / 192; XLM-R: 192 (0.18% of training texts exceed 128 XLM-R tokens, 0.03% exceed 192)
-  loss          weighted CE (inverse frequency), focal 1.5 / 2.0, then focal 1.0 or 2.5 toward the better side
+  loss          weighted CE (inverse frequency), focal gamma 1.0 / 1.5 / 2.0 / 2.5
   class_weights weighted CE with sqrt-inverse and effective-number (beta 0.9999) weights
   smoothing     label smoothing 0.03 / 0.05 / 0.10 (CE/WCE recipes only)
   lang_tokens   [LANG_ENGLISH]/[LANG_TELUGU]/[LANG_CODE_MIXED] special tokens (embeddings resized)
   sampler       language-reweighted TRAIN sampling: sqrt (temperature) and fully balanced
-  text_variant  repeat normalisation; repeat normalisation + emoticon tokens
+  text_variant  repeat normalisation (letters + punctuation); letters only (punctuation untouched); repeat
+                normalisation + emoticon tokens; emoticon tokens only
   optimizer     weight decay 0 / 0.02, warmup 0.03 / 0.05, cosine schedule
   freezing      bottom 3 / 6 layers frozen permanently; bottom 6 frozen in epoch 1 only (gradual unfreezing)
   batch         batch 32 (OOM -> 16 x 2 accumulation)
@@ -61,9 +62,14 @@ FAMILY_STAGES = {
     "mdeberta": {"core": ("lr", "epochs")},
 }
 # default session plan, in order; finished runs are reused, so it can be cut short and resumed
-PLAN = [("e5", "core"), ("xlmr", "core"), ("muril", "core"), ("indicbert", "core"),
-        ("e5", "extra"), ("xlmr", "refine"), ("muril", "refine"), ("indicbert", "refine"),
+# E5 is not in the GPU plan: its family winner (e5_lr5e-05_ce_ep3p2_bs32_len128_cpu) was trained locally on CPU and is
+# already imported; PLAN_WITH_E5 restores the original order if a wider E5 search is wanted.
+PLAN = [("xlmr", "core"), ("muril", "core"), ("indicbert", "core"),
+        ("xlmr", "refine"), ("muril", "refine"), ("indicbert", "refine"),
         ("mdeberta", "core"), ("xlmr", "extra")]
+PLAN_WITH_E5 = [("e5", "core"), ("xlmr", "core"), ("muril", "core"), ("indicbert", "core"),
+                ("e5", "extra"), ("xlmr", "refine"), ("muril", "refine"), ("indicbert", "refine"),
+                ("mdeberta", "core"), ("xlmr", "extra")]
 
 
 def exp_id(c: dict) -> str:
@@ -244,9 +250,8 @@ class Runner:
             base = dict(b, loss="ce", label_smoothing=0.0, class_weight_scheme="inverse")
             for c in (base, dict(base, loss="wce")):
                 self.run(c)
-            f15 = self.run(dict(base, loss="focal", gamma=1.5))
-            f20 = self.run(dict(base, loss="focal", gamma=2.0))
-            self.run(dict(base, loss="focal", gamma=1.0 if rank_key(f15) >= rank_key(f20) else 2.5))
+            for g in (1.0, 1.5, 2.0, 2.5):
+                self.run(dict(base, loss="focal", gamma=g))
         elif name == "class_weights":
             for sch in ("sqrt_inverse", "effective"):
                 self.run(dict(b, loss="wce", gamma=2.0, class_weight_scheme=sch))
@@ -263,7 +268,7 @@ class Runner:
                 if s != b["sampler"]:
                     self.run(dict(b, sampler=s))
         elif name == "text_variant":
-            for v in ("v3_repeat_norm", "v4_repeat_norm_emoticons"):
+            for v in ("v3_repeat_norm", "v3b_letter_repeat_norm", "v4_repeat_norm_emoticons", "v4b_emoticons_only"):
                 if v != b["text_variant"]:
                     self.run(dict(b, text_variant=v))
         elif name == "optimizer":

@@ -31,7 +31,7 @@ def transformer_runs_text() -> str:
                         + (f", resumed from {c['resumed_from_checkpoint']} after an interruption"
                            if c.get("resumed_from_checkpoint") else "") + ")")
     if not runs:
-        return "none trained yet (Colab GPU package phase3-v5 is ready)."
+        return "none trained yet (Colab GPU package phase3-v6 is ready)."
     return ("; ".join(runs) + ". Not trained yet (GPU needed): XLM-RoBERTa base (Model B), MuRIL, IndicBERTv2, "
             "mDeBERTa-v3 and the rest of the staged E5 search.")
 
@@ -198,7 +198,7 @@ def main() -> None:
           "comparable across languages, and the Telugu-only run uses a different test split.",
           "- Some labels are ambiguous (TeSent annotator disagreement; 55 texts with conflicting labels were kept).",
           "- Only the Transformer runs listed in section 3 were trained; XLM-R, MuRIL, IndicBERTv2 and mDeBERTa (and a "
-          "wider E5 search) still need a GPU (Colab package phase3-v5). If the selected model's weights are missing, "
+          "wider E5 search) still need a GPU (Colab package phase3-v6). If the selected model's weights are missing, "
           "the app falls back to A+.", ""]
 
     L += ["## 12. Future context-aware Model C", "",

@@ -15,7 +15,7 @@ Every metric shown anywhere comes from saved, executed results. Pending experime
 | multilingual-e5-small (`e5_lr5e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3 on validation) | trained — validation macro F1 0.7390; test macro F1 0.7453, accuracy 0.7438 |
 | **Ensemble A+ 0.5 / E5 0.5** (weights tuned on validation) | **final selected model, served by the app** — test macro F1 **0.7499**, accuracy **0.7483**; vs A+ McNemar p = 4.4e-59, macro F1 diff 95% CI [+0.044, +0.056] |
 | Language-aware ensemble | evaluated (test macro F1 0.7527, as served 0.7522) but not selected: only +0.0011 validation macro F1 over the simpler ensemble (< 0.005 gate) |
-| XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, wider E5 search | **Not trained / pending GPU run** (Colab package phase3-v5) |
+| XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, wider E5 search | **Not trained / pending GPU run** (Colab package phase3-v6) |
 | Model C (context-aware) | Skipped — no real conversation_id/message_order available. |
 | Telugu-only run (`D:\NLP\outputs`, different test split) | A 0.6232 / XLM-R 0.6985 test macro F1 |
 

@@ -1,0 +1,28 @@
+{
+  "name": "Current production ensemble (A+ 0.50 / E5 0.50)",
+  "members": [
+    "Multilingual A+",
+    "Best alternative Transformer (multilingual-e5-small)"
+  ],
+  "member_ids": [
+    "model_a_plus",
+    "e5_lr5e-05_ce_ep3p2_bs32_len128_cpu"
+  ],
+  "weights": [
+    0.5,
+    0.5
+  ],
+  "val_macro_f1": 0.7462601139690407,
+  "temperature": 0.8498782304327254,
+  "test_at_promotion": {
+    "accuracy": 0.7482808780745834,
+    "macro_precision": 0.7534063994141338,
+    "macro_recall": 0.7470366301397924,
+    "macro_f1": 0.7498642680877716,
+    "weighted_precision": 0.7497579169801298,
+    "weighted_recall": 0.7482808780745834,
+    "weighted_f1": 0.748639524500003
+  },
+  "promoted_on": "2026-10-24 (finalize_phase3, validation-tuned weights; significant vs A+)",
+  "rule": "Frozen incumbent: replaced only by a validation-selected challenger that is also significantly better than it on test (McNemar p < 0.05 and bootstrap 95% CI of the macro F1 difference > 0)."
+}

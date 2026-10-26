@@ -87,7 +87,8 @@ class Artifacts:
             else:
                 rows.append({"id": mid, "name": name, "input": "cleaned_text", "metrics": exp / "_none.json",
                              "tag": f"pending_{fam}", "dir": exp / "final", "pending_note": MODEL_B_PENDING})
-        for mid, tag, name in (("E", "ensemble_validation_tuned", "Ensemble (weights tuned on validation)"),
+        for mid, tag, name in (("P", "production_incumbent", "Current production ensemble (frozen A+ / E5 weights)"),
+                               ("E", "ensemble_validation_tuned", "Ensemble (weights tuned on validation)"),
                                ("E-lang", "lang_ensemble_validation_tuned",
                                 "Language-aware ensemble (per-language weights tuned on validation)")):
             d = exp / "final" / tag

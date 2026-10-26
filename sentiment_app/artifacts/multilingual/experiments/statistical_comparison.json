@@ -123,6 +123,37 @@
       "accuracy_diff_mean": 0.051569690558053424
     }
   },
+  "Current production ensemble (A+ 0.50 / E5 0.50) vs Multilingual A+": {
+    "mcnemar": {
+      "a_right_b_wrong": 667,
+      "a_wrong_b_right": 1406,
+      "test": "chi-square with continuity correction",
+      "statistic": 262.73227206946456,
+      "p_value": 4.3546956812348315e-59
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.692998642873132,
+        0.7076171991936867
+      ],
+      "macro_f1_ci95_model": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_diff_ci95": [
+        0.0439688096764493,
+        0.05570165195274901
+      ],
+      "macro_f1_diff_mean": 0.04981072097878848,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.04304251520761707,
+        0.05487966146522083
+      ],
+      "accuracy_diff_mean": 0.04890726659613859
+    }
+  },
   "Ensemble vs Best alternative Transformer (multilingual-e5-small)": {
     "mcnemar": {
       "a_right_b_wrong": 563,
@@ -152,6 +183,129 @@
         0.009190690293573115
       ],
       "accuracy_diff_mean": 0.004527572070880721
+    }
+  },
+  "Multilingual A+ vs Current production ensemble (A+ 0.50 / E5 0.50)": {
+    "mcnemar": {
+      "a_right_b_wrong": 1406,
+      "a_wrong_b_right": 667,
+      "test": "chi-square with continuity correction",
+      "statistic": 262.73227206946456,
+      "p_value": 4.3546956812348315e-59
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_ci95_model": [
+        0.692998642873132,
+        0.7076171991936867
+      ],
+      "macro_f1_diff_ci95": [
+        -0.055701651952749016,
+        -0.043968809676449304
+      ],
+      "macro_f1_diff_mean": -0.04981072097878848,
+      "share_of_resamples_model_better": 0.0,
+      "accuracy_diff_ci95": [
+        -0.05487966146522083,
+        -0.04304251520761708
+      ],
+      "accuracy_diff_mean": -0.04890726659613859
+    }
+  },
+  "Best alternative Transformer (multilingual-e5-small) vs Current production ensemble (A+ 0.50 / E5 0.50)": {
+    "mcnemar": {
+      "a_right_b_wrong": 631,
+      "a_wrong_b_right": 563,
+      "test": "chi-square with continuity correction",
+      "statistic": 3.7596314907872697,
+      "p_value": 0.052504148760608625
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_ci95_model": [
+        0.7380446680164366,
+        0.7518742688692824
+      ],
+      "macro_f1_diff_ci95": [
+        -0.009238669148366513,
+        -0.00016617310109507942
+      ],
+      "macro_f1_diff_mean": -0.0046394400791996936,
+      "share_of_resamples_model_better": 0.021,
+      "accuracy_diff_ci95": [
+        -0.009190690293573115,
+        6.612007405437937e-05
+      ],
+      "accuracy_diff_mean": -0.004527572070880721
+    }
+  },
+  "Ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50)": {
+    "mcnemar": {
+      "a_right_b_wrong": 0,
+      "a_wrong_b_right": 0,
+      "p_value": 1.0,
+      "test": "none (no disagreements)"
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_ci95_model": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "macro_f1_diff_mean": 0.0,
+      "share_of_resamples_model_better": 0.0,
+      "accuracy_diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "accuracy_diff_mean": 0.0
+    }
+  },
+  "Language-aware ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50)": {
+    "mcnemar": {
+      "a_right_b_wrong": 176,
+      "a_wrong_b_right": 216,
+      "test": "chi-square with continuity correction",
+      "statistic": 3.8801020408163267,
+      "p_value": 0.048861587595496594
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_ci95_model": [
+        0.7457164591482468,
+        0.759541872458485
+      ],
+      "macro_f1_diff_ci95": [
+        0.000340623202032736,
+        0.005311494496644062
+      ],
+      "macro_f1_diff_mean": 0.0028277638775272215,
+      "share_of_resamples_model_better": 0.99,
+      "accuracy_diff_ci95": [
+        0.00013224014810897522,
+        0.005223485850304188
+      ],
+      "accuracy_diff_mean": 0.0026624239619148374
     }
   }
 }

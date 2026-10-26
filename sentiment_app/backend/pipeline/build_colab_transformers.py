@@ -19,8 +19,9 @@ from pipeline import paths  # noqa: E402
 BACKEND = Path(__file__).resolve().parents[1]
 OUT = paths.APP_ROOT / "artifacts" / "colab_package_phase3"
 PKG_NAME = "transformer_package.zip"
-PACKAGE_VERSION = ("phase3-v5 (staged per-family search: E5 deep, XLM-R, MuRIL, IndicBERTv2, mDeBERTa; class-weight "
-                   "schemes, language sampler, text variants, freezing, cosine; as-served language tokens)")
+PACKAGE_VERSION = ("phase3-v6 (GPU search for XLM-R, MuRIL, IndicBERTv2, mDeBERTa; E5 winner already trained locally; "
+                   "focal 1.0-2.5, class-weight schemes, language sampler, 4 text variants, freezing, cosine; "
+                   "as-served language tokens)")
 
 
 def sha(p: Path) -> str:
@@ -57,14 +58,14 @@ CELLS = [
 
 | Step of `PLAN` | Stages (one factor at a time) | Runs (approx.) | T4 / L4 / A100 (rough estimate, not measured) |
 |---|---|---|---|
-| E5 core | lr 2e-5/3e-5/5e-5 @3 ep (+1e-5) → epochs 4→5→6→8 while improving → max_len 64/96/192 → loss (WCE, focal 1.0–2.5) → class weights (sqrt-inverse, effective-number) → label smoothing 0.03/0.05/0.10 → language tokens → language sampler | ~22 | 4 h / 2.5 h / 1.3 h |
-| XLM-R core | lr 1e-5/2e-5/3e-5 @3 ep → epochs → loss → language tokens → sampler | ~14 | 7 h / 4 h / 2 h |
+| XLM-R core | lr 1e-5/2e-5/3e-5 @3 ep → epochs 4→5→6→8 while improving → loss (CE, WCE, focal 1.0/1.5/2.0/2.5) → language tokens → sampler (sqrt, balanced) | ~14 | 7 h / 4 h / 2 h |
 | MuRIL core, IndicBERTv2 core | best XLM-R recipe; lr 2e-5/3e-5 → epochs | ~5 each | 3 h each / 1.7 h / 0.9 h |
-| E5 extra | text variants → wd/warmup/cosine → freezing 3/6 (+gradual) → batch 32 | ~12 | 2 h / 1.2 h / 0.6 h |
-| XLM-R refine | lr 1.5e-5/2.5e-5 → class weights → label smoothing → text variants | ~9 | 5 h / 3 h / 1.5 h |
+| XLM-R refine | lr 1.5e-5/2.5e-5 → class weights (sqrt-inverse, effective-number) → label smoothing → text variants (repeat norm, letters-only repeat norm, + emoticon tokens, emoticons only) | ~9 | 5 h / 3 h / 1.5 h |
 | MuRIL / IndicBERTv2 refine | loss → language tokens → sampler | ~6 each | 3 h each |
 | mDeBERTa core (fp32) | lr 2e-5/3e-5 → epochs | ~5 | 8 h / 4 h / 2 h |
 | XLM-R extra | wd/warmup/cosine → batch 32 → freezing → max_len 192 | ~9 | 5 h / 3 h / 1.5 h |
+
+E5 is not in `PLAN`: its family winner `e5_lr5e-05_ce_ep3p2_bs32_len128_cpu` was trained on the local CPU and is already imported (use `colab_runner.PLAN_WITH_E5` for a wider E5 search).
 
 Cut `PLAN` short for a session and resume later: finished runs are reused, so nothing is retrained."""),
     ("code", """import sys, json, hashlib, zipfile, shutil
@@ -103,7 +104,7 @@ print(f"All {len(manifest)} package files verified. Package: {(PKG / 'VERSION.tx
     ("code", """# ---- settings ----
 sys.path.insert(0, str(PKG))
 import colab_runner
-PLAN = colab_runner.PLAN          # full order (see the table above); e.g. PLAN[:2] = E5 core + XLM-R core only
+PLAN = colab_runner.PLAN          # full order (see the table above); e.g. PLAN[:2] = XLM-R core + MuRIL core only
 RUNS = DRIVE / "phase3_runs"
 runner = colab_runner.Runner(PKG / "data", RUNS)
 runner.plan(PLAN)

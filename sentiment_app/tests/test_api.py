@@ -166,7 +166,8 @@ def test_comparison_uses_only_saved_results_and_exact_status_texts(client):
         else:
             assert multi[mid]["status"] == "pending" and "macro_f1" not in multi[mid]
             assert multi[mid]["note"] == "Not trained / pending GPU run."
-    for mid, tag in (("E", "ensemble_validation_tuned"), ("E-lang", "lang_ensemble_validation_tuned")):
+    for mid, tag in (("P", "production_incumbent"), ("E", "ensemble_validation_tuned"),
+                     ("E-lang", "lang_ensemble_validation_tuned")):
         done = (exp / "final" / tag / f"metrics_{tag}.json").exists()
         assert (multi[mid]["status"] == "trained") == done and (("macro_f1" in multi[mid]) == done)
     assert multi["A+"]["macro_precision"] is not None and multi["A+"]["macro_recall"] is not None

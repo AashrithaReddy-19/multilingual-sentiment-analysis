@@ -114,3 +114,46 @@ def test_pair_grid_contains_the_requested_a_plus_weights():
     pairs = fp.ensemble_grid(2)
     for a in (0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5):
         assert (a, round(1 - a, 2)) in pairs
+
+
+def test_complexity_counts_transformers_and_routing():
+    cands = [{"id": "model_a_plus", "kind": None}, {"id": "e5", "kind": "transformer"}]
+    assert fp.complexity(cands[0], cands) == 0 and fp.complexity(cands[1], cands) == 1
+    pair = {"kind": "ensemble", "member_ids": ["model_a_plus", "e5"]}
+    trio = {"kind": "ensemble", "member_ids": ["e5", "xlmr", "muril"]}
+    lang = {"kind": "lang_ensemble", "member_ids": ["model_a_plus", "e5"]}
+    inc = {"kind": "incumbent", "member_ids": ["model_a_plus", "e5"]}
+    assert fp.complexity(pair, cands) == fp.complexity(inc, cands) == 1.5
+    assert fp.complexity(lang, cands) == 2.0 and fp.complexity(trio, cands) == 3.5
+
+
+def _cand(cid, kind, val, test, member_ids=None):
+    return {"id": cid, "name": cid, "kind": kind, "val": val, "test": test, "best_val": 0.0,
+            "member_ids": member_ids or [], "family": "xlmr"}
+
+
+def _select(cands, y_val, y_test):
+    results = {c["id"]: {"m": fp.full_metrics(y_test, c["test"].argmax(1), np.resize(np.array(list(fp.LANGS)), len(y_test))),
+                         "out": {}} for c in cands}
+    inc = next(c for c in cands if c["kind"] == "incumbent")
+    pi = inc["test"].argmax(1)
+    stats = {f"{c['name']} vs {inc['name']}": {"mcnemar": fp.mcnemar(y_test, pi, c["test"].argmax(1)),
+                                               "bootstrap": fp.bootstrap(y_test, pi, c["test"].argmax(1), n=200)}
+             for c in cands if c is not inc}
+    return fp.select_final(cands, results, stats, y_val)
+
+
+def test_incumbent_kept_unless_challenger_is_significantly_better_on_test():
+    rng = np.random.default_rng(1)
+    yv, yt = rng.integers(0, 3, 900), rng.integers(0, 3, 900)
+    oh = lambda y, acc: np.where((rng.random(len(y)) < acc)[:, None], np.eye(3)[y], np.eye(3)[(y + 1) % 3])
+    inc = _cand("production_incumbent", "incumbent", oh(yv, 0.75), oh(yt, 0.75), ["model_a_plus", "e5"])
+    a_plus = _cand("model_a_plus", None, oh(yv, 0.70), oh(yt, 0.70))
+    # better on validation by > 0.005 but NOT better on test -> incumbent stays
+    weak = _cand("xlmr_run", "transformer", oh(yv, 0.80), inc["test"].copy())
+    sel = _select([a_plus, inc, weak], yv, yt)
+    assert sel["selected_id"] == "production_incumbent" and sel["served_model_id"] == "production_ensemble"
+    # better on validation AND significantly better on test -> replaces the incumbent
+    strong = _cand("xlmr_run", "transformer", oh(yv, 0.85), oh(yt, 0.90))
+    sel = _select([a_plus, inc, strong], yv, yt)
+    assert sel["selected_id"] == "xlmr_run" and sel["served_model_id"] == "xlmr_phase3"

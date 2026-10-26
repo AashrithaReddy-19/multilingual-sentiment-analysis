@@ -27,6 +27,11 @@ def normalize_repeats(text: str) -> str:
     return PUNCT_REPEAT_RE.sub(r"\1\1\1", LATIN_REPEAT_RE.sub(r"\1\1", text))
 
 
+def normalize_letter_repeats(text: str) -> str:
+    """Repeat normalisation for Latin letters only; punctuation is left exactly as typed."""
+    return LATIN_REPEAT_RE.sub(r"", text)
+
+
 def emoticon_tokens(text: str) -> str:
     for rx, tok in EMOTICON_RES:
         text = rx.sub(tok, text)
@@ -36,6 +41,7 @@ def emoticon_tokens(text: str) -> str:
 VARIANTS = {
     "v1_current": lambda t: t,                                   # cleaned_text as used by A/A+
     "v3_repeat_norm": normalize_repeats,
+    "v3b_letter_repeat_norm": normalize_letter_repeats,          # less aggressive: punctuation untouched
     "v4_repeat_norm_emoticons": lambda t: emoticon_tokens(normalize_repeats(t)),
     "v4b_emoticons_only": emoticon_tokens,
 }

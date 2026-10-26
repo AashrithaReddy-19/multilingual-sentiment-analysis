@@ -67,6 +67,7 @@ Validation leaderboard (2 entries, written before any test comparison; full conf
 | Best alternative Transformer (multilingual-e5-small) | 0.7438 | 0.7502 | 0.7414 | 0.7453 | 0.7441 | 0.7424 | 0.7241 | 0.7692 | 0.7276 | 0.7148 | 0.7836 | 0.7390 |
 | Ensemble (validation-tuned weights) | 0.7483 | 0.7534 | 0.7470 | 0.7499 | 0.7486 | 0.7491 | 0.7301 | 0.7704 | 0.7271 | 0.7242 | 0.7929 | 0.7463 |
 | Language-aware ensemble (validation-tuned weights) | 0.7509 | 0.7563 | 0.7498 | 0.7527 | 0.7513 | 0.7526 | 0.7315 | 0.7739 | 0.7322 | 0.7242 | 0.7929 | 0.7474 |
+| Current production ensemble (A+ 0.50 / E5 0.50) | 0.7483 | 0.7534 | 0.7470 | 0.7499 | 0.7486 | 0.7491 | 0.7301 | 0.7704 | 0.7271 | 0.7242 | 0.7929 | 0.7463 |
 
 Models that use the language (language tokens, language-aware ensemble) are scored with the dataset's language labels; with the app's heuristic detector (as served) they score:
 
@@ -93,6 +94,9 @@ Per language (test):
 | Language-aware ensemble (validation-tuned weights) | English | 8981 | 0.7383 | 0.7371 | 0.7280 | 0.7322 | 0.6980 | 0.7366 | 0.7621 |
 | Language-aware ensemble (validation-tuned weights) | Telugu | 3167 | 0.7278 | 0.7357 | 0.7165 | 0.7242 | 0.7094 | 0.7417 | 0.7214 |
 | Language-aware ensemble (validation-tuned weights) | Code-mixed | 2976 | 0.8135 | 0.7918 | 0.7941 | 0.7929 | 0.8646 | 0.6744 | 0.8396 |
+| Current production ensemble (A+ 0.50 / E5 0.50) | English | 8981 | 0.7339 | 0.7317 | 0.7230 | 0.7271 | 0.6903 | 0.7345 | 0.7564 |
+| Current production ensemble (A+ 0.50 / E5 0.50) | Telugu | 3167 | 0.7278 | 0.7357 | 0.7165 | 0.7242 | 0.7094 | 0.7417 | 0.7214 |
+| Current production ensemble (A+ 0.50 / E5 0.50) | Code-mixed | 2976 | 0.8135 | 0.7918 | 0.7941 | 0.7929 | 0.8646 | 0.6744 | 0.8396 |
 
 - **Best improved classical model**: Best of 177 validation-searched classical configs: s0_a_plus_reproduced (val macro F1 0.6969). No configuration beat A+ on validation: A+ remains the best classical model (see the A+ row; no separate test run).
 - **Multilingual XLM-R Model B**: Not trained / pending GPU run.
@@ -106,6 +110,7 @@ Absolute change vs A+:
 | Best alternative Transformer (multilingual-e5-small) | 0.0444 | 0.0507 | 0.0403 | 0.0452 | 0.0445 | 0.0498 | 0.0416 | 0.0441 | 0.0659 | 0.0438 | 0.0062 |
 | Ensemble (validation-tuned weights) | 0.0489 | 0.0539 | 0.0460 | 0.0498 | 0.0490 | 0.0564 | 0.0477 | 0.0453 | 0.0654 | 0.0532 | 0.0155 |
 | Language-aware ensemble (validation-tuned weights) | 0.0515 | 0.0567 | 0.0488 | 0.0526 | 0.0516 | 0.0599 | 0.0491 | 0.0488 | 0.0706 | 0.0532 | 0.0155 |
+| Current production ensemble (A+ 0.50 / E5 0.50) | 0.0489 | 0.0539 | 0.0460 | 0.0498 | 0.0490 | 0.0564 | 0.0477 | 0.0453 | 0.0654 | 0.0532 | 0.0155 |
 
 ## 7. Error analysis
 
@@ -149,7 +154,12 @@ High-confidence validation mistakes are listed in `experiments/possible_label_am
 | Best alternative Transformer (multilingual-e5-small) vs Multilingual A+ | 3.36e-32 | +0.0452 | [+0.0378, +0.0528] | +0.0444 | [+0.0371, +0.0519] |
 | Ensemble (validation-tuned weights) vs Multilingual A+ | 4.35e-59 | +0.0498 | [+0.0440, +0.0557] | +0.0489 | [+0.0430, +0.0549] |
 | Language-aware ensemble (validation-tuned weights) vs Multilingual A+ | 8.84e-56 | +0.0526 | [+0.0461, +0.0593] | +0.0516 | [+0.0450, +0.0581] |
+| Current production ensemble (A+ 0.50 / E5 0.50) vs Multilingual A+ | 4.35e-59 | +0.0498 | [+0.0440, +0.0557] | +0.0489 | [+0.0430, +0.0549] |
 | Ensemble vs Best alternative Transformer (multilingual-e5-small) | 0.0525 | +0.0046 | [+0.0002, +0.0092] | +0.0045 | [-0.0001, +0.0092] |
+| Multilingual A+ vs Current production ensemble (A+ 0.50 / E5 0.50) | 4.35e-59 | -0.0498 | [-0.0557, -0.0440] | -0.0489 | [-0.0549, -0.0430] |
+| Best alternative Transformer (multilingual-e5-small) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.0525 | -0.0046 | [-0.0092, -0.0002] | -0.0045 | [-0.0092, +0.0001] |
+| Ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50) | 1 | +0.0000 | [+0.0000, +0.0000] | +0.0000 | [+0.0000, +0.0000] |
+| Language-aware ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.0489 | +0.0028 | [+0.0003, +0.0053] | +0.0027 | [+0.0001, +0.0052] |
 
 For a row 'X vs Y' the macro F1 difference is X − Y. A difference counts as meaningful only if McNemar p < 0.05 and the bootstrap CI excludes 0.
 
@@ -162,12 +172,13 @@ For a row 'X vs Y' the macro F1 difference is X − Y. A difference counts as me
 | lang_ensemble_validation_tuned | 0.7314 | 0.0204 | 0.9044 | 0.0075 |
 | model_a | 0.6368 | 0.0267 | — | — |
 | model_a_plus | 0.6912 | 0.0110 | 0.9590 | 0.0065 |
+| production_incumbent | 0.7151 | 0.0332 | 0.8499 | 0.0027 |
 
 A+ accuracy by confidence bucket (test): 0.00-0.50: 0.4564 (n=2386); 0.50-0.60: 0.5714 (n=3017); 0.60-0.70: 0.6583 (n=2684); 0.70-0.80: 0.7597 (n=2480); 0.80-0.90: 0.8405 (n=2151); 0.90-1.00: 0.9584 (n=2406).
 
 ## 10. Final selected model
 
-**Ensemble (validation-tuned weights)** (served as `ensemble_phase3`).
+**Current production ensemble (A+ 0.50 / E5 0.50)** (served as `production_ensemble`).
 
 Test: accuracy 0.7483, macro precision 0.7534, macro recall 0.7470, macro F1 0.7499, weighted F1 0.7486.
 
@@ -175,7 +186,7 @@ Selection rule: Final model: best VALIDATION rank, simplicity gate (needs >= 0.0
 
 - Highest validation macro F1: Language-aware ensemble (validation-tuned weights) (0.7474).
 - Language-aware ensemble (validation-tuned weights) beats the simpler Ensemble (validation-tuned weights) by < 0.005 validation macro F1 -> prefer the simpler model.
-- Significantly better than A+ on test: McNemar p=4.35e-59, macro F1 difference 95% CI [+0.0440, +0.0557].
+- Ensemble (validation-tuned weights) is not significantly better than the current production model on test (McNemar / bootstrap) -> keep Current production ensemble (A+ 0.50 / E5 0.50).
 
 | Target | Met | Actual |
 |---|---|---|
@@ -193,7 +204,7 @@ Limiting class: **Neutral** (F1 0.7301); limiting language: **Telugu**.
 - Language type at prediction time is a script/keyword heuristic, not a trained language identifier.
 - Datasets differ in domain (literary/news Telugu, tweets, social-media code-mix); scores are not directly comparable across languages, and the Telugu-only run uses a different test split.
 - Some labels are ambiguous (TeSent annotator disagreement; 55 texts with conflicting labels were kept).
-- Only the Transformer runs listed in section 3 were trained; XLM-R, MuRIL, IndicBERTv2 and mDeBERTa (and a wider E5 search) still need a GPU (Colab package phase3-v5). If the selected model's weights are missing, the app falls back to A+.
+- Only the Transformer runs listed in section 3 were trained; XLM-R, MuRIL, IndicBERTv2 and mDeBERTa (and a wider E5 search) still need a GPU (Colab package phase3-v6). If the selected model's weights are missing, the app falls back to A+.
 
 ## 12. Future context-aware Model C
 
