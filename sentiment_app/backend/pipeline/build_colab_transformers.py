@@ -104,11 +104,21 @@ print(f"All {len(manifest)} package files verified. Package: {(PKG / 'VERSION.tx
     ("code", """# ---- settings ----
 sys.path.insert(0, str(PKG))
 import colab_runner
-PLAN = colab_runner.PLAN          # full order (see the table above); e.g. PLAN[:2] = XLM-R core + MuRIL core only
 RUNS = DRIVE / "phase3_runs"
 runner = colab_runner.Runner(PKG / "data", RUNS)
-runner.plan(PLAN)
-runner.report("all planned stages")"""),
+
+def export_step(tag):
+    \"\"\"After every plan step: all finished runs (no weights) -> Drive, so nothing is lost if the session ends early.
+    Each zip is cumulative; the newest one is enough for finalize_phase3 --import. No browser download here: a pending
+    download blocks the cell (and the whole plan) until the browser accepts it.\"\"\"
+    z_path = DRIVE / f"phase3_results_step_{tag}.zip"
+    with zipfile.ZipFile(z_path, "w", zipfile.ZIP_DEFLATED) as z:
+        for p in sorted(RUNS.rglob("*")):
+            if p.is_file() and not any(part.startswith("_") for part in p.relative_to(RUNS).parts):
+                z.write(p, p.relative_to(RUNS).as_posix())
+    runner.report(f"after {tag}")
+    print("STEP_DONE", tag, z_path, f"({z_path.stat().st_size / 1e6:.1f} MB)")"""),
+    "PLAN_STEPS",
     ("md", """## Final test (validation-selected configurations only)
 For each model family the run with the best validation macro F1 is scored once on `test.csv`."""),
     ("code", """selected = runner.final_test()
@@ -145,7 +155,18 @@ for fam in DOWNLOAD_MODELS:
 
 def build_notebook(dest: Path) -> None:
     nb = nbf.v4.new_notebook()
-    nb.cells = [nbf.v4.new_markdown_cell(s) if k == "md" else nbf.v4.new_code_cell(s) for k, s in CELLS]
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import colab_runner
+    cells = []
+    for item in CELLS:
+        if item == "PLAN_STEPS":           # one cell per plan step (family + tier), each followed by an export
+            for fam, tier in colab_runner.PLAN:
+                cells.append(nbf.v4.new_code_cell(
+                    f'# plan step: {fam} {tier}\nrunner.plan([("{fam}", "{tier}")])\nexport_step("{fam}_{tier}")'))
+            continue
+        k, s = item
+        cells.append(nbf.v4.new_markdown_cell(s) if k == "md" else nbf.v4.new_code_cell(s))
+    nb.cells = cells
     nb.metadata = {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
                    "language_info": {"name": "python"}, "accelerator": "GPU",
                    "colab": {"provenance": [], "gpuType": "T4"}}

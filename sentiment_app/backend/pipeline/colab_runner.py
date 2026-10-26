@@ -54,17 +54,20 @@ RECIPE_KEYS = ("loss", "gamma", "class_weight_scheme", "label_smoothing", "lang_
 FAMILY_STAGES = {
     "e5": {"core": ("lr", "epochs", "max_length", "loss", "class_weights", "smoothing", "lang_tokens", "sampler"),
            "extra": ("text_variant", "optimizer", "freezing", "batch")},
-    "xlmr": {"core": ("lr", "epochs", "loss", "lang_tokens", "sampler"),
+    "xlmr": {"first": ("lr",), "core": ("lr", "epochs", "loss", "lang_tokens", "sampler"),
              "refine": ("lr_refine", "class_weights", "smoothing", "text_variant"),
              "extra": ("optimizer", "batch", "freezing", "max_length")},
-    "muril": {"core": ("lr", "epochs"), "refine": ("loss", "lang_tokens", "sampler")},
-    "indicbert": {"core": ("lr", "epochs"), "refine": ("loss", "lang_tokens", "sampler")},
+    "muril": {"first": ("lr",), "core": ("lr", "epochs"), "refine": ("loss", "lang_tokens", "sampler")},
+    "indicbert": {"first": ("lr",), "core": ("lr", "epochs"), "refine": ("loss", "lang_tokens", "sampler")},
     "mdeberta": {"core": ("lr", "epochs")},
 }
 # default session plan, in order; finished runs are reused, so it can be cut short and resumed
 # E5 is not in the GPU plan: its family winner (e5_lr5e-05_ce_ep3p2_bs32_len128_cpu) was trained locally on CPU and is
 # already imported; PLAN_WITH_E5 restores the original order if a wider E5 search is wanted.
-PLAN = [("xlmr", "core"), ("muril", "core"), ("indicbert", "core"),
+# The learning-rate stage of XLM-R, MuRIL and IndicBERTv2 runs first ("first" tier) so that every family has a
+# validation winner early (useful for ensembles when GPU time is limited); the "core" tiers then reuse those runs.
+PLAN = [("xlmr", "first"), ("muril", "first"), ("indicbert", "first"),
+        ("xlmr", "core"), ("muril", "core"), ("indicbert", "core"),
         ("xlmr", "refine"), ("muril", "refine"), ("indicbert", "refine"),
         ("mdeberta", "core"), ("xlmr", "extra")]
 PLAN_WITH_E5 = [("e5", "core"), ("xlmr", "core"), ("muril", "core"), ("indicbert", "core"),
