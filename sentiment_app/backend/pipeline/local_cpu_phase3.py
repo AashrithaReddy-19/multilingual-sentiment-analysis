@@ -41,8 +41,16 @@ def main(argv=None) -> None:
 
     selected = json.loads((TRANS / "_selected_for_test.json").read_text(encoding="utf-8")) \
         if (TRANS / "_selected_for_test.json").exists() else {}
-    if selected.get(fam) not in (None, args.exp_id):
-        raise SystemExit(f"{selected[fam]} is already the selected {fam} run; compare on validation first.")
+    prev = selected.get(fam)
+    if prev not in (None, args.exp_id):
+        from pipeline.finalize_phase3 import rank_key
+        new_v = json.loads((run / "validation_metrics.json").read_text(encoding="utf-8"))
+        old_v = json.loads((TRANS / prev / "validation_metrics.json").read_text(encoding="utf-8"))
+        if rank_key(new_v) <= rank_key(old_v):
+            raise SystemExit(f"{args.exp_id} (val macro F1 {new_v['macro_f1']:.4f}) does not beat the selected {fam} run "
+                             f"{prev} ({old_v['macro_f1']:.4f}) on validation; not tested.")
+        print(f"{args.exp_id} beats {prev} on validation ({new_v['macro_f1']:.4f} > {old_v['macro_f1']:.4f}); "
+              f"it becomes the {fam} family winner.")
 
     if not (run / "test_metrics.json").exists():
         tt.main(["--data-dir", str(paths.MULTI / "data"), "--out-dir", str(args.runs_dir), "--exp-id", args.exp_id,

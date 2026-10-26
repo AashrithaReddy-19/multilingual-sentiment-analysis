@@ -12,10 +12,12 @@ Every metric shown anywhere comes from saved, executed results. Pending experime
 | Multilingual A (word TF-IDF + LR) | trained — test macro F1 0.6637 |
 | Multilingual A+ (word + char TF-IDF + LR) | trained — test macro F1 0.7001, accuracy 0.6994 (kept as the app's fallback) |
 | Classical search (177 validation-only configs) | done — nothing beat A+ on validation; classical phase closed |
-| multilingual-e5-small (`e5_lr5e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3 on validation) | trained — validation macro F1 0.7390; test macro F1 0.7453, accuracy 0.7438 |
-| **Ensemble A+ 0.5 / E5 0.5** (weights tuned on validation) | **final selected model, served by the app** — test macro F1 **0.7499**, accuracy **0.7483**; vs A+ McNemar p = 4.4e-59, macro F1 diff 95% CI [+0.044, +0.056] |
-| Language-aware ensemble | evaluated (test macro F1 0.7527, as served 0.7522) but not selected: only +0.0011 validation macro F1 over the simpler ensemble (< 0.005 gate) |
-| XLM-R Model B, MuRIL / IndicBERTv2 / mDeBERTa, wider E5 search | **Not trained / pending GPU run** (Colab package phase3-v6) |
+| multilingual-e5-small (`e5_lr5e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3 on validation) | trained — validation macro F1 0.7390; test macro F1 0.7453, accuracy 0.7438 (production member) |
+| multilingual-e5-small (`e5_lr3e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3) | trained — validation macro F1 0.7431 (E5 family winner); test macro F1 0.7458, accuracy 0.7445; not significantly better than production (McNemar p = 0.13) |
+| **Ensemble A+ 0.5 / E5 0.5** (frozen production incumbent, served as `production_ensemble`) | **final selected model, served by the app** — test macro F1 **0.7499**, accuracy **0.7483**; vs A+ McNemar p = 4.4e-59, macro F1 diff 95% CI [+0.044, +0.056] |
+| Language-aware ensemble (A+ / new E5 / old E5) | evaluated (test macro F1 0.7553, accuracy 0.7536) but not selected: below the 0.005 validation gate over simpler models and better than production in only 3/5 validation CV folds |
+| CPU-only studies (`cpu_ensemble_study`, `cpu_study_v2`, `cpu_classical_diversity`) | ~20 validation-CV methods (fine-grid / class-aware / language-aware weights, stacking, routing, disagreement resolver, two-stage and language-specific TF-IDF): best +0.0021 CV macro F1 over production, none passes; CPU-only improvement has plateaued |
+| XLM-R, MuRIL, IndicBERTv2 (GPU round 1, validation only: 0.7488 / 0.7414 / 0.7505) | weights lost before upload; **recovery pending GPU** (`colab_rerun_winners.ipynb`); mDeBERTa not trained |
 | Model C (context-aware) | Skipped — no real conversation_id/message_order available. |
 | Telugu-only run (`D:\NLP\outputs`, different test split) | A 0.6232 / XLM-R 0.6985 test macro F1 |
 

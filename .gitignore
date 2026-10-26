@@ -82,3 +82,5 @@ audit_only/data_audit_executed.ipynb
 sentiment_app/artifacts/multilingual/experiments/transformers_cpu/
 # training-data audit listing (contains dataset text)
 sentiment_app/artifacts/multilingual/experiments/cpu_study/train_label_conflicts.csv
+# CPU diversity models (large, embed dataset vocabulary)
+sentiment_app/artifacts/multilingual/experiments/cpu_classical/*/model.joblib

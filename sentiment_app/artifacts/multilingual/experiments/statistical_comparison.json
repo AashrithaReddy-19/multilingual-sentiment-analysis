@@ -33,10 +33,10 @@
   "Best alternative Transformer (multilingual-e5-small) vs Multilingual A+": {
     "mcnemar": {
       "a_right_b_wrong": 1273,
-      "a_wrong_b_right": 1944,
+      "a_wrong_b_right": 1955,
       "test": "chi-square with continuity correction",
-      "statistic": 139.53994404724898,
-      "p_value": 3.355973246353923e-32
+      "statistic": 143.6682156133829,
+      "p_value": 4.198856778563191e-33
     },
     "bootstrap": {
       "resamples": 2000,
@@ -45,29 +45,29 @@
         0.7076171991936867
       ],
       "macro_f1_ci95_model": [
-        0.7380446680164366,
-        0.7518742688692824
+        0.7387684685949946,
+        0.7525620126775044
       ],
       "macro_f1_diff_ci95": [
-        0.037817286965308686,
-        0.05282137051773382
+        0.03835958669257837,
+        0.05313931419455555
       ],
-      "macro_f1_diff_mean": 0.04517128089958878,
+      "macro_f1_diff_mean": 0.045793234266314785,
       "share_of_resamples_model_better": 1.0,
       "accuracy_diff_ci95": [
-        0.03709170854271353,
-        0.05190425813276911
+        0.03768844221105527,
+        0.05249933879925939
       ],
-      "accuracy_diff_mean": 0.044379694525257876
+      "accuracy_diff_mean": 0.04515177862999207
     }
   },
   "Ensemble (validation-tuned weights) vs Multilingual A+": {
     "mcnemar": {
-      "a_right_b_wrong": 667,
-      "a_wrong_b_right": 1406,
+      "a_right_b_wrong": 1032,
+      "a_wrong_b_right": 1812,
       "test": "chi-square with continuity correction",
-      "statistic": 262.73227206946456,
-      "p_value": 4.3546956812348315e-59
+      "statistic": 213.37587904360058,
+      "p_value": 2.5198340710590606e-48
     },
     "bootstrap": {
       "resamples": 2000,
@@ -76,29 +76,29 @@
         0.7076171991936867
       ],
       "macro_f1_ci95_model": [
-        0.74292669007212,
-        0.7569934698910302
+        0.7452509777831829,
+        0.7590633732407543
       ],
       "macro_f1_diff_ci95": [
-        0.0439688096764493,
-        0.05570165195274901
+        0.04522493929270514,
+        0.05919828197271068
       ],
-      "macro_f1_diff_mean": 0.04981072097878848,
+      "macro_f1_diff_mean": 0.05229906915213019,
       "share_of_resamples_model_better": 1.0,
       "accuracy_diff_ci95": [
-        0.04304251520761707,
-        0.05487966146522083
+        0.044432689764612565,
+        0.05845014546416283
       ],
-      "accuracy_diff_mean": 0.04890726659613859
+      "accuracy_diff_mean": 0.05158903067971437
     }
   },
   "Language-aware ensemble (validation-tuned weights) vs Multilingual A+": {
     "mcnemar": {
-      "a_right_b_wrong": 833,
-      "a_wrong_b_right": 1612,
+      "a_right_b_wrong": 880,
+      "a_wrong_b_right": 1699,
       "test": "chi-square with continuity correction",
-      "statistic": 247.559918200409,
-      "p_value": 8.839134880228403e-56
+      "statistic": 259.4509499806126,
+      "p_value": 2.2604578370554774e-58
     },
     "bootstrap": {
       "resamples": 2000,
@@ -107,20 +107,20 @@
         0.7076171991936867
       ],
       "macro_f1_ci95_model": [
-        0.7457164591482468,
-        0.759541872458485
+        0.7481230090296171,
+        0.7622266963998373
       ],
       "macro_f1_diff_ci95": [
-        0.04608784588400279,
-        0.05932621925056618
+        0.048485533295958776,
+        0.061682386668806224
       ],
-      "macro_f1_diff_mean": 0.0526384848563157,
+      "macro_f1_diff_mean": 0.05521196920501218,
       "share_of_resamples_model_better": 1.0,
       "accuracy_diff_ci95": [
-        0.04502611742925148,
-        0.05812119809574186
+        0.0473419730230098,
+        0.060766001057921244
       ],
-      "accuracy_diff_mean": 0.051569690558053424
+      "accuracy_diff_mean": 0.05420477386934674
     }
   },
   "Current production ensemble (A+ 0.50 / E5 0.50) vs Multilingual A+": {
@@ -156,33 +156,33 @@
   },
   "Ensemble vs Best alternative Transformer (multilingual-e5-small)": {
     "mcnemar": {
-      "a_right_b_wrong": 563,
-      "a_wrong_b_right": 631,
+      "a_right_b_wrong": 196,
+      "a_wrong_b_right": 294,
       "test": "chi-square with continuity correction",
-      "statistic": 3.7596314907872697,
-      "p_value": 0.052504148760608625
+      "statistic": 19.20204081632653,
+      "p_value": 1.1758761339251796e-05
     },
     "bootstrap": {
       "resamples": 2000,
       "macro_f1_ci95_reference": [
-        0.7380446680164366,
-        0.7518742688692824
+        0.7387684685949946,
+        0.7525620126775044
       ],
       "macro_f1_ci95_model": [
-        0.74292669007212,
-        0.7569934698910302
+        0.7452509777831829,
+        0.7590633732407543
       ],
       "macro_f1_diff_ci95": [
-        0.00016617310109507405,
-        0.009238669148366511
+        0.003614037093593239,
+        0.009410995817751873
       ],
-      "macro_f1_diff_mean": 0.0046394400791996936,
-      "share_of_resamples_model_better": 0.979,
+      "macro_f1_diff_mean": 0.0065058348858154,
+      "share_of_resamples_model_better": 1.0,
       "accuracy_diff_ci95": [
-        -6.612007405437937e-05,
-        0.009190690293573115
+        0.0035043639248876213,
+        0.009258463369478952
       ],
-      "accuracy_diff_mean": 0.004527572070880721
+      "accuracy_diff_mean": 0.006437252049722298
     }
   },
   "Multilingual A+ vs Current production ensemble (A+ 0.50 / E5 0.50)": {
@@ -218,11 +218,11 @@
   },
   "Best alternative Transformer (multilingual-e5-small) vs Current production ensemble (A+ 0.50 / E5 0.50)": {
     "mcnemar": {
-      "a_right_b_wrong": 631,
-      "a_wrong_b_right": 563,
+      "a_right_b_wrong": 722,
+      "a_wrong_b_right": 665,
       "test": "chi-square with continuity correction",
-      "statistic": 3.7596314907872697,
-      "p_value": 0.052504148760608625
+      "statistic": 2.260994953136265,
+      "p_value": 0.1326688001155614
     },
     "bootstrap": {
       "resamples": 2000,
@@ -231,28 +231,29 @@
         0.7569934698910302
       ],
       "macro_f1_ci95_model": [
-        0.7380446680164366,
-        0.7518742688692824
+        0.7387684685949946,
+        0.7525620126775044
       ],
       "macro_f1_diff_ci95": [
-        -0.009238669148366513,
-        -0.00016617310109507942
+        -0.008872144190111153,
+        0.0007880561478285121
       ],
-      "macro_f1_diff_mean": -0.0046394400791996936,
-      "share_of_resamples_model_better": 0.021,
+      "macro_f1_diff_mean": -0.004017486712473685,
+      "share_of_resamples_model_better": 0.0495,
       "accuracy_diff_ci95": [
-        -0.009190690293573115,
-        6.612007405437937e-05
+        -0.00866172970113721,
+        0.001059574186723152
       ],
-      "accuracy_diff_mean": -0.004527572070880721
+      "accuracy_diff_mean": -0.003755487966146524
     }
   },
   "Ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50)": {
     "mcnemar": {
-      "a_right_b_wrong": 0,
-      "a_wrong_b_right": 0,
-      "p_value": 1.0,
-      "test": "none (no disagreements)"
+      "a_right_b_wrong": 433,
+      "a_wrong_b_right": 474,
+      "test": "chi-square with continuity correction",
+      "statistic": 1.7640573318632855,
+      "p_value": 0.18411924426541665
     },
     "bootstrap": {
       "resamples": 2000,
@@ -261,29 +262,29 @@
         0.7569934698910302
       ],
       "macro_f1_ci95_model": [
-        0.74292669007212,
-        0.7569934698910302
+        0.7452509777831829,
+        0.7590633732407543
       ],
       "macro_f1_diff_ci95": [
-        0.0,
-        0.0
+        -0.0014622309417126056,
+        0.006342630736207865
       ],
-      "macro_f1_diff_mean": 0.0,
-      "share_of_resamples_model_better": 0.0,
+      "macro_f1_diff_mean": 0.002488348173341714,
+      "share_of_resamples_model_better": 0.898,
       "accuracy_diff_ci95": [
-        0.0,
-        0.0
+        -0.0012562814070351564,
+        0.006479767257339342
       ],
-      "accuracy_diff_mean": 0.0
+      "accuracy_diff_mean": 0.002681764083575774
     }
   },
   "Language-aware ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50)": {
     "mcnemar": {
-      "a_right_b_wrong": 176,
-      "a_wrong_b_right": 216,
+      "a_right_b_wrong": 324,
+      "a_wrong_b_right": 404,
       "test": "chi-square with continuity correction",
-      "statistic": 3.8801020408163267,
-      "p_value": 0.048861587595496594
+      "statistic": 8.572802197802197,
+      "p_value": 0.003412215903849998
     },
     "bootstrap": {
       "resamples": 2000,
@@ -292,20 +293,20 @@
         0.7569934698910302
       ],
       "macro_f1_ci95_model": [
-        0.7457164591482468,
-        0.759541872458485
+        0.7481230090296171,
+        0.7622266963998373
       ],
       "macro_f1_diff_ci95": [
-        0.000340623202032736,
-        0.005311494496644062
+        0.0018241945708774826,
+        0.008879873674654334
       ],
-      "macro_f1_diff_mean": 0.0028277638775272215,
-      "share_of_resamples_model_better": 0.99,
+      "macro_f1_diff_mean": 0.005401248226223706,
+      "share_of_resamples_model_better": 0.999,
       "accuracy_diff_ci95": [
-        0.00013224014810897522,
-        0.005223485850304188
+        0.0016530018513620792,
+        0.008793969849246297
       ],
-      "accuracy_diff_mean": 0.0026624239619148374
+      "accuracy_diff_mean": 0.005297507273208145
     }
   }
 }

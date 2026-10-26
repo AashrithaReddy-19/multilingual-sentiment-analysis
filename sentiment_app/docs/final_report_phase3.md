@@ -25,7 +25,7 @@ Hate-speech files in `Tel_Eng_dataset` were **not** converted into sentiment lab
 - **A** word TF-IDF (1–2-grams, 20k) + Logistic Regression (balanced).
 - **A+** word TF-IDF + character `char_wb` (3–5) TF-IDF + Logistic Regression (balanced).
 - **Classical search** (177 configs): word / char / union TF-IDF grids; LR, LinearSVC, SGD; preprocessing variants (casing, repeated characters, emoticon tokens); label-free signal features.
-- **Transformers**: `e5_lr5e-05_ce_ep3p2_bs32_len128_cpu` (intfloat/multilingual-e5-small, local CPU, lr 5e-05, batch 32, max_len 128, loss ce, best epoch 2/3 by validation macro F1, resumed from checkpoint-4410 after an interruption). Not trained yet (GPU needed): XLM-RoBERTa base (Model B), MuRIL, IndicBERTv2, mDeBERTa-v3 and the rest of the staged E5 search.
+- **Transformers**: `e5_lr3e-05_ce_ep3p2_bs32_len128_cpu` (intfloat/multilingual-e5-small, local CPU, lr 3e-05, batch 32, max_len 128, loss ce, best epoch 2/3 by validation macro F1); `e5_lr5e-05_ce_ep3p2_bs32_len128_cpu` (intfloat/multilingual-e5-small, local CPU, lr 5e-05, batch 32, max_len 128, loss ce, best epoch 2/3 by validation macro F1, resumed from checkpoint-4410 after an interruption); `indicbert_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (ai4bharat/IndicBERTv2-MLM-only, Colab Tesla T4, lr 2e-05, batch 16, max_len 128, loss ce, best epoch 3/3 by validation macro F1); `indicbert_lr2e-05_ce_ep4p2_bs16x1_wd0.01_wu0.1_len128` (ai4bharat/IndicBERTv2-MLM-only, Colab Tesla T4, lr 2e-05, batch 16, max_len 128, loss ce, best epoch 3/4 by validation macro F1); `indicbert_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (ai4bharat/IndicBERTv2-MLM-only, Colab Tesla T4, lr 3e-05, batch 16, max_len 128, loss ce, best epoch 2/3 by validation macro F1); `muril_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (google/muril-base-cased, Colab Tesla T4, lr 2e-05, batch 16, max_len 128, loss ce, best epoch 2/3 by validation macro F1); `muril_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (google/muril-base-cased, Colab Tesla T4, lr 3e-05, batch 16, max_len 128, loss ce, best epoch 3/3 by validation macro F1); `muril_lr3e-05_ce_ep4p2_bs16x1_wd0.01_wu0.1_len128` (google/muril-base-cased, Colab Tesla T4, lr 3e-05, batch 16, max_len 128, loss ce, best epoch 2/4 by validation macro F1); `xlmr_lr1e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (xlm-roberta-base, Colab Tesla T4, lr 1e-05, batch 16, max_len 128, loss ce, best epoch 2/3 by validation macro F1); `xlmr_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (xlm-roberta-base, Colab Tesla T4, lr 2e-05, batch 16, max_len 128, loss ce, best epoch 2/3 by validation macro F1); `xlmr_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128` (xlm-roberta-base, Colab Tesla T4, lr 3e-05, batch 16, max_len 128, loss ce, best epoch 3/3 by validation macro F1). Not trained yet (GPU needed): XLM-RoBERTa base (Model B), MuRIL, IndicBERTv2, mDeBERTa-v3 and the rest of the staged E5 search.
 - **Ensembles**: probability averages of A+ and the family winners (all pairs, then best pair + 1), and a language-aware variant with per-language weights; all weights tuned on validation.
 - **Model C (context-aware)**: Skipped — no real conversation_id/message_order available.
 
@@ -45,18 +45,38 @@ No configuration beat the A+ configuration by a meaningful margin (differences �
 
 ## 5. Transformer experiments (validation only)
 
-Validation leaderboard (2 entries, written before any test comparison; full configuration columns in `experiments/validation_leaderboard_phase3.csv`):
+Validation leaderboard (12 entries, written before any test comparison; full configuration columns in `experiments/validation_leaderboard_phase3.csv`):
 
 | model | experiment_id | best_epoch | val_accuracy | val_macro_precision | val_macro_recall | val_macro_f1 | val_weighted_f1 | val_Negative_f1 | val_Neutral_f1 | val_Positive_f1 | val_english_macro_f1 | val_telugu_macro_f1 | val_code_mixed_macro_f1 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| IndicBERTv2 | indicbert_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 3.0000 | 0.7485 | 0.7496 | 0.7515 | 0.7505 | 0.7482 | 0.7526 | 0.7195 | 0.7793 | 0.7202 | 0.7507 | 0.7930 |
+| XLM-RoBERTa | xlmr_lr1e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 2.0000 | 0.7478 | 0.7512 | 0.7478 | 0.7488 | 0.7484 | 0.7412 | 0.7302 | 0.7752 | 0.7280 | 0.7217 | 0.7854 |
+| IndicBERTv2 | indicbert_lr2e-05_ce_ep4p2_bs16x1_wd0.01_wu0.1_len128 | 3.0000 | 0.7467 | 0.7475 | 0.7506 | 0.7488 | 0.7463 | 0.7537 | 0.7168 | 0.7760 | 0.7207 | 0.7459 | 0.7834 |
+| IndicBERTv2 | indicbert_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 2.0000 | 0.7460 | 0.7479 | 0.7485 | 0.7480 | 0.7463 | 0.7479 | 0.7230 | 0.7730 | 0.7177 | 0.7444 | 0.7847 |
+| XLM-RoBERTa | xlmr_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 2.0000 | 0.7437 | 0.7467 | 0.7435 | 0.7448 | 0.7442 | 0.7370 | 0.7236 | 0.7739 | 0.7175 | 0.7176 | 0.7966 |
+| multilingual-e5-small | e5_lr3e-05_ce_ep3p2_bs32_len128_cpu | 2.0000 | 0.7420 | 0.7484 | 0.7390 | 0.7431 | 0.7423 | 0.7379 | 0.7233 | 0.7682 | 0.7270 | 0.6974 | 0.7908 |
+| XLM-RoBERTa | xlmr_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 3.0000 | 0.7412 | 0.7405 | 0.7458 | 0.7427 | 0.7405 | 0.7427 | 0.7092 | 0.7762 | 0.7186 | 0.7128 | 0.8021 |
+| MuRIL | muril_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 3.0000 | 0.7395 | 0.7423 | 0.7410 | 0.7414 | 0.7391 | 0.7432 | 0.7098 | 0.7711 | 0.7105 | 0.7290 | 0.7906 |
+| MuRIL | muril_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 2.0000 | 0.7399 | 0.7413 | 0.7408 | 0.7408 | 0.7403 | 0.7331 | 0.7212 | 0.7681 | 0.7081 | 0.7330 | 0.7770 |
 | multilingual-e5-small | e5_lr5e-05_ce_ep3p2_bs32_len128_cpu | 2.0000 | 0.7378 | 0.7434 | 0.7354 | 0.7390 | 0.7381 | 0.7323 | 0.7157 | 0.7690 | 0.7230 | 0.6906 | 0.7911 |
+| MuRIL | muril_lr3e-05_ce_ep4p2_bs16x1_wd0.01_wu0.1_len128 | 2.0000 | 0.7370 | 0.7369 | 0.7402 | 0.7378 | 0.7375 | 0.7273 | 0.7181 | 0.7680 | 0.7078 | 0.7280 | 0.7629 |
 | Multilingual A+ | model_a_plus | — | 0.6964 | 0.6967 | 0.6976 | 0.6969 | 0.6967 | 0.6885 | 0.6814 | 0.7207 | 0.6620 | 0.6570 | 0.7681 |
 
-1 runs (validation; ranked by macro F1, then macro recall, then accuracy):
+11 runs (validation; ranked by macro F1, then macro recall, then accuracy):
 
 | experiment | val acc | val macro P | val macro R | val macro F1 | val weighted F1 | Neg F1 | Neu F1 | Pos F1 | best epoch |
 |---|---|---|---|---|---|---|---|---|---|
+| indicbert_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7485 | 0.7496 | 0.7515 | 0.7505 | 0.7482 | 0.7526 | 0.7195 | 0.7793 | 3.0000 |
+| xlmr_lr1e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7478 | 0.7512 | 0.7478 | 0.7488 | 0.7484 | 0.7412 | 0.7302 | 0.7752 | 2.0000 |
+| indicbert_lr2e-05_ce_ep4p2_bs16x1_wd0.01_wu0.1_len128 | 0.7467 | 0.7475 | 0.7506 | 0.7488 | 0.7463 | 0.7537 | 0.7168 | 0.7760 | 3.0000 |
+| indicbert_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7460 | 0.7479 | 0.7485 | 0.7480 | 0.7463 | 0.7479 | 0.7230 | 0.7730 | 2.0000 |
+| xlmr_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7437 | 0.7467 | 0.7435 | 0.7448 | 0.7442 | 0.7370 | 0.7236 | 0.7739 | 2.0000 |
+| e5_lr3e-05_ce_ep3p2_bs32_len128_cpu | 0.7420 | 0.7484 | 0.7390 | 0.7431 | 0.7423 | 0.7379 | 0.7233 | 0.7682 | 2.0000 |
+| xlmr_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7412 | 0.7405 | 0.7458 | 0.7427 | 0.7405 | 0.7427 | 0.7092 | 0.7762 | 3.0000 |
+| muril_lr3e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7395 | 0.7423 | 0.7410 | 0.7414 | 0.7391 | 0.7432 | 0.7098 | 0.7711 | 3.0000 |
+| muril_lr2e-05_ce_ep3p2_bs16x1_wd0.01_wu0.1_len128 | 0.7399 | 0.7413 | 0.7408 | 0.7408 | 0.7403 | 0.7331 | 0.7212 | 0.7681 | 2.0000 |
 | e5_lr5e-05_ce_ep3p2_bs32_len128_cpu | 0.7378 | 0.7434 | 0.7354 | 0.7390 | 0.7381 | 0.7323 | 0.7157 | 0.7690 | 2.0000 |
+| muril_lr3e-05_ce_ep4p2_bs16x1_wd0.01_wu0.1_len128 | 0.7370 | 0.7369 | 0.7402 | 0.7378 | 0.7375 | 0.7273 | 0.7181 | 0.7680 | 2.0000 |
 
 ## 6. Final comparison (multilingual test split, n = 15,124)
 
@@ -64,16 +84,16 @@ Validation leaderboard (2 entries, written before any test comparison; full conf
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Multilingual A | 0.6635 | 0.6624 | 0.6662 | 0.6637 | 0.6639 | 0.6492 | 0.6457 | 0.6963 | 0.6281 | 0.6008 | 0.7660 | 0.6609 |
 | Multilingual A+ | 0.6994 | 0.6995 | 0.7010 | 0.7001 | 0.6996 | 0.6927 | 0.6825 | 0.7251 | 0.6617 | 0.6710 | 0.7774 | 0.6962 |
-| Best alternative Transformer (multilingual-e5-small) | 0.7438 | 0.7502 | 0.7414 | 0.7453 | 0.7441 | 0.7424 | 0.7241 | 0.7692 | 0.7276 | 0.7148 | 0.7836 | 0.7390 |
-| Ensemble (validation-tuned weights) | 0.7483 | 0.7534 | 0.7470 | 0.7499 | 0.7486 | 0.7491 | 0.7301 | 0.7704 | 0.7271 | 0.7242 | 0.7929 | 0.7463 |
-| Language-aware ensemble (validation-tuned weights) | 0.7509 | 0.7563 | 0.7498 | 0.7527 | 0.7513 | 0.7526 | 0.7315 | 0.7739 | 0.7322 | 0.7242 | 0.7929 | 0.7474 |
+| Best alternative Transformer (multilingual-e5-small) | 0.7445 | 0.7513 | 0.7416 | 0.7458 | 0.7449 | 0.7421 | 0.7258 | 0.7697 | 0.7297 | 0.7123 | 0.7801 | 0.7431 |
+| Ensemble (validation-tuned weights) | 0.7510 | 0.7575 | 0.7484 | 0.7524 | 0.7514 | 0.7497 | 0.7327 | 0.7748 | 0.7350 | 0.7197 | 0.7892 | 0.7486 |
+| Language-aware ensemble (validation-tuned weights) | 0.7536 | 0.7595 | 0.7520 | 0.7553 | 0.7540 | 0.7546 | 0.7349 | 0.7763 | 0.7350 | 0.7259 | 0.7929 | 0.7501 |
 | Current production ensemble (A+ 0.50 / E5 0.50) | 0.7483 | 0.7534 | 0.7470 | 0.7499 | 0.7486 | 0.7491 | 0.7301 | 0.7704 | 0.7271 | 0.7242 | 0.7929 | 0.7463 |
 
 Models that use the language (language tokens, language-aware ensemble) are scored with the dataset's language labels; with the app's heuristic detector (as served) they score:
 
 | Model | Macro F1 | As-served Macro F1 (detected language) |
 |---|---|---|
-| Language-aware ensemble (validation-tuned weights) | 0.7527 | 0.7522 |
+| Language-aware ensemble (validation-tuned weights) | 0.7553 | 0.7545 |
 
 Per language (test):
 
@@ -85,15 +105,15 @@ Per language (test):
 | Multilingual A+ | English | 8981 | 0.6734 | 0.6615 | 0.6619 | 0.6617 | 0.6010 | 0.6808 | 0.7033 |
 | Multilingual A+ | Telugu | 3167 | 0.6767 | 0.6806 | 0.6662 | 0.6710 | 0.6545 | 0.6992 | 0.6594 |
 | Multilingual A+ | Code-mixed | 2976 | 0.8021 | 0.7823 | 0.7744 | 0.7774 | 0.8530 | 0.6528 | 0.8265 |
-| Best alternative Transformer (multilingual-e5-small) | English | 8981 | 0.7337 | 0.7329 | 0.7231 | 0.7276 | 0.6932 | 0.7315 | 0.7582 |
-| Best alternative Transformer (multilingual-e5-small) | Telugu | 3167 | 0.7177 | 0.7212 | 0.7098 | 0.7148 | 0.6981 | 0.7292 | 0.7173 |
-| Best alternative Transformer (multilingual-e5-small) | Code-mixed | 2976 | 0.8021 | 0.7816 | 0.7882 | 0.7836 | 0.8497 | 0.6667 | 0.8344 |
-| Ensemble (validation-tuned weights) | English | 8981 | 0.7339 | 0.7317 | 0.7230 | 0.7271 | 0.6903 | 0.7345 | 0.7564 |
-| Ensemble (validation-tuned weights) | Telugu | 3167 | 0.7278 | 0.7357 | 0.7165 | 0.7242 | 0.7094 | 0.7417 | 0.7214 |
-| Ensemble (validation-tuned weights) | Code-mixed | 2976 | 0.8135 | 0.7918 | 0.7941 | 0.7929 | 0.8646 | 0.6744 | 0.8396 |
-| Language-aware ensemble (validation-tuned weights) | English | 8981 | 0.7383 | 0.7371 | 0.7280 | 0.7322 | 0.6980 | 0.7366 | 0.7621 |
-| Language-aware ensemble (validation-tuned weights) | Telugu | 3167 | 0.7278 | 0.7357 | 0.7165 | 0.7242 | 0.7094 | 0.7417 | 0.7214 |
-| Language-aware ensemble (validation-tuned weights) | Code-mixed | 2976 | 0.8135 | 0.7918 | 0.7941 | 0.7929 | 0.8646 | 0.6744 | 0.8396 |
+| Best alternative Transformer (multilingual-e5-small) | English | 8981 | 0.7366 | 0.7372 | 0.7234 | 0.7297 | 0.6920 | 0.7349 | 0.7621 |
+| Best alternative Transformer (multilingual-e5-small) | Telugu | 3167 | 0.7155 | 0.7230 | 0.7049 | 0.7123 | 0.6988 | 0.7279 | 0.7102 |
+| Best alternative Transformer (multilingual-e5-small) | Code-mixed | 2976 | 0.7994 | 0.7786 | 0.7833 | 0.7801 | 0.8486 | 0.6626 | 0.8291 |
+| Ensemble (validation-tuned weights) | English | 8981 | 0.7418 | 0.7419 | 0.7292 | 0.7350 | 0.6979 | 0.7408 | 0.7663 |
+| Ensemble (validation-tuned weights) | Telugu | 3167 | 0.7231 | 0.7298 | 0.7126 | 0.7197 | 0.7054 | 0.7360 | 0.7179 |
+| Ensemble (validation-tuned weights) | Code-mixed | 2976 | 0.8085 | 0.7876 | 0.7919 | 0.7892 | 0.8592 | 0.6733 | 0.8352 |
+| Language-aware ensemble (validation-tuned weights) | English | 8981 | 0.7418 | 0.7419 | 0.7292 | 0.7350 | 0.6979 | 0.7408 | 0.7663 |
+| Language-aware ensemble (validation-tuned weights) | Telugu | 3167 | 0.7300 | 0.7407 | 0.7172 | 0.7259 | 0.7128 | 0.7452 | 0.7196 |
+| Language-aware ensemble (validation-tuned weights) | Code-mixed | 2976 | 0.8142 | 0.7921 | 0.7937 | 0.7929 | 0.8673 | 0.6719 | 0.8394 |
 | Current production ensemble (A+ 0.50 / E5 0.50) | English | 8981 | 0.7339 | 0.7317 | 0.7230 | 0.7271 | 0.6903 | 0.7345 | 0.7564 |
 | Current production ensemble (A+ 0.50 / E5 0.50) | Telugu | 3167 | 0.7278 | 0.7357 | 0.7165 | 0.7242 | 0.7094 | 0.7417 | 0.7214 |
 | Current production ensemble (A+ 0.50 / E5 0.50) | Code-mixed | 2976 | 0.8135 | 0.7918 | 0.7941 | 0.7929 | 0.8646 | 0.6744 | 0.8396 |
@@ -107,9 +127,9 @@ Absolute change vs A+:
 | Model | Accuracy | Macro Precision | Macro Recall | Macro F1 | Weighted F1 | Negative F1 | Neutral F1 | Positive F1 | English Macro F1 | Telugu Macro F1 | Code-mixed Macro F1 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Multilingual A | -0.0359 | -0.0371 | -0.0348 | -0.0364 | -0.0357 | -0.0435 | -0.0368 | -0.0288 | -0.0336 | -0.0702 | -0.0114 |
-| Best alternative Transformer (multilingual-e5-small) | 0.0444 | 0.0507 | 0.0403 | 0.0452 | 0.0445 | 0.0498 | 0.0416 | 0.0441 | 0.0659 | 0.0438 | 0.0062 |
-| Ensemble (validation-tuned weights) | 0.0489 | 0.0539 | 0.0460 | 0.0498 | 0.0490 | 0.0564 | 0.0477 | 0.0453 | 0.0654 | 0.0532 | 0.0155 |
-| Language-aware ensemble (validation-tuned weights) | 0.0515 | 0.0567 | 0.0488 | 0.0526 | 0.0516 | 0.0599 | 0.0491 | 0.0488 | 0.0706 | 0.0532 | 0.0155 |
+| Best alternative Transformer (multilingual-e5-small) | 0.0451 | 0.0518 | 0.0406 | 0.0458 | 0.0452 | 0.0494 | 0.0433 | 0.0446 | 0.0680 | 0.0413 | 0.0027 |
+| Ensemble (validation-tuned weights) | 0.0516 | 0.0579 | 0.0474 | 0.0523 | 0.0517 | 0.0570 | 0.0502 | 0.0497 | 0.0733 | 0.0487 | 0.0118 |
+| Language-aware ensemble (validation-tuned weights) | 0.0542 | 0.0600 | 0.0509 | 0.0552 | 0.0543 | 0.0619 | 0.0524 | 0.0512 | 0.0733 | 0.0549 | 0.0155 |
 | Current production ensemble (A+ 0.50 / E5 0.50) | 0.0489 | 0.0539 | 0.0460 | 0.0498 | 0.0490 | 0.0564 | 0.0477 | 0.0453 | 0.0654 | 0.0532 | 0.0155 |
 
 ## 7. Error analysis
@@ -131,18 +151,18 @@ Main confusions, A+ vs Transformer/ensemble (test):
 
 | model | confusion | A+ count | model count | A+ errors fixed by model |
 |---|---|---|---|---|
-| Best alternative Transformer (multilingual-e5-small) | Positive -> Neutral | 1173 | 1100 | 442 |
-| Best alternative Transformer (multilingual-e5-small) | Neutral -> Positive | 1027 | 908 | 464 |
-| Best alternative Transformer (multilingual-e5-small) | Neutral -> Negative | 923 | 664 | 458 |
-| Best alternative Transformer (multilingual-e5-small) | Negative -> Neutral | 822 | 847 | 336 |
-| Best alternative Transformer (multilingual-e5-small) | Negative -> Positive | 275 | 203 | 101 |
-| Best alternative Transformer (multilingual-e5-small) | Positive -> Negative | 326 | 153 | 143 |
-| Ensemble (validation-tuned weights) | Positive -> Neutral | 1173 | 1096 | 294 |
-| Ensemble (validation-tuned weights) | Neutral -> Positive | 1027 | 866 | 321 |
-| Ensemble (validation-tuned weights) | Neutral -> Negative | 923 | 681 | 348 |
-| Ensemble (validation-tuned weights) | Negative -> Neutral | 822 | 789 | 242 |
-| Ensemble (validation-tuned weights) | Negative -> Positive | 275 | 198 | 83 |
-| Ensemble (validation-tuned weights) | Positive -> Negative | 326 | 177 | 118 |
+| Best alternative Transformer (multilingual-e5-small) | Positive -> Neutral | 1173 | 1109 | 449 |
+| Best alternative Transformer (multilingual-e5-small) | Neutral -> Positive | 1027 | 890 | 476 |
+| Best alternative Transformer (multilingual-e5-small) | Neutral -> Negative | 923 | 656 | 463 |
+| Best alternative Transformer (multilingual-e5-small) | Negative -> Neutral | 822 | 854 | 329 |
+| Best alternative Transformer (multilingual-e5-small) | Negative -> Positive | 275 | 204 | 100 |
+| Best alternative Transformer (multilingual-e5-small) | Positive -> Negative | 326 | 151 | 138 |
+| Ensemble (validation-tuned weights) | Positive -> Neutral | 1173 | 1082 | 401 |
+| Ensemble (validation-tuned weights) | Neutral -> Positive | 1027 | 868 | 431 |
+| Ensemble (validation-tuned weights) | Neutral -> Negative | 923 | 642 | 441 |
+| Ensemble (validation-tuned weights) | Negative -> Neutral | 822 | 823 | 305 |
+| Ensemble (validation-tuned weights) | Negative -> Positive | 275 | 198 | 96 |
+| Ensemble (validation-tuned weights) | Positive -> Negative | 326 | 153 | 138 |
 
 High-confidence validation mistakes are listed in `experiments/possible_label_ambiguity.csv` (possible annotation ambiguity; nothing was relabelled). Error categories are heuristic, not ground truth.
 
@@ -151,15 +171,15 @@ High-confidence validation mistakes are listed in `experiments/possible_label_am
 | Comparison | McNemar p | Macro F1 diff | 95% CI | Accuracy diff | 95% CI |
 |---|---|---|---|---|---|
 | Multilingual A vs Multilingual A+ | 5.33e-37 | -0.0364 | [-0.0416, -0.0310] | -0.0359 | [-0.0411, -0.0305] |
-| Best alternative Transformer (multilingual-e5-small) vs Multilingual A+ | 3.36e-32 | +0.0452 | [+0.0378, +0.0528] | +0.0444 | [+0.0371, +0.0519] |
-| Ensemble (validation-tuned weights) vs Multilingual A+ | 4.35e-59 | +0.0498 | [+0.0440, +0.0557] | +0.0489 | [+0.0430, +0.0549] |
-| Language-aware ensemble (validation-tuned weights) vs Multilingual A+ | 8.84e-56 | +0.0526 | [+0.0461, +0.0593] | +0.0516 | [+0.0450, +0.0581] |
+| Best alternative Transformer (multilingual-e5-small) vs Multilingual A+ | 4.2e-33 | +0.0458 | [+0.0384, +0.0531] | +0.0452 | [+0.0377, +0.0525] |
+| Ensemble (validation-tuned weights) vs Multilingual A+ | 2.52e-48 | +0.0523 | [+0.0452, +0.0592] | +0.0516 | [+0.0444, +0.0585] |
+| Language-aware ensemble (validation-tuned weights) vs Multilingual A+ | 2.26e-58 | +0.0552 | [+0.0485, +0.0617] | +0.0542 | [+0.0473, +0.0608] |
 | Current production ensemble (A+ 0.50 / E5 0.50) vs Multilingual A+ | 4.35e-59 | +0.0498 | [+0.0440, +0.0557] | +0.0489 | [+0.0430, +0.0549] |
-| Ensemble vs Best alternative Transformer (multilingual-e5-small) | 0.0525 | +0.0046 | [+0.0002, +0.0092] | +0.0045 | [-0.0001, +0.0092] |
+| Ensemble vs Best alternative Transformer (multilingual-e5-small) | 1.18e-05 | +0.0065 | [+0.0036, +0.0094] | +0.0064 | [+0.0035, +0.0093] |
 | Multilingual A+ vs Current production ensemble (A+ 0.50 / E5 0.50) | 4.35e-59 | -0.0498 | [-0.0557, -0.0440] | -0.0489 | [-0.0549, -0.0430] |
-| Best alternative Transformer (multilingual-e5-small) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.0525 | -0.0046 | [-0.0092, -0.0002] | -0.0045 | [-0.0092, +0.0001] |
-| Ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50) | 1 | +0.0000 | [+0.0000, +0.0000] | +0.0000 | [+0.0000, +0.0000] |
-| Language-aware ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.0489 | +0.0028 | [+0.0003, +0.0053] | +0.0027 | [+0.0001, +0.0052] |
+| Best alternative Transformer (multilingual-e5-small) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.133 | -0.0040 | [-0.0089, +0.0008] | -0.0038 | [-0.0087, +0.0011] |
+| Ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.184 | +0.0025 | [-0.0015, +0.0063] | +0.0027 | [-0.0013, +0.0065] |
+| Language-aware ensemble (validation-tuned weights) vs Current production ensemble (A+ 0.50 / E5 0.50) | 0.00341 | +0.0054 | [+0.0018, +0.0089] | +0.0053 | [+0.0017, +0.0088] |
 
 For a row 'X vs Y' the macro F1 difference is X − Y. A difference counts as meaningful only if McNemar p < 0.05 and the bootstrap CI excludes 0.
 
@@ -167,9 +187,10 @@ For a row 'X vs Y' the macro F1 difference is X − Y. A difference counts as me
 
 | Model | Mean confidence | ECE (10 bins) | Temperature (fit on validation) | ECE after |
 |---|---|---|---|---|
+| e5_lr3e-05_ce_ep3p2_bs32_len128_cpu | 0.7785 | 0.0340 | 1.1963 | 0.0119 |
 | e5_lr5e-05_ce_ep3p2_bs32_len128_cpu | 0.7853 | 0.0415 | 1.2625 | 0.0112 |
-| ensemble_validation_tuned | 0.7151 | 0.0332 | 0.8499 | 0.0027 |
-| lang_ensemble_validation_tuned | 0.7314 | 0.0204 | 0.9044 | 0.0075 |
+| ensemble_validation_tuned | 0.7492 | 0.0103 | 0.9760 | 0.0108 |
+| lang_ensemble_validation_tuned | 0.7371 | 0.0165 | 0.9275 | 0.0092 |
 | model_a | 0.6368 | 0.0267 | — | — |
 | model_a_plus | 0.6912 | 0.0110 | 0.9590 | 0.0065 |
 | production_incumbent | 0.7151 | 0.0332 | 0.8499 | 0.0027 |
@@ -184,9 +205,11 @@ Test: accuracy 0.7483, macro precision 0.7534, macro recall 0.7470, macro F1 0.7
 
 Selection rule: Final model: best VALIDATION rank, simplicity gate (needs >= 0.005 validation macro F1 to justify a more complex model), then a test go/no-go against A+ (McNemar p < 0.05 AND bootstrap 95% CI of the macro F1 difference > 0).
 
-- Highest validation macro F1: Language-aware ensemble (validation-tuned weights) (0.7474).
+- Highest validation macro F1: Language-aware ensemble (validation-tuned weights) (0.7501).
 - Language-aware ensemble (validation-tuned weights) beats the simpler Ensemble (validation-tuned weights) by < 0.005 validation macro F1 -> prefer the simpler model.
-- Ensemble (validation-tuned weights) is not significantly better than the current production model on test (McNemar / bootstrap) -> keep Current production ensemble (A+ 0.50 / E5 0.50).
+- Ensemble (validation-tuned weights) beats the simpler Current production ensemble (A+ 0.50 / E5 0.50) by < 0.005 validation macro F1 -> prefer the simpler model.
+- Current production ensemble (A+ 0.50 / E5 0.50) beats the simpler Best alternative Transformer (multilingual-e5-small) by < 0.005 validation macro F1 -> prefer the simpler model.
+- Best alternative Transformer (multilingual-e5-small) is not significantly better than the current production model on test (McNemar / bootstrap) -> keep Current production ensemble (A+ 0.50 / E5 0.50).
 
 | Target | Met | Actual |
 |---|---|---|

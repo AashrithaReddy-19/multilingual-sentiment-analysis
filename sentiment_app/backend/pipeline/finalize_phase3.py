@@ -50,7 +50,7 @@ FAMILY_OF_MODEL = {"xlm-roberta-base": "xlmr", "google/muril-base-cased": "muril
                    "intfloat/multilingual-e5-small": "e5"}
 LANG_NAME = {"english": "English", "telugu": "Telugu", "code_mixed": "Code-mixed"}
 LANGS = tuple(LANG_NAME)
-ENS_W = (0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9)        # first-member weight in a 2-model ensemble
+ENS_W = tuple(round(0.05 * i, 2) for i in range(1, 20))                # first-member weight 0.05 ... 0.95 (pairs)
 ENS3_W = (0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8)                  # each weight of a 3-model ensemble
 TARGETS = [("Accuracy >= 0.75", "accuracy", 0.75), ("Accuracy >= 0.80", "accuracy", 0.80),
            ("Macro F1 >= 0.75", "macro_f1", 0.75), ("Macro F1 >= 0.80", "macro_f1", 0.80)]
@@ -269,8 +269,9 @@ def main(argv=None) -> dict:
             continue
         best = fam_runs[0]
         if best["test"] is None:
-            raise SystemExit(f"{best['id']} is the best {fam} validation run but has no test predictions; re-run the "
-                             "Colab 'Final test' cell.")
+            print(f"{FAMILY_LABEL[fam]}: best validation run {best['id']} has no test predictions (weights not "
+                  f"available; see colab_rerun_winners.ipynb) -> family skipped in this evaluation.")
+            continue
         vp = pd.read_csv(best["dir"] / "predictions.csv", encoding="utf-8-sig")
         tp = pd.read_csv(best["dir"] / "predictions_test.csv", encoding="utf-8-sig")
         check_rows(vp, val_df, f"{best['id']} validation"); check_rows(tp, test_df, f"{best['id']} test")
@@ -322,6 +323,19 @@ def main(argv=None) -> dict:
     xl = next((c for c in cands if c["id"] == fam_best.get("xlmr", {}).get("id")), None)
     ensemble_cfg = None
     pool = [a_plus] + [c for c in cands if c.get("kind") == "transformer"]
+    inc_cfg = json.loads(INCUMBENT.read_text(encoding="utf-8")) if INCUMBENT.exists() else {}
+    for mid in inc_cfg.get("member_ids", []):          # e.g. the previous E5 after a better E5 run won validation
+        run = TRANS / mid
+        if any(c["id"] == mid for c in pool) or not (run / "predictions_test.csv").exists():
+            continue
+        r = next(r for r in transformer_runs() if r["id"] == mid)
+        vp = pd.read_csv(run / "predictions.csv", encoding="utf-8-sig")
+        tp = pd.read_csv(run / "predictions_test.csv", encoding="utf-8-sig")
+        check_rows(vp, val_df, f"{mid} validation"); check_rows(tp, test_df, f"{mid} test")
+        pool.append({"name": f"{FAMILY_LABEL[r['family']]} ({mid}, production member)", "id": mid, "input": "cleaned_text",
+                     "val": probs_of(vp), "test": probs_of(tp), "test_served": probs_of(tp), "family": r["family"],
+                     "kind": "transformer", "cfg": r["cfg"], "val_metrics": r["val"], "best_val": r["val"]["macro_f1"],
+                     "notes": "member of the frozen production ensemble (ensemble pool only)"})
     ens_dir = EXP / "ensemble_validation_tuned"
     for f in ("config.json", "NOT_PROMOTED.json"):
         (ens_dir / f).unlink(missing_ok=True)

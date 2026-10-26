@@ -1,31 +1,36 @@
 {
   "members": [
     "Multilingual A+",
-    "Best alternative Transformer (multilingual-e5-small)"
+    "Best alternative Transformer (multilingual-e5-small)",
+    "multilingual-e5-small (e5_lr5e-05_ce_ep3p2_bs32_len128_cpu, production member)"
   ],
   "member_ids": [
     "model_a_plus",
+    "e5_lr3e-05_ce_ep3p2_bs32_len128_cpu",
     "e5_lr5e-05_ce_ep3p2_bs32_len128_cpu"
   ],
   "weights_by_language": {
     "english": [
-      0.3,
-      0.7
+      0.2,
+      0.5,
+      0.3
     ],
     "telugu": [
       0.5,
-      0.5
+      0.4,
+      0.1
     ],
     "code_mixed": [
       0.5,
-      0.5
+      0.2,
+      0.3
     ]
   },
   "tuned_with": "dataset language_type on validation",
   "served_with": "heuristic detect_language",
-  "val_macro_f1": 0.7474352083081491,
-  "val_macro_f1_as_served_detected_language": 0.7463503124640426,
-  "global_ensemble_val_macro_f1": 0.7462601139690407,
+  "val_macro_f1": 0.7501154989366663,
+  "val_macro_f1_as_served_detected_language": 0.7495930782503993,
+  "global_ensemble_val_macro_f1": 0.7485619083693721,
   "promoted": true,
   "promotion_rule": "beats the global ensemble and best single member on validation with BOTH dataset and detected languages"
 }
