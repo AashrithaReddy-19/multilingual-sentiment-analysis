@@ -1,0 +1,21 @@
+{
+  "train_rows": 70540,
+  "exact_duplicate_rows": 77,
+  "normalized_duplicate_rows": 304,
+  "conflicting_label_groups_after_normalization": 60,
+  "rows_in_conflicting_groups": 141,
+  "conflict_rows_by_language": {
+    "code_mixed": 88,
+    "english": 28,
+    "telugu": 25
+  },
+  "conflict_rows_by_source": {
+    "CMTET": 88,
+    "TweetEval": 28,
+    "TeSent": 25
+  },
+  "already_flagged_conflicting_label_group": 77,
+  "texts_of_2_chars_or_less": 0,
+  "possible_encoding_corruption_rows": 16,
+  "changes_applied": "none (report only; validation/test untouched)"
+}

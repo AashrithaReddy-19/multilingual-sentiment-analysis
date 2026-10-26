@@ -1,0 +1,6 @@
+{
+  "candidates": [],
+  "incumbent_cv_macro_f1": 0.7462410375852426,
+  "temperature_incumbent_fitted_on_validation": 0.8498782304327254,
+  "rule": "mean fold gain >= 0.005 and better in >= 4/5 folds"
+}

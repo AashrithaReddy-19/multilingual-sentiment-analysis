@@ -80,3 +80,5 @@ audit_only/data_audit_executed.ipynb
 
 # local CPU Transformer working runs (weights, tokenizer, checkpoints, progress logs); the run record is in experiments/transformers/
 sentiment_app/artifacts/multilingual/experiments/transformers_cpu/
+# training-data audit listing (contains dataset text)
+sentiment_app/artifacts/multilingual/experiments/cpu_study/train_label_conflicts.csv
