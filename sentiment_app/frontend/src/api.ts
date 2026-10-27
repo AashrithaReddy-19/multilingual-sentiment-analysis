@@ -1,8 +1,8 @@
 export type Scope = "multilingual" | "telugu_only";
 export type ClassName = "Negative" | "Neutral" | "Positive";
 export const CLASSES: ClassName[] = ["Negative", "Neutral", "Positive"];
-export const MODEL_C_SKIP = "Skipped — no real conversation_id/message_order available.";
-export const MODEL_B_PENDING = "Not trained / pending GPU run.";
+
+export type DisplayCategory = "production" | "evaluated" | "baseline" | "pending" | "skipped";
 
 export interface ModelInfo {
   id: string;
@@ -15,6 +15,10 @@ export interface ModelInfo {
   is_default: boolean;
   path: string;
   context_aware?: boolean;
+  display_name?: string;
+  test_accuracy?: number | null;
+  test_macro_f1?: number | null;
+  inference_available?: boolean;
 }
 
 export interface PredictResponse {
@@ -60,7 +64,18 @@ export interface ModelResult {
   confusion_matrix?: number[][] | null;
   confusion_png?: string;
   confidence?: { mean: number; mean_when_correct: number | null; mean_when_wrong: number | null };
+  display_name?: string;
+  description?: string;
+  category?: DisplayCategory;
+  is_production?: boolean;
+  dashboard_visible?: boolean;
 }
+
+/** Dashboard rule: every TRAINED model with real test metrics is shown, whatever its score;
+ *  pending, skipped and metric-less entries are never shown. */
+export const isDashboardVisible = (m: ModelResult) =>
+  m.status === "trained" && m.accuracy != null && m.macro_f1 != null;
+export const modelName = (m: { display_name?: string; name: string }) => m.display_name ?? m.name;
 
 export interface RunResult {
   run: "multilingual" | "telugu_only";
@@ -70,12 +85,9 @@ export interface RunResult {
 
 export interface Dashboard {
   title: string;
-  datasets: { name: string; source: string; licence_note: string; checksums_match: boolean; final_rows: number }[];
+  datasets: { name: string; source: string; url?: string | null; licence_note: string; checksums_match: boolean; final_rows: number }[];
   runs: RunResult[];
   serving_model: ModelInfo | null;
-  model_c: string;
-  selection_note?: string;
-  current_message_note?: string;
 }
 
 export interface ErrorRow {

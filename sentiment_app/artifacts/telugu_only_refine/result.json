@@ -1,0 +1,137 @@
+{
+  "selected_on_validation": {
+    "word": null,
+    "char": [
+      2,
+      5
+    ],
+    "char_kind": "char",
+    "C": 1
+  },
+  "validation_macro_f1": 0.6684446645004373,
+  "search": [
+    {
+      "word": [
+        1,
+        2
+      ],
+      "char": [
+        3,
+        5
+      ],
+      "char_kind": "char_wb",
+      "C": 0.5,
+      "val_accuracy": 0.6594065656565656,
+      "val_macro_f1": 0.6586274828400122
+    },
+    {
+      "word": [
+        1,
+        2
+      ],
+      "char": [
+        3,
+        5
+      ],
+      "char_kind": "char_wb",
+      "C": 1,
+      "val_accuracy": 0.6549873737373737,
+      "val_macro_f1": 0.6538330252132606
+    },
+    {
+      "word": [
+        1,
+        2
+      ],
+      "char": [
+        3,
+        5
+      ],
+      "char_kind": "char_wb",
+      "C": 2,
+      "val_accuracy": 0.6518308080808081,
+      "val_macro_f1": 0.6501332964617345
+    },
+    {
+      "word": [
+        1,
+        2
+      ],
+      "char": [
+        3,
+        5
+      ],
+      "char_kind": "char_wb",
+      "C": 4,
+      "val_accuracy": 0.6499368686868687,
+      "val_macro_f1": 0.6474858502722215
+    },
+    {
+      "word": [
+        1,
+        2
+      ],
+      "char": [
+        2,
+        5
+      ],
+      "char_kind": "char_wb",
+      "C": 1,
+      "val_accuracy": 0.6553030303030303,
+      "val_macro_f1": 0.6536410005156157
+    },
+    {
+      "word": [
+        1,
+        1
+      ],
+      "char": [
+        2,
+        6
+      ],
+      "char_kind": "char_wb",
+      "C": 1,
+      "val_accuracy": 0.6549873737373737,
+      "val_macro_f1": 0.6540334819119406
+    },
+    {
+      "word": null,
+      "char": [
+        2,
+        5
+      ],
+      "char_kind": "char",
+      "C": 1,
+      "val_accuracy": 0.6695075757575758,
+      "val_macro_f1": 0.6684446645004373
+    },
+    {
+      "word": [
+        1,
+        2
+      ],
+      "char": [
+        2,
+        6
+      ],
+      "char_kind": "char",
+      "C": 1,
+      "val_accuracy": 0.6537247474747475,
+      "val_macro_f1": 0.652634946335854
+    }
+  ],
+  "test": {
+    "accuracy": 0.6597222222222222,
+    "macro_f1": 0.6558374133999187,
+    "weighted_f1": 0.6595285797210604,
+    "per_class_f1": {
+      "Negative": 0.6553795740032768,
+      "Neutral": 0.6757132915796799,
+      "Positive": 0.6364193746167995
+    }
+  },
+  "original_baseline_test": {
+    "accuracy": 0.6284722222222222,
+    "macro_f1": 0.6232315740822059
+  }
+}

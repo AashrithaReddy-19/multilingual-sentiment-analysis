@@ -1,0 +1,93 @@
+{
+  "accuracy": 0.7537027241470511,
+  "macro_f1": 0.7553118821663496,
+  "macro_precision": 0.7595012290483574,
+  "macro_recall": 0.7520238568729166,
+  "weighted_f1": 0.754104562368544,
+  "Negative_f1": 0.754026754026754,
+  "Neutral_f1": 0.7351258132789841,
+  "Positive_f1": 0.7767830791933104,
+  "english_macro_f1": 0.7349433766839736,
+  "telugu_macro_f1": 0.7262807629047296,
+  "code_mixed_macro_f1": 0.793404955137698,
+  "calibration_test": {
+    "buckets": [
+      {
+        "bucket": "0.00-0.50",
+        "n": 1282,
+        "accuracy": 0.46489859594383776,
+        "mean_confidence": 0.45070428602799417
+      },
+      {
+        "bucket": "0.50-0.60",
+        "n": 2478,
+        "accuracy": 0.5722356739305892,
+        "mean_confidence": 0.5494876891521329
+      },
+      {
+        "bucket": "0.60-0.70",
+        "n": 2365,
+        "accuracy": 0.6600422832980972,
+        "mean_confidence": 0.649712198892795
+      },
+      {
+        "bucket": "0.70-0.80",
+        "n": 2553,
+        "accuracy": 0.7410889150019585,
+        "mean_confidence": 0.7510062873537571
+      },
+      {
+        "bucket": "0.80-0.90",
+        "n": 3048,
+        "accuracy": 0.8661417322834646,
+        "mean_confidence": 0.852002506631321
+      },
+      {
+        "bucket": "0.90-1.00",
+        "n": 3398,
+        "accuracy": 0.9688051795173631,
+        "mean_confidence": 0.948900917634951
+      }
+    ],
+    "ece_10_bins": 0.015970597423745587,
+    "mean_confidence": 0.741509570797296,
+    "accuracy": 0.7537027241470511
+  },
+  "temperature_scaling": {
+    "T_fitted_on_validation": 0.9548836265905458,
+    "test_ece_before": 0.015970597423745587,
+    "test_ece_after": 0.010529173922640904
+  },
+  "vs_production": {
+    "mcnemar": {
+      "a_right_b_wrong": 313,
+      "a_wrong_b_right": 395,
+      "test": "chi-square with continuity correction",
+      "statistic": 9.266949152542374,
+      "p_value": 0.0023332603458368914
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_ci95_model": [
+        0.7482284108348477,
+        0.7622683944539071
+      ],
+      "macro_f1_diff_ci95": [
+        0.0019252825723372862,
+        0.008787317535304503
+      ],
+      "macro_f1_diff_mean": 0.0054516177817536355,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.001851362073525542,
+        0.008793969849246297
+      ],
+      "accuracy_diff_mean": 0.005429251520761703
+    }
+  },
+  "best_validation_macro_f1": 0.7509060391832282
+}

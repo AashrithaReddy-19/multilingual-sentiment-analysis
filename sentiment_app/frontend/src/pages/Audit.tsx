@@ -11,7 +11,7 @@ interface AuditData {
     total_removed_exact_duplicates: number;
     conflicting_labels: { texts_with_more_than_one_label: number; rows_in_those_groups: number; decision: string; by_dataset: Record<string, number> };
     split: { method: string; sizes: Record<string, number>; fractions: Record<string, number> };
-    context: { note: string; model_c: string };
+
     negation_words_preserved: Record<string, number>;
   } | null;
   class_distributions: { split: string; language_type: string; label_name: string; rows: number }[];
@@ -99,7 +99,6 @@ export default function Audit() {
                   </div>
                 ))}
               </dl>
-              <p className="mt-3 text-xs text-slate-600">{data.cleaning.context.note}</p>
             </Card>
           </div>
 

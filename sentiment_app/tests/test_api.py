@@ -42,6 +42,8 @@ class FakeModels:
     def selection_note(self):
         return "fake"
 
+    from sentiment_core.language import LANGUAGE_NOTE as language_method   # the fake routes with the heuristic
+
     def info(self, mid):
         return self._info[mid]
 
@@ -175,3 +177,32 @@ def test_comparison_uses_only_saved_results_and_exact_status_texts(client):
         c = next(m for m in run["models"] if m["id"] == "C")
         assert c["status"] == "skipped" and c["note"] == "Skipped — no real conversation_id/message_order available."
         assert "macro_f1" not in c
+
+
+def test_dashboard_shows_every_trained_model_and_no_placeholders(client):
+    """Dashboard rule: every TRAINED model with real test metrics is visible whatever its score; pending / skipped /
+    metric-less entries never are. category only describes a model; at most one production row exists."""
+    runs = {r["run"]: {m["id"]: m for m in r["models"]} for r in client.get("/api/comparison").json()}
+    rows = [m for r in runs.values() for m in r.values()]
+    assert sum(m.get("is_production", False) for m in rows) <= 1
+    for m in rows:
+        assert m["category"] in {"production", "evaluated", "baseline", "pending", "skipped"}
+        has_metrics = m["status"] == "trained" and m.get("accuracy") is not None and m.get("macro_f1") is not None
+        assert m["dashboard_visible"] == has_metrics
+    multi, tel = runs["multilingual"], runs["telugu_only"]
+    for mid in ("A", "A+"):                      # below-70% trained models stay visible
+        if multi.get(mid, {}).get("status") == "trained":
+            assert multi[mid]["dashboard_visible"]
+    for mid in ("A", "B"):
+        if tel.get(mid, {}).get("status") == "trained":
+            assert tel[mid]["dashboard_visible"]
+    for mid in ("B", "B2", "B-IndicBERT", "B-mDeBERTa", "C"):
+        if mid in multi and multi[mid]["status"] != "trained":
+            assert not multi[mid]["dashboard_visible"]
+    assert not tel["C"]["dashboard_visible"]
+
+
+def test_error_sources_put_production_first(client):
+    src = client.get("/api/errors/sources").json()
+    if any(s["is_production"] for s in src):
+        assert src[0]["is_production"] and src[0]["dashboard_visible"]

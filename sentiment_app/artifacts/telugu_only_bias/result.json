@@ -1,0 +1,18 @@
+{
+  "validation_base": {
+    "accuracy": 0.711489898989899,
+    "macro_f1": 0.7126334974381244
+  },
+  "validation_with_bias": {
+    "accuracy": 0.7143308080808081,
+    "macro_f1": 0.7150944405543038
+  },
+  "class_log_bias": [
+    0.4,
+    0.4,
+    0.0
+  ],
+  "val_macro_f1_gain": 0.0024609431161790596,
+  "rule": "promote only if validation gain >= 0.003 (project rule)",
+  "promoted": false
+}

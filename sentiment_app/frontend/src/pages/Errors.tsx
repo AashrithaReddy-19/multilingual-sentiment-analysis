@@ -9,7 +9,8 @@ const REASONS = ["low confidence prediction", "negation handling", "emoji ambigu
 const PAGE = 25;
 
 export default function Errors() {
-  const sources = useApi<{ run: string; tag: string; label: string }[]>("/api/errors/sources");
+  const allSources = useApi<{ run: string; tag: string; label: string; display_name: string; dashboard_visible: boolean; is_production: boolean }[]>("/api/errors/sources");
+  const sources = { ...allSources, data: allSources.data?.filter((s) => s.dashboard_visible) ?? null };
   const [source, setSource] = useState("");
   const [q, setQ] = useState("");
   const [query, setQuery] = useState("");
@@ -19,7 +20,11 @@ export default function Errors() {
   const [reason, setReason] = useState("");
   const [offset, setOffset] = useState(0);
 
-  useEffect(() => { if (!source && sources.data?.length) setSource(`${sources.data[0].run}|${sources.data[0].tag}`); }, [sources.data, source]);
+  useEffect(() => {
+    if (source || !sources.data?.length) return;
+    const first = sources.data.find((s) => s.is_production) ?? sources.data[0];      // default: the served model
+    setSource(`${first.run}|${first.tag}`);
+  }, [sources.data, source]);
   useEffect(() => { const t = setTimeout(() => setQuery(q), 300); return () => clearTimeout(t); }, [q]);
   useEffect(() => setOffset(0), [source, query, language, actual, predicted, reason]);
 
@@ -43,9 +48,9 @@ export default function Errors() {
 
   return (
     <>
-      <PageHeader title="Error analysis" subtitle="All misclassified test examples of a trained model, most confident first." />
+      <PageHeader title="Error analysis" subtitle="Misclassified test examples, most confident first." />
       <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" role="note">
-        <span className="font-semibold">Heuristic only:</span> “likely error reason” tags come from simple rules (negation words, emojis, mixed script, low confidence, annotator disagreement). They are guesses to guide inspection, not ground truth.
+        Likely error reasons are heuristic indicators for analysis and are not ground-truth explanations.
       </div>
       {sources.error && <ErrorState message={sources.error} onRetry={sources.reload} />}
       <Card className="mb-6">
@@ -53,7 +58,7 @@ export default function Errors() {
           <div className="sm:col-span-2">
             <Field label="Model" htmlFor="src">
               <select id="src" value={source} onChange={(e) => setSource(e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm">
-                {sources.data?.map((s) => <option key={s.run + s.tag} value={`${s.run}|${s.tag}`}>{s.label}</option>)}
+                {sources.data?.map((s) => <option key={s.run + s.tag} value={`${s.run}|${s.tag}`}>{s.display_name}{s.is_production ? " (production)" : ""}</option>)}
               </select>
             </Field>
           </div>

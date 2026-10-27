@@ -1,40 +1,51 @@
 {
-  "selected_model_name": "Current production ensemble (A+ 0.50 / E5 0.50)",
-  "selected_id": "production_incumbent",
-  "served_model_id": "production_ensemble",
+  "selected_model_name": "Language-aware ensemble (A+ / E5 / E5-b, learned language detector)",
+  "selected_id": "lang_aware_v2",
+  "served_model_id": "lang_aware_v2",
   "class_log_bias": null,
-  "temperature": 0.8498782304327254,
-  "requires_transformer_weights": [],
+  "temperature": 0.9548836265905458,
+  "requires_transformer_weights": [
+    "e5",
+    "e5b"
+  ],
   "test": {
-    "accuracy": 0.7482808780745834,
-    "macro_precision": 0.7534063994141338,
-    "macro_recall": 0.7470366301397924,
-    "macro_f1": 0.7498642680877716,
-    "weighted_precision": 0.7497579169801298,
-    "weighted_recall": 0.7482808780745834,
-    "weighted_f1": 0.748639524500003
+    "accuracy": 0.7537027241470511,
+    "macro_precision": 0.7595012290483574,
+    "macro_recall": 0.7520238568729166,
+    "macro_f1": 0.7553118821663496,
+    "weighted_f1": 0.754104562368544
   },
   "test_per_class_f1": {
-    "Negative": 0.7490820073439413,
-    "Neutral": 0.7301462494102846,
-    "Positive": 0.7703645475090891
+    "Negative": 0.754026754026754,
+    "Neutral": 0.7351258132789841,
+    "Positive": 0.7767830791933104
   },
   "test_per_language_macro_f1": {
-    "english": 0.7270607132558422,
-    "telugu": 0.7241844704300905,
-    "code_mixed": 0.7928814809219314
+    "english": 0.7349433766839736,
+    "telugu": 0.7262807629047296,
+    "code_mixed": 0.793404955137698
   },
   "test_as_served": {
-    "accuracy": 0.7482808780745834,
-    "macro_f1": 0.7498642680877716
+    "accuracy": 0.7537027241470511,
+    "macro_f1": 0.7553118821663496
   },
-  "validation_macro_f1": 0.7462601139690407,
+  "validation_macro_f1": 0.7509060391832282,
   "reasoning": [
-    "Highest validation macro F1: Language-aware ensemble (validation-tuned weights) (0.7501).",
-    "Language-aware ensemble (validation-tuned weights) beats the simpler Ensemble (validation-tuned weights) by < 0.005 validation macro F1 -> prefer the simpler model.",
-    "Ensemble (validation-tuned weights) beats the simpler Current production ensemble (A+ 0.50 / E5 0.50) by < 0.005 validation macro F1 -> prefer the simpler model.",
-    "Current production ensemble (A+ 0.50 / E5 0.50) beats the simpler Best alternative Transformer (multilingual-e5-small) by < 0.005 validation macro F1 -> prefer the simpler model.",
-    "Best alternative Transformer (multilingual-e5-small) is not significantly better than the current production model on test (McNemar / bootstrap) -> keep Current production ensemble (A+ 0.50 / E5 0.50)."
+    "Selected on validation with the learned language detector in the loop (val macro F1 0.7509 vs production 0.7463); stable in 4/5 validation CV folds (+0.0030), no class/language regression; simplicity tie-break chose it over confidence routing.",
+    "Test (scored once): McNemar p=0.00233, macro F1 difference 95% CI [+0.0019, +0.0088].",
+    "Promotion rule for this round (set by the project owner): better validation macro F1, better in >= 3/5 validation folds, no class/language drop > 0.01."
   ],
-  "rule": "Final model: best VALIDATION rank, simplicity gate (needs >= 0.005 validation macro F1 to justify a more complex\n    model), then a test go/no-go against A+ (McNemar p < 0.05 AND bootstrap 95% CI of the macro F1 difference > 0)."
+  "rule": "val macro F1 > production, better in >= 3/5 validation CV folds, no class/language F1 drop > 0.01",
+  "previous_production": {
+    "served_model_id": "production_ensemble",
+    "test": {
+      "accuracy": 0.7482808780745834,
+      "macro_precision": 0.7534063994141338,
+      "macro_recall": 0.7470366301397924,
+      "macro_f1": 0.7498642680877716,
+      "weighted_precision": 0.7497579169801298,
+      "weighted_recall": 0.7482808780745834,
+      "weighted_f1": 0.748639524500003
+    }
+  }
 }

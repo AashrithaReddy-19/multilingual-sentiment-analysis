@@ -11,6 +11,24 @@ from sentiment_core.labels import CLASS_NAMES, LABEL2ID, MODEL_B_PENDING, MODEL_
 
 from .config import Settings
 
+# Presentation layer for the web app (the saved records are unchanged). Every TRAINED model with real test metrics is
+# dashboard_visible, whatever its score; pending / skipped / metric-less entries are never shown. "category" only
+# describes a model (production, evaluated = >= 0.70 accuracy and macro F1, baseline = below that).
+CATEGORY_MIN = 0.70
+DISPLAY = {   # (run, row id) -> (display name, short description)
+    ("multilingual", "PROD"): ("Production Ensemble", "Language-aware: Enhanced TF-IDF + two Multilingual E5 models"),
+    ("multilingual", "P"): ("Previous Production Ensemble", "Enhanced TF-IDF + Multilingual E5 (equal weights)"),
+    ("multilingual", "E"): ("Optimized Ensemble", "Enhanced TF-IDF + two Multilingual E5 models (global weights)"),
+    ("multilingual", "E-lang"): ("Language-Aware Ensemble (v1)", "Per-language weights, heuristic language routing"),
+    ("multilingual", "B-E5"): ("Multilingual E5", "Fine-tuned multilingual-e5-small"),
+    ("multilingual", "A+"): ("Enhanced TF-IDF", "Word + character TF-IDF + logistic regression"),
+    ("multilingual", "A"): ("TF-IDF Baseline", "Word TF-IDF + logistic regression"),
+    ("telugu_only", "A"): ("Telugu Model A", "TF-IDF + logistic regression (Telugu-only split)"),
+    ("telugu_only", "B"): ("Telugu Model B", "XLM-RoBERTa fine-tuned (Telugu-only split)"),
+    ("telugu_only", "A+"): ("Telugu Model A+", "Character TF-IDF + logistic regression (Telugu-only split)"),
+}
+
+
 MODEL_C_EXPLANATION = ("None of the datasets contain conversation_id/message_order, so context_text equals "
                        "cleaned_text for every row. Training Model C would duplicate Model B (same input, same "
                        "settings), so it was intentionally skipped. It is not a failure.")
@@ -36,6 +54,7 @@ class Artifacts:
                      "metrics": s.multi / "model_a" / "metrics_model_a.json", "tag": "model_a",
                      "dir": s.multi / "model_a", "pending_note": None},
                     *self._model_a_plus(),
+                    *self._production_row(),
                     *self._phase3(),
                 ]},
             "telugu_only": {
@@ -47,6 +66,7 @@ class Artifacts:
                     {"id": "B", "name": "XLM-RoBERTa (no context)", "input": "cleaned_text",
                      "metrics": s.telugu_outputs / "metrics_no_context.json", "tag": "no_context",
                      "dir": s.telugu_outputs, "pending_note": None},
+                    *self._telugu_refined(),
                 ]},
         }
 
@@ -59,6 +79,23 @@ class Artifacts:
                  "metrics": self.s.multi / "model_a_plus" / "metrics_model_a_plus.json", "tag": "model_a_plus",
                  "dir": self.s.multi / "model_a_plus", "pending_note": None,
                  "baseline_note": "Improved variant selected on validation; the original Model A baseline is kept unchanged."}]
+
+    def _telugu_refined(self) -> list[dict]:
+        """Compact validation-selected refinement of the Telugu-only TF-IDF baseline (pipeline.telugu_tfidf_refine)."""
+        d = self.s.nlp_root / "sentiment_app" / "artifacts" / "telugu_only_refine"
+        if not (d / "metrics_telugu_char_tfidf.json").exists():
+            return []
+        return [{"id": "A+", "name": "Character TF-IDF + logistic regression", "input": "cleaned_text",
+                 "metrics": d / "metrics_telugu_char_tfidf.json", "tag": "telugu_char_tfidf", "dir": d, "pending_note": None}]
+
+    def _production_row(self) -> list[dict]:
+        """The language-aware ensemble promoted on 2026-10-27 (experiments/final/lang_aware_v2)."""
+        d = self.s.multi / "experiments" / "final" / "lang_aware_v2"
+        if not (d / "metrics_lang_aware_v2.json").exists():
+            return []
+        return [{"id": "PROD", "name": "Language-aware ensemble (A+ / E5 / E5-b, learned language detector)",
+                 "input": "cleaned_text", "metrics": d / "metrics_lang_aware_v2.json", "tag": "lang_aware_v2", "dir": d,
+                 "pending_note": None}]
 
     def _phase3(self) -> list[dict]:
         """Phase-3 Transformer rows (validation-selected per family) and the validation-tuned ensemble.
@@ -87,7 +124,7 @@ class Artifacts:
             else:
                 rows.append({"id": mid, "name": name, "input": "cleaned_text", "metrics": exp / "_none.json",
                              "tag": f"pending_{fam}", "dir": exp / "final", "pending_note": MODEL_B_PENDING})
-        for mid, tag, name in (("P", "production_incumbent", "Current production ensemble (frozen A+ / E5 weights)"),
+        for mid, tag, name in (("P", "production_incumbent", "Previous production ensemble (frozen A+ / E5 weights)"),
                                ("E", "ensemble_validation_tuned", "Ensemble (weights tuned on validation)"),
                                ("E-lang", "lang_ensemble_validation_tuned",
                                 "Language-aware ensemble (per-language weights tuned on validation)")):
@@ -131,8 +168,27 @@ class Artifacts:
                 models.append(entry)
             models.append({"id": "C", "name": "XLM-RoBERTa (context-aware)", "input": "context_text",
                            "status": "skipped", "note": MODEL_C_SKIP, "explanation": MODEL_C_EXPLANATION})
+            prod_tag = (_json(self.s.multi / "final_selection.json") or {}).get("selected_id")
+            tags = {spec["id"]: spec["tag"] for spec in run["models"]}
+            for m in models:
+                m.update(self.presentation(run_id, m, is_production=run_id == "multilingual" and prod_tag is not None
+                                           and tags.get(m["id"]) == prod_tag))
             out.append({"run": run_id, "title": run["title"], "models": models})
         return out
+
+    @staticmethod
+    def presentation(run_id: str, m: dict, is_production: bool) -> dict:
+        name, desc = DISPLAY.get((run_id, m["id"]), (m["name"], ""))
+        if m["status"] != "trained":
+            cat = m["status"]                                  # pending / skipped: never shown in the polished UI
+        elif is_production:
+            cat = "production"
+        else:
+            strong = (m.get("accuracy") or 0) >= CATEGORY_MIN and (m.get("macro_f1") or 0) >= CATEGORY_MIN
+            cat = "evaluated" if strong else "baseline"
+        visible = m["status"] == "trained" and m.get("accuracy") is not None and m.get("macro_f1") is not None
+        return {"display_name": name, "description": desc, "category": cat, "is_production": is_production,
+                "dashboard_visible": visible}
 
     @staticmethod
     def _macro_pr(m: dict) -> dict:
@@ -220,9 +276,15 @@ class Artifacts:
                 "heuristic_note": HEURISTIC_NOTE}
 
     def error_sources(self) -> list[dict]:
+        cmp = {(r["run"], m["id"]): m for r in self.comparison() for m in r["models"]}
         out = []
         for run_id, run in self.runs().items():
             for m in run["models"]:
                 if (m["dir"] / f"predictions_{m['tag']}.csv").exists():
-                    out.append({"run": run_id, "tag": m["tag"], "label": f"{run['title']}: Model {m['id']} ({m['name']})"})
-        return out
+                    c = cmp.get((run_id, m["id"]), {})
+                    out.append({"run": run_id, "tag": m["tag"], "id": m["id"],
+                                "label": f"{run['title']}: Model {m['id']} ({m['name']})",
+                                "display_name": c.get("display_name", m["name"]), "category": c.get("category"),
+                                "dashboard_visible": bool(c.get("dashboard_visible")),
+                                "is_production": bool(c.get("is_production"))})
+        return sorted(out, key=lambda r: (not r["is_production"], not r["dashboard_visible"]))

@@ -38,6 +38,10 @@ class ModelInfo(BaseModel):
     scope_label: str
     available: bool
     loaded: bool
+    display_name: str | None = None
+    test_accuracy: float | None = None
+    test_macro_f1: float | None = None
+    inference_available: bool = False
     is_default: bool
     path: str
     context_aware: bool = False

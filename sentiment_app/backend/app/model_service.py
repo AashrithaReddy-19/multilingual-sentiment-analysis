@@ -28,6 +28,11 @@ SCOPE_LABELS = {"multilingual": "Multilingual model (Telugu + English + code-mix
                 "telugu_only": "Telugu-only model currently loaded"}
 LANG_TOKENS = {"english": "[LANG_ENGLISH]", "telugu": "[LANG_TELUGU]", "code_mixed": "[LANG_CODE_MIXED]"}
 FALLBACK_ORDER = ("tfidf_plus_multilingual", "tfidf_multilingual", "xlmr_telugu", "tfidf_telugu")
+DISPLAY_NAME = {"lang_aware_v2": "Production Ensemble", "production_ensemble": "Previous Production Ensemble",
+                "ensemble_phase3": "Optimized Ensemble", "lang_ensemble_phase3": "Language-Aware Ensemble (v1)",
+                "e5b_phase3": "Multilingual E5", "e5_phase3": "Multilingual E5 (earlier run)",
+                "tfidf_plus_multilingual": "Enhanced TF-IDF", "tfidf_multilingual": "TF-IDF Baseline",
+                "xlmr_telugu": "Telugu Model B (XLM-RoBERTa)", "tfidf_telugu": "Telugu Model A (TF-IDF)"}
 
 
 def _json(p: Path) -> dict | None:
@@ -75,7 +80,8 @@ class ModelService:
                            ("muril", "MuRIL (best validation run, multilingual)"),
                            ("indicbert", "IndicBERTv2 (best validation run, multilingual)"),
                            ("mdeberta", "mDeBERTa-v3 (best validation run, multilingual)"),
-                           ("e5", "multilingual-e5-small (best validation run, multilingual)")):
+                           ("e5", "multilingual-e5-small (best validation run, multilingual)"),
+                           ("e5b", "multilingual-e5-small (second CPU run, multilingual)")):
             cfg = _json(p3 / fam / "phase3_config.json") or {}
             specs.append(ModelSpec(f"{fam}_phase3", label + (f" — {cfg['experiment_id']}" if cfg.get("experiment_id") else ""),
                                    "transformer", "multilingual", p3 / fam,
@@ -93,6 +99,11 @@ class ModelService:
             specs.append(ModelSpec("production_ensemble", inc["name"], "ensemble", "multilingual",
                                    s.multi / "experiments" / "production_incumbent",
                                    {"member_ids": inc["member_ids"], "weights": inc["weights"]}))
+        la2 = _json(s.multi / "experiments" / "lang_aware_v2" / "config.json")
+        if la2:   # language-aware ensemble routed by the learned language detector (promoted 2026-10-27)
+            specs.append(ModelSpec("lang_aware_v2", la2["name"], "ensemble", "multilingual",
+                                   s.multi / "experiments" / "lang_aware_v2",
+                                   {"member_ids": la2["member_ids"], "weights_by_language": la2["weights_by_language"]}))
         lens = _json(s.multi / "experiments" / "lang_ensemble_validation_tuned" / "config.json")
         if lens:
             specs.append(ModelSpec("lang_ensemble_phase3", "Language-aware ensemble (" + ", ".join(lens["members"]) + ")",
@@ -103,13 +114,34 @@ class ModelService:
         self._lock = threading.RLock()
         self.load_error: dict[str, str] = {}
         self.final_selection = _json(s.multi / "final_selection.json")
+        self._lang_detector = None
+        self._lang_detector_path = s.multi / "experiments" / "lang_aware_v2" / "lang_detector.joblib"
+
+    # ---- language detection ----------------------------------------------------------------
+    @property
+    def language_method(self) -> str:
+        if self._lang_detector_path.exists():
+            return ("Learned language detector (character n-gram logistic regression trained on the training "
+                    "language labels; 99.8% agreement with the validation labels).")
+        from sentiment_core.language import LANGUAGE_NOTE
+        return LANGUAGE_NOTE
+
+    def detect_languages(self, cleaned: list[str]) -> list[str]:
+        """Learned detector when its file is present (it routes the language-aware ensemble), else the heuristic."""
+        if self._lang_detector_path.exists():
+            with self._lock:
+                if self._lang_detector is None:
+                    import joblib
+                    self._lang_detector = joblib.load(self._lang_detector_path)
+            return [str(x) for x in self._lang_detector.predict([t or " " for t in cleaned])]
+        return [detect_language(t) for t in cleaned]
 
     # ---- availability ------------------------------------------------------------------
     def _member_spec(self, member_id: str) -> str | None:
         """Map an ensemble member (experiment id) to a served model id."""
         if member_id == "model_a_plus":
             return "tfidf_plus_multilingual"
-        for sid in ("xlmr_phase3", "muril_phase3", "indicbert_phase3", "mdeberta_phase3", "e5_phase3"):
+        for sid in ("xlmr_phase3", "muril_phase3", "indicbert_phase3", "mdeberta_phase3", "e5_phase3", "e5b_phase3"):
             if self.specs[sid].extra.get("experiment_id") == member_id:
                 return sid
         return None
@@ -141,11 +173,29 @@ class ModelService:
         return (f"Final selected model {sel.get('selected_model_name', sid)} is not available on this machine "
                 f"(weights missing); falling back to {self.specs[self.default_id].name if self.default_id else 'none'}.")
 
+    def test_metrics(self, mid: str) -> dict | None:
+        """Real saved test metrics of a served model (None if it was never evaluated)."""
+        m, f = self.specs[mid], self.s.multi / "experiments" / "final"
+        paths_ = {"tfidf_plus_multilingual": self.s.multi / "model_a_plus" / "metrics_model_a_plus.json",
+                  "tfidf_multilingual": self.s.multi / "model_a" / "metrics_model_a.json",
+                  "production_ensemble": f / "production_incumbent" / "metrics_production_incumbent.json",
+                  "ensemble_phase3": f / "ensemble_validation_tuned" / "metrics_ensemble_validation_tuned.json",
+                  "lang_ensemble_phase3": f / "lang_ensemble_validation_tuned" / "metrics_lang_ensemble_validation_tuned.json",
+                  "lang_aware_v2": f / "lang_aware_v2" / "metrics_lang_aware_v2.json",
+                  "xlmr_telugu": self.s.telugu_outputs / "metrics_no_context.json",
+                  "tfidf_telugu": self.s.telugu_outputs / "metrics_baseline.json"}
+        eid = m.extra.get("experiment_id")
+        p = paths_.get(mid) or (f / eid / f"metrics_{eid}.json" if eid else None)
+        return _json(p) if p else None
+
     def info(self, mid: str) -> dict:
         m = self.specs[mid]
+        t = self.test_metrics(mid) or {}
+        acc, f1 = t.get("accuracy"), t.get("macro_f1")
         return {"id": m.id, "name": m.name, "kind": m.kind, "scope": m.scope, "scope_label": SCOPE_LABELS[m.scope],
                 "available": self.available(mid), "loaded": mid in self._loaded, "is_default": mid == self.default_id,
-                "path": str(m.path), "context_aware": False}
+                "path": str(m.path), "context_aware": False, "display_name": DISPLAY_NAME.get(mid, m.name),
+                "test_accuracy": acc, "test_macro_f1": f1, "inference_available": self.available(mid)}
 
     def list(self) -> list[dict]:
         return [self.info(mid) for mid in self.specs]
@@ -223,7 +273,7 @@ class ModelService:
         """Probabilities, cleaned texts, model id and heuristic language per text."""
         mid = self.ensure_loaded(mid)
         cleaned = [clean_text(t) or "" for t in texts]
-        langs = [detect_language(t) for t in cleaned]
+        langs = self.detect_languages(cleaned)
         return self._adjust(mid, self._proba(mid, cleaned, langs)), cleaned, mid, langs
 
     def _adjust(self, mid: str, probs: np.ndarray) -> np.ndarray:

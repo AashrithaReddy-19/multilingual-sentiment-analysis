@@ -68,7 +68,7 @@ const STATUS_STYLE = {
 } as const;
 
 export function StatusBadge({ status }: { status: keyof typeof STATUS_STYLE }) {
-  const text = { trained: "Trained", pending: "Pending GPU run", skipped: "Skipped" }[status];
+  const text = { trained: "Trained", pending: "Pending", skipped: "Not included" }[status];
   return <span className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_STYLE[status]}`}>{text}</span>;
 }
 
@@ -142,12 +142,12 @@ export function ModelScopeBanner({ model }: { model: ModelInfo }) {
   const telugu = model.scope === "telugu_only";
   return (
     <div className={`rounded-lg border px-4 py-3 text-sm ${telugu ? "border-amber-300 bg-amber-50 text-amber-900" : "border-indigo-200 bg-indigo-50 text-indigo-900"}`} role="note">
-      <p className="font-semibold">{telugu ? "Telugu-only model currently loaded." : "Multilingual model loaded."}</p>
-      <p className="mt-0.5">
-        {model.name}
-        {telugu && " — trained on Telugu (TeSent) only. Its predictions are not multilingual model output; English and code-mixed text are outside its training data."}
-      </p>
-      <p className="mt-0.5 text-xs opacity-80">Uses the current message only — not context-aware (Model C was not trained: no real conversation data).</p>
+      <p className="text-xs font-medium uppercase tracking-wide opacity-80">Model status</p>
+      <p className="font-semibold">{model.display_name ?? model.name}{model.is_default ? " active" : ""}</p>
+      {model.test_accuracy != null && model.test_macro_f1 != null && (
+        <p className="mt-0.5 text-xs">Test accuracy {(model.test_accuracy * 100).toFixed(1)}% · macro F1 {(model.test_macro_f1 * 100).toFixed(1)}%</p>
+      )}
+      {telugu && <p className="mt-0.5 text-xs">Trained on Telugu (TeSent) only; English and code-mixed text are outside its training data.</p>}
     </div>
   );
 }

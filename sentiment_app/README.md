@@ -14,9 +14,11 @@ Every metric shown anywhere comes from saved, executed results. Pending experime
 | Classical search (177 validation-only configs) | done — nothing beat A+ on validation; classical phase closed |
 | multilingual-e5-small (`e5_lr5e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3 on validation) | trained — validation macro F1 0.7390; test macro F1 0.7453, accuracy 0.7438 (production member) |
 | multilingual-e5-small (`e5_lr3e-05_ce_ep3p2_bs32_len128_cpu`, local CPU, best epoch 2/3) | trained — validation macro F1 0.7431 (E5 family winner); test macro F1 0.7458, accuracy 0.7445; not significantly better than production (McNemar p = 0.13) |
-| **Ensemble A+ 0.5 / E5 0.5** (frozen production incumbent, served as `production_ensemble`) | **final selected model, served by the app** — test macro F1 **0.7499**, accuracy **0.7483**; vs A+ McNemar p = 4.4e-59, macro F1 diff 95% CI [+0.044, +0.056] |
+| **Production Ensemble** (`lang_aware_v2`, served): language-aware A+ / E5 / E5-b with a learned language detector | **promoted 2026-10-27** — test accuracy **0.7537**, macro F1 **0.7553** (Neg/Neu/Pos 0.754/0.735/0.777; EN/TE/CM 0.735/0.726/0.793); selected on validation with the router in the loop (val 0.7509 vs 0.7463, better in 4/5 CV folds); vs previous production McNemar p = 0.0023, macro F1 diff CI [+0.0019, +0.0088] |
+| Ensemble A+ 0.5 / E5 0.5 (previous production, `production_ensemble`) | kept as fallback/reference — test macro F1 **0.7499**, accuracy **0.7483**; vs A+ McNemar p = 4.4e-59, macro F1 diff 95% CI [+0.044, +0.056] |
 | Language-aware ensemble (A+ / new E5 / old E5) | evaluated (test macro F1 0.7553, accuracy 0.7536) but not selected: below the 0.005 validation gate over simpler models and better than production in only 3/5 validation CV folds |
 | CPU-only studies (`cpu_ensemble_study`, `cpu_study_v2`, `cpu_classical_diversity`, `cpu_round3`, `cpu_round4`) | ~20 validation-CV methods (fine-grid / class-aware / language-aware weights, stacking, routing, disagreement resolver, two-stage and language-specific TF-IDF): best +0.0021 CV macro F1 over production, none passes; CPU-only improvement has plateaued. Round 3-4 (frozen base-E5 embeddings, TF-IDF-SVD + embedding hybrids, MLP, distillation, Neutral / English / Telugu specialists, new LinearSVC ranges, hard-example weights): best single model validation macro F1 0.7079 (distilled MLP); best ensemble +0.0025 CV over production in 2/5 folds -> no candidate |
+| Telugu-only refinements | character TF-IDF (`telugu_tfidf_refine`): test 0.6597 / 0.6558 (original A 0.6285 / 0.6232); XLM-R class bias +0.0025 val, below the 0.003 rule, not applied |
 | Data-centric study (`data_centric`, training data only) | audit, train-CV quality scores, 20 cleaned / weighted / augmented training variants screened with A+: best +0.0013 val macro F1 (Neutral weight x1.05), below the +0.003 screen -> no E5 retrain; learning curve still rising for English and Telugu (more labelled data would help) |
 | XLM-R, MuRIL, IndicBERTv2 (GPU round 1, validation only: 0.7488 / 0.7414 / 0.7505) | weights lost before upload; **recovery pending GPU** (`colab_rerun_winners.ipynb`); mDeBERTa not trained |
 | Model C (context-aware) | Skipped — no real conversation_id/message_order available. |
@@ -78,7 +80,7 @@ sentiment_app/
   backend/app/            FastAPI: main.py, model_service.py (model registry + fallback), artifacts.py, schemas.py
   backend/sentiment_core/ labels, cleaning, context (Model C, ready for real data), language (heuristic), evaluation, experiment_io
   backend/pipeline/       data, classical, Colab, finalisation and report scripts (see table above)
-  frontend/               React app: Dashboard, Predict, Batch, Comparison, Audit, Errors, Context
+  frontend/               React app: Dashboard, Predict, Batch, Comparison, Audit, Errors (every trained model with real metrics is shown; pending/skipped entries are not)
   tests/                  pytest suite
   artifacts/multilingual/ data, model_a, model_a_plus, experiments/, final_selection.json, phase3_models/ (installed weights)
   artifacts/colab_package_phase3/  Colab notebook + package;  artifacts/colab_results/  downloaded Colab zips

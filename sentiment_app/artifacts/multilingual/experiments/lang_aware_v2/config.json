@@ -1,0 +1,33 @@
+{
+  "name": "Language-aware ensemble (A+ / E5 / E5-b, learned language detector)",
+  "members": [
+    "Multilingual A+",
+    "multilingual-e5-small (e5_lr5e-05)",
+    "multilingual-e5-small (e5_lr3e-05)"
+  ],
+  "member_ids": [
+    "model_a_plus",
+    "e5_lr5e-05_ce_ep3p2_bs32_len128_cpu",
+    "e5_lr3e-05_ce_ep3p2_bs32_len128_cpu"
+  ],
+  "weights_by_language": {
+    "english": [
+      0.15,
+      0.35,
+      0.5
+    ],
+    "telugu": [
+      0.55,
+      0.45,
+      0.0
+    ],
+    "code_mixed": [
+      0.5,
+      0.3,
+      0.2
+    ]
+  },
+  "router": "learned language detector",
+  "router_file": "lang_detector.joblib",
+  "selected_on": "validation (lang_aware_v2.select; frozen before test)"
+}

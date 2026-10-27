@@ -1,0 +1,141 @@
+{
+  "model": "Character TF-IDF + logistic regression (Telugu-only)",
+  "tag": "telugu_char_tfidf",
+  "input": "cleaned_text",
+  "n": 3168,
+  "accuracy": 0.6597222222222222,
+  "macro_f1": 0.6558374133999187,
+  "weighted_f1": 0.6595285797210604,
+  "per_class": {
+    "Negative": {
+      "precision": 0.6302521008403361,
+      "recall": 0.6825938566552902,
+      "f1": 0.6553795740032768,
+      "support": 879
+    },
+    "Neutral": {
+      "precision": 0.6766550522648084,
+      "recall": 0.674774148714385,
+      "f1": 0.6757132915796799,
+      "support": 1439
+    },
+    "Positive": {
+      "precision": 0.6645326504481434,
+      "recall": 0.6105882352941177,
+      "f1": 0.6364193746167995,
+      "support": 850
+    }
+  },
+  "classification_report": {
+    "Negative": {
+      "precision": 0.6302521008403361,
+      "recall": 0.6825938566552902,
+      "f1-score": 0.6553795740032768,
+      "support": 879.0
+    },
+    "Neutral": {
+      "precision": 0.6766550522648084,
+      "recall": 0.674774148714385,
+      "f1-score": 0.6757132915796799,
+      "support": 1439.0
+    },
+    "Positive": {
+      "precision": 0.6645326504481434,
+      "recall": 0.6105882352941177,
+      "f1-score": 0.6364193746167995,
+      "support": 850.0
+    },
+    "accuracy": 0.6597222222222222,
+    "macro avg": {
+      "precision": 0.6571466011844292,
+      "recall": 0.6559854135545976,
+      "f1-score": 0.6558374133999187,
+      "support": 3168.0
+    },
+    "weighted avg": {
+      "precision": 0.6605274525658575,
+      "recall": 0.6597222222222222,
+      "f1-score": 0.6595285797210604,
+      "support": 3168.0
+    }
+  },
+  "confidence": {
+    "mean": 0.5878314088577682,
+    "mean_when_correct": 0.6201010423870265,
+    "mean_when_wrong": 0.5252678336479817
+  },
+  "best_validation_macro_f1": 0.6684446645004373,
+  "per_language": {
+    "telugu": {
+      "status": "evaluated",
+      "n": 3168,
+      "accuracy": 0.6597222222222222,
+      "macro_f1": 0.6558374133999187,
+      "weighted_f1": 0.6595285797210604,
+      "per_class": {
+        "Negative": {
+          "precision": 0.6302521008403361,
+          "recall": 0.6825938566552902,
+          "f1": 0.6553795740032768,
+          "support": 879
+        },
+        "Neutral": {
+          "precision": 0.6766550522648084,
+          "recall": 0.674774148714385,
+          "f1": 0.6757132915796799,
+          "support": 1439
+        },
+        "Positive": {
+          "precision": 0.6645326504481434,
+          "recall": 0.6105882352941177,
+          "f1": 0.6364193746167995,
+          "support": 850
+        }
+      }
+    },
+    "english": {
+      "status": "not in test set",
+      "n": 0,
+      "accuracy": null,
+      "macro_f1": null,
+      "weighted_f1": null
+    },
+    "code_mixed": {
+      "status": "not in test set",
+      "n": 0,
+      "accuracy": null,
+      "macro_f1": null,
+      "weighted_f1": null
+    }
+  },
+  "confusion_matrix": [
+    [
+      600,
+      216,
+      63
+    ],
+    [
+      269,
+      971,
+      199
+    ],
+    [
+      83,
+      248,
+      519
+    ]
+  ],
+  "n_misclassified_total": 1078,
+  "n_misclassified_saved": 30,
+  "heuristic_reason_counts_all_mistakes": {
+    "annotation ambiguity": 701,
+    "low confidence prediction": 527,
+    "negation handling": 111,
+    "class overlap": 111,
+    "emoji ambiguity": 90,
+    "mixed-language ambiguity": 56,
+    "insufficient conversational context": 40,
+    "sarcasm/implicit sentiment": 17
+  },
+  "heuristic_note": "HEURISTIC (rule-based guess, not ground truth)"
+}

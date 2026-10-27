@@ -93,3 +93,6 @@ sentiment_app/artifacts/multilingual/experiments/data_centric/training_quality_a
 sentiment_app/artifacts/multilingual/experiments/data_centric/conflict_groups_v2.csv
 sentiment_app/artifacts/multilingual/experiments/data_centric/train_clean_v2.csv
 sentiment_app/artifacts/multilingual/experiments/data_centric/train_quality_scores.csv
+# fitted CPU models (embed dataset vocabulary; regenerable)
+sentiment_app/artifacts/multilingual/experiments/lang_aware_v2/lang_detector.joblib
+sentiment_app/artifacts/telugu_only_refine/model.joblib

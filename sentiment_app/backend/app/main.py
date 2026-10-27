@@ -1,6 +1,8 @@
 """FastAPI application. Interactive API documentation: http://127.0.0.1:8000/docs"""
 from __future__ import annotations
 
+import re
+
 import io
 import threading
 from contextlib import asynccontextmanager
@@ -69,16 +71,22 @@ def list_models(svc: ModelService = Depends(get_models)):
     return svc.list()
 
 
+DATASET_LABEL = {"TeSent": "DSL-13-SRMAP · TeSent Benchmark Dataset", "TweetEval": "cardiffnlp · TweetEval (sentiment)",
+                 "CMTET": "ksubbu199 · CMTET code-mixed sentiment"}
+DATASET_URL = {"TweetEval": "https://github.com/cardiffnlp/tweeteval", "CMTET": "https://github.com/ksubbu199/cmtet-sentiment"}
+
+
 @app.get("/api/dashboard", tags=["results"])
 def dashboard(art: Artifacts = Depends(get_artifacts), svc: ModelService = Depends(get_models)):
     audit = art.audit()
     datasets = []
     for name, prov in (audit.get("provenance") or {}).items():
         stats = ((audit.get("cleaning") or {}).get("per_dataset") or {}).get(name, {})
-        datasets.append({"name": name, "source": prov.get("source"), "licence_note": prov.get("licence_note"),
+        datasets.append({"name": name, "source": DATASET_LABEL.get(name, prov.get("source")), "url": DATASET_URL.get(name),
+                         "licence_note": prov.get("licence_note"),
                          "checksums_match": prov.get("all_match"), "final_rows": stats.get("final_rows")})
     default = svc.default_id
-    return {"title": "Context-Aware Sentiment Analysis for Telugu, English, and Telugu-English Code-Mixed Conversational Chat",
+    return {"title": "Multilingual Sentiment Analysis",
             "datasets": datasets, "runs": art.comparison(),
             "serving_model": svc.info(default) if default else None, "model_c": MODEL_C_SKIP,
             "selection_note": svc.selection_note(), "current_message_note": CURRENT_MESSAGE_NOTE}
@@ -91,7 +99,17 @@ def comparison(art: Artifacts = Depends(get_artifacts)):
 
 @app.get("/api/audit", tags=["results"])
 def audit(art: Artifacts = Depends(get_artifacts)):
-    return art.audit()
+    """Audit data for the web app; local file-system paths in dataset sources are shown as dataset labels."""
+    import copy
+    a = copy.deepcopy(art.audit())
+    for name, prov in (a.get("provenance") or {}).items():
+        if name in DATASET_LABEL:
+            prov["source"] = DATASET_LABEL[name]
+    srcs = (a.get("label_mapping") or {}).get("sources") or {}
+    for name in list(srcs):
+        if name in DATASET_LABEL and re.search(r"[A-Za-z]:\\", str(srcs[name])):
+            srcs[name] = DATASET_LABEL[name]
+    return a
 
 
 @app.get("/api/errors/sources", tags=["results"])
@@ -148,7 +166,7 @@ def predict(req: PredictRequest, svc: ModelService = Depends(get_models)):
     return {"label": CLASS_NAMES[k], "label_id": k, "confidence": float(p[k]),
             "probabilities": [{"label": c, "probability": float(v)} for c, v in zip(CLASS_NAMES, p)],
             "cleaned_text": cleaned[0], "model": svc.info(mid),
-            "language": {"detected": langs[0], "method": LANGUAGE_NOTE},
+            "language": {"detected": langs[0], "method": svc.language_method},
             "low_confidence": bool(p[k] < LOW_CONFIDENCE_THRESHOLD),
             "low_confidence_threshold": LOW_CONFIDENCE_THRESHOLD,
             "context_aware": False, "note": CURRENT_MESSAGE_NOTE}

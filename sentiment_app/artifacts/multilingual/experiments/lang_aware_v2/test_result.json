@@ -1,0 +1,77 @@
+{
+  "candidate": "lang3_learned",
+  "params": {
+    "english": [
+      0.15,
+      0.35,
+      0.5
+    ],
+    "telugu": [
+      0.55,
+      0.45,
+      -0.0
+    ],
+    "code_mixed": [
+      0.5,
+      0.3,
+      0.2
+    ]
+  },
+  "test": {
+    "accuracy": 0.7537027241470511,
+    "macro_f1": 0.7553118821663496,
+    "macro_precision": 0.7595012290483574,
+    "macro_recall": 0.7520238568729166,
+    "weighted_f1": 0.754104562368544,
+    "Negative_f1": 0.754026754026754,
+    "Neutral_f1": 0.7351258132789841,
+    "Positive_f1": 0.7767830791933104,
+    "english_macro_f1": 0.7349433766839736,
+    "telugu_macro_f1": 0.7262807629047296,
+    "code_mixed_macro_f1": 0.793404955137698
+  },
+  "production_test": {
+    "accuracy": 0.7482808780745834,
+    "macro_f1": 0.7498642680877716,
+    "macro_precision": 0.7534063994141338,
+    "macro_recall": 0.7470366301397924,
+    "weighted_f1": 0.748639524500003,
+    "Negative_f1": 0.7490820073439413,
+    "Neutral_f1": 0.7301462494102846,
+    "Positive_f1": 0.7703645475090891,
+    "english_macro_f1": 0.7270607132558422,
+    "telugu_macro_f1": 0.7241844704300905,
+    "code_mixed_macro_f1": 0.7928814809219314
+  },
+  "vs_production": {
+    "mcnemar": {
+      "a_right_b_wrong": 313,
+      "a_wrong_b_right": 395,
+      "test": "chi-square with continuity correction",
+      "statistic": 9.266949152542374,
+      "p_value": 0.0023332603458368914
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.74292669007212,
+        0.7569934698910302
+      ],
+      "macro_f1_ci95_model": [
+        0.7482284108348477,
+        0.7622683944539071
+      ],
+      "macro_f1_diff_ci95": [
+        0.0019252825723372862,
+        0.008787317535304503
+      ],
+      "macro_f1_diff_mean": 0.0054516177817536355,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.001851362073525542,
+        0.008793969849246297
+      ],
+      "accuracy_diff_mean": 0.005429251520761703
+    }
+  }
+}

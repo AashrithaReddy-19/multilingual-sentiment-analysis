@@ -190,6 +190,7 @@ For a row 'X vs Y' the macro F1 difference is X − Y. A difference counts as me
 | e5_lr3e-05_ce_ep3p2_bs32_len128_cpu | 0.7785 | 0.0340 | 1.1963 | 0.0119 |
 | e5_lr5e-05_ce_ep3p2_bs32_len128_cpu | 0.7853 | 0.0415 | 1.2625 | 0.0112 |
 | ensemble_validation_tuned | 0.7492 | 0.0103 | 0.9760 | 0.0108 |
+| lang_aware_v2 | 0.7415 | 0.0160 | 0.9549 | 0.0105 |
 | lang_ensemble_validation_tuned | 0.7371 | 0.0165 | 0.9275 | 0.0092 |
 | model_a | 0.6368 | 0.0267 | — | — |
 | model_a_plus | 0.6912 | 0.0110 | 0.9590 | 0.0065 |
@@ -199,17 +200,15 @@ A+ accuracy by confidence bucket (test): 0.00-0.50: 0.4564 (n=2386); 0.50-0.60: 
 
 ## 10. Final selected model
 
-**Current production ensemble (A+ 0.50 / E5 0.50)** (served as `production_ensemble`).
+**Language-aware ensemble (A+ / E5 / E5-b, learned language detector)** (served as `lang_aware_v2`).
 
-Test: accuracy 0.7483, macro precision 0.7534, macro recall 0.7470, macro F1 0.7499, weighted F1 0.7486.
+Test: accuracy 0.7537, macro precision 0.7595, macro recall 0.7520, macro F1 0.7553, weighted F1 0.7541.
 
-Selection rule: Final model: best VALIDATION rank, simplicity gate (needs >= 0.005 validation macro F1 to justify a more complex model), then a test go/no-go against A+ (McNemar p < 0.05 AND bootstrap 95% CI of the macro F1 difference > 0).
+Selection rule: val macro F1 > production, better in >= 3/5 validation CV folds, no class/language F1 drop > 0.01
 
-- Highest validation macro F1: Language-aware ensemble (validation-tuned weights) (0.7501).
-- Language-aware ensemble (validation-tuned weights) beats the simpler Ensemble (validation-tuned weights) by < 0.005 validation macro F1 -> prefer the simpler model.
-- Ensemble (validation-tuned weights) beats the simpler Current production ensemble (A+ 0.50 / E5 0.50) by < 0.005 validation macro F1 -> prefer the simpler model.
-- Current production ensemble (A+ 0.50 / E5 0.50) beats the simpler Best alternative Transformer (multilingual-e5-small) by < 0.005 validation macro F1 -> prefer the simpler model.
-- Best alternative Transformer (multilingual-e5-small) is not significantly better than the current production model on test (McNemar / bootstrap) -> keep Current production ensemble (A+ 0.50 / E5 0.50).
+- Selected on validation with the learned language detector in the loop (val macro F1 0.7509 vs production 0.7463); stable in 4/5 validation CV folds (+0.0030), no class/language regression; simplicity tie-break chose it over confidence routing.
+- Test (scored once): McNemar p=0.00233, macro F1 difference 95% CI [+0.0019, +0.0088].
+- Promotion rule for this round (set by the project owner): better validation macro F1, better in >= 3/5 validation folds, no class/language drop > 0.01.
 
 | Target | Met | Actual |
 |---|---|---|

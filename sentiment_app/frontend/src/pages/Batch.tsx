@@ -14,7 +14,7 @@ export default function Batch() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ url: string; rows: number; model: string } | null>(null);
 
-  const available = (models.data ?? []).filter((m) => m.available);
+  const available = (models.data ?? []).filter((m) => m.available);       // loadable for inference
   const selected = available.find((m) => m.id === modelId) ?? available.find((m) => m.is_default);
 
   async function onFile(f: File | null) {
@@ -37,7 +37,7 @@ export default function Batch() {
     setBusy("predict"); setError(null); setDone(null);
     try {
       const { blob, modelId: used } = await api.batchPredict(file, column, modelId || undefined);
-      setDone({ url: URL.createObjectURL(blob), rows: info?.n_rows ?? 0, model: available.find((m) => m.id === used)?.name ?? used ?? "" });
+      setDone({ url: URL.createObjectURL(blob), rows: info?.n_rows ?? 0, model: (available.find((m) => m.id === used)?.display_name ?? available.find((m) => m.id === used)?.name) ?? used ?? "" });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -64,8 +64,8 @@ export default function Batch() {
           <Field label="Model" htmlFor="bmodel">
             <select id="bmodel" value={modelId} onChange={(e) => setModelId(e.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
-              <option value="">Default{selected && !modelId ? ` — ${selected.name}` : ""}</option>
-              {available.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+              <option value="">Default{selected && !modelId ? ` — ${selected.display_name ?? selected.name}` : ""}</option>
+              {available.map((m) => <option key={m.id} value={m.id}>{m.display_name ?? m.name}</option>)}
             </select>
           </Field>
           {selected && <ModelScopeBanner model={selected} />}

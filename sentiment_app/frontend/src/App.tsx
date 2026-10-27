@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { NavLink, Route, Routes, useLocation } from "react-router";
+import { Navigate, NavLink, Route, Routes, useLocation } from "react-router";
 import Dashboard from "./pages/Dashboard";
 import Predict from "./pages/Predict";
 import Batch from "./pages/Batch";
 import Comparison from "./pages/Comparison";
 import Audit from "./pages/Audit";
 import Errors from "./pages/Errors";
-import Context from "./pages/Context";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: "▦" },
-  { to: "/predict", label: "Single prediction", icon: "✎" },
-  { to: "/batch", label: "Batch prediction", icon: "⇪" },
-  { to: "/comparison", label: "Model comparison", icon: "◫" },
-  { to: "/audit", label: "Data audit", icon: "☰" },
-  { to: "/errors", label: "Error analysis", icon: "⚑" },
-  { to: "/context", label: "Context status", icon: "↺" },
+  { to: "/predict", label: "Predict", icon: "✎" },
+  { to: "/batch", label: "Batch", icon: "⇪" },
+  { to: "/comparison", label: "Comparison", icon: "◫" },
+  { to: "/audit", label: "Audit", icon: "☰" },
+  { to: "/errors", label: "Errors", icon: "⚑" },
 ];
 
 function Nav({ onNavigate }: { onNavigate?: () => void }) {
@@ -80,7 +78,7 @@ export default function App() {
           <Route path="/comparison" element={<Comparison />} />
           <Route path="/audit" element={<Audit />} />
           <Route path="/errors" element={<Errors />} />
-          <Route path="/context" element={<Context />} />
+          <Route path="/context" element={<Navigate to="/" replace />} />
           <Route path="*" element={<p className="text-slate-600">Page not found.</p>} />
         </Routes>
       </main>
