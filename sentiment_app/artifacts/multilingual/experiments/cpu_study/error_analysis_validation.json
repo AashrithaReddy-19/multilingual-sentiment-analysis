@@ -1,0 +1,118 @@
+{
+  "errors": 3860,
+  "error_rate": 0.2552741220818729,
+  "confusions": {
+    "Negative->Neutral": 772,
+    "Negative->Positive": 217,
+    "Neutral->Negative": 723,
+    "Neutral->Positive": 880,
+    "Positive->Negative": 174,
+    "Positive->Neutral": 1094
+  },
+  "slices": [
+    {
+      "slice": "English",
+      "n": 8980,
+      "error_rate": 0.266,
+      "share_of_errors": 0.619
+    },
+    {
+      "slice": "Telugu",
+      "n": 3169,
+      "error_rate": 0.293,
+      "share_of_errors": 0.24
+    },
+    {
+      "slice": "Code-mixed",
+      "n": 2972,
+      "error_rate": 0.183,
+      "share_of_errors": 0.141
+    },
+    {
+      "slice": "Romanized Telugu (code-mixed, >90% Latin letters)",
+      "n": 2956,
+      "error_rate": 0.183,
+      "share_of_errors": 0.14
+    },
+    {
+      "slice": "<=5 words",
+      "n": 1089,
+      "error_rate": 0.287,
+      "share_of_errors": 0.081
+    },
+    {
+      "slice": "6-20 words",
+      "n": 9210,
+      "error_rate": 0.253,
+      "share_of_errors": 0.604
+    },
+    {
+      "slice": ">20 words",
+      "n": 4822,
+      "error_rate": 0.253,
+      "share_of_errors": 0.316
+    },
+    {
+      "slice": "emoji",
+      "n": 1423,
+      "error_rate": 0.183,
+      "share_of_errors": 0.067
+    },
+    {
+      "slice": "negation",
+      "n": 1732,
+      "error_rate": 0.314,
+      "share_of_errors": 0.141
+    },
+    {
+      "slice": "@mention (raw)",
+      "n": 4091,
+      "error_rate": 0.197,
+      "share_of_errors": 0.209
+    },
+    {
+      "slice": "#hashtag",
+      "n": 2158,
+      "error_rate": 0.254,
+      "share_of_errors": 0.142
+    },
+    {
+      "slice": "URL (raw)",
+      "n": 81,
+      "error_rate": 0.247,
+      "share_of_errors": 0.005
+    },
+    {
+      "slice": "char repetition (3+)",
+      "n": 370,
+      "error_rate": 0.151,
+      "share_of_errors": 0.015
+    },
+    {
+      "slice": "! or ?",
+      "n": 3197,
+      "error_rate": 0.245,
+      "share_of_errors": 0.203
+    },
+    {
+      "slice": "mixed polarity cues (pos & neg words)",
+      "n": 52,
+      "error_rate": 0.385,
+      "share_of_errors": 0.005
+    },
+    {
+      "slice": "low confidence (<0.5)",
+      "n": 1667,
+      "error_rate": 0.529,
+      "share_of_errors": 0.228
+    },
+    {
+      "slice": "low margin (<0.1)",
+      "n": 1590,
+      "error_rate": 0.51,
+      "share_of_errors": 0.21
+    }
+  ],
+  "high_confidence_wrong_(>=0.9)": 71,
+  "low_confidence_wrong_(<0.5)": 882
+}

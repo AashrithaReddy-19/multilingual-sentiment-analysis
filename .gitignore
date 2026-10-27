@@ -84,3 +84,7 @@ sentiment_app/artifacts/multilingual/experiments/transformers_cpu/
 sentiment_app/artifacts/multilingual/experiments/cpu_study/train_label_conflicts.csv
 # CPU diversity models (large, embed dataset vocabulary)
 sentiment_app/artifacts/multilingual/experiments/cpu_classical/*/model.joblib
+# CPU rounds 3-4: cached embeddings, SVD matrices and fitted models (large / regenerable)
+sentiment_app/artifacts/multilingual/experiments/cpu_embed/
+sentiment_app/artifacts/multilingual/experiments/cpu_round4/_cache/
+sentiment_app/artifacts/multilingual/experiments/cpu_round3/*/model.joblib
