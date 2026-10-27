@@ -5,6 +5,12 @@ import { useApi } from "../hooks";
 import { Card, ErrorState, PageHeader, Spinner } from "../components/ui";
 
 const LANGS = ["telugu", "english", "code_mixed"];
+const ENSEMBLE_IDS = new Set(["P", "E", "E-lang"]);
+const reached75 = (m: ModelResult) => (m.accuracy ?? 0) >= 0.75 && (m.macro_f1 ?? 0) >= 0.75;
+
+function Badge75() {
+  return <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-200">75%+ achieved</span>;
+}
 
 function Stat({ label, value, big = false }: { label: string; value?: number | null; big?: boolean }) {
   return (
@@ -24,7 +30,10 @@ function ProductionCard({ m }: { m: ModelResult }) {
           <h2 id="prod-title" className="mt-1 text-xl font-semibold text-slate-900">{modelName(m)}</h2>
           {m.description && <p className="text-sm text-slate-600">{m.description}</p>}
         </div>
-        <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">Production</span>
+        <div className="flex items-center gap-2">
+          {reached75(m) && <Badge75 />}
+          <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">Production</span>
+        </div>
       </div>
       <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Accuracy" value={m.accuracy} big />
@@ -63,6 +72,7 @@ function ModelCard({ m }: { m: ModelResult }) {
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 ring-1 ring-inset ring-emerald-200">Trained</span>
           {m.is_production && <span className="rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white">Production</span>}
+          {reached75(m) && <Badge75 />}
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -88,7 +98,9 @@ export default function Dashboard() {
   const { data, error, loading, reload } = useApi<DashboardData>("/api/dashboard");
   const multi = data?.runs.find((r) => r.run === "multilingual");
   const production = multi?.models.find((m) => m.is_production && m.status === "trained");
-  const multiModels = (multi?.models ?? []).filter((m) => isDashboardVisible(m) && !m.is_production);
+  const others = (multi?.models ?? []).filter((m) => isDashboardVisible(m) && !m.is_production);
+  const singles = others.filter((m) => !ENSEMBLE_IDS.has(m.id));
+  const ensembles = others.filter((m) => ENSEMBLE_IDS.has(m.id));
   const telugu = (data?.runs.find((r) => r.run === "telugu_only")?.models ?? []).filter(isDashboardVisible);
   return (
     <>
@@ -115,18 +127,26 @@ export default function Dashboard() {
             </ul>
           </Card>
           {production && <ProductionCard m={production} />}
-          {multiModels.length > 0 && (
+          {singles.length > 0 && (
             <Card title="Multilingual Models" actions={<Link to="/comparison" className="text-sm font-medium text-indigo-700 hover:underline">Compare →</Link>}>
-              <p className="mb-3 text-xs text-slate-500">All trained models, evaluated on the same multilingual test set ({production?.n_test?.toLocaleString() ?? "15,124"} texts). The production model above answers predictions.</p>
+              <p className="mb-3 text-xs text-slate-500">Individual trained models, evaluated on the same multilingual test set ({production?.n_test?.toLocaleString() ?? "15,124"} texts). The production model above answers predictions.</p>
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {multiModels.map((m) => <ModelCard key={m.id} m={m} />)}
+                {singles.map((m) => <ModelCard key={m.id} m={m} />)}
+              </div>
+            </Card>
+          )}
+          {ensembles.length > 0 && (
+            <Card title="Enhanced-Ensemble Models">
+              <p className="mb-3 text-xs text-slate-500">Probability ensembles of the multilingual models, on the same test set.</p>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {ensembles.map((m) => <ModelCard key={m.id} m={m} />)}
               </div>
             </Card>
           )}
           {telugu.length > 0 && (
             <Card title="Telugu-Only Models">
               <p className="mb-3 text-xs text-slate-500">Trained and evaluated on a separate Telugu-only split (TeSent, {telugu[0]?.n_test?.toLocaleString()} test texts); not directly comparable with the multilingual results.</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {telugu.map((m) => <ModelCard key={m.id} m={m} />)}
               </div>
             </Card>

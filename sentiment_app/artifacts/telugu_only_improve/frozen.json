@@ -1,0 +1,25 @@
+{
+  "hybrid": {
+    "name": "Telugu Hybrid (char TF-IDF + E5 embeddings)",
+    "features": "char(2,5) TF-IDF + frozen e5-small x1.0",
+    "clf": "LogisticRegression C=2 balanced",
+    "val_macro_f1": 0.6810997833873186
+  },
+  "ensemble": {
+    "name": "Telugu Ensemble (Model B + char TF-IDF)",
+    "member": "char(2,5) TF-IDF LR C=2",
+    "w_char_tfidf": 0.6,
+    "val_macro_f1": 0.7167448804205042,
+    "cv_vs_B": [
+      0.004180632375443816,
+      4,
+      [
+        0.0106,
+        0.0028,
+        0.0131,
+        0.0054,
+        -0.011
+      ]
+    ]
+  }
+}

@@ -26,6 +26,8 @@ DISPLAY = {   # (run, row id) -> (display name, short description)
     ("telugu_only", "A"): ("Telugu Model A", "TF-IDF + logistic regression (Telugu-only split)"),
     ("telugu_only", "B"): ("Telugu Model B", "XLM-RoBERTa fine-tuned (Telugu-only split)"),
     ("telugu_only", "A+"): ("Telugu Model A+", "Character TF-IDF + logistic regression (Telugu-only split)"),
+    ("telugu_only", "H"): ("Telugu Hybrid", "Character TF-IDF + frozen E5 embeddings, logistic regression (Telugu-only split)"),
+    ("telugu_only", "TE"): ("Telugu Ensemble", "Telugu Model B + character TF-IDF, probability blend (Telugu-only split)"),
 }
 
 
@@ -67,6 +69,7 @@ class Artifacts:
                      "metrics": s.telugu_outputs / "metrics_no_context.json", "tag": "no_context",
                      "dir": s.telugu_outputs, "pending_note": None},
                     *self._telugu_refined(),
+                    *self._telugu_improve(),
                 ]},
         }
 
@@ -87,6 +90,17 @@ class Artifacts:
             return []
         return [{"id": "A+", "name": "Character TF-IDF + logistic regression", "input": "cleaned_text",
                  "metrics": d / "metrics_telugu_char_tfidf.json", "tag": "telugu_char_tfidf", "dir": d, "pending_note": None}]
+
+    def _telugu_improve(self) -> list[dict]:
+        """New Telugu-only architectures from pipeline.improve_all (frozen on validation, tested once)."""
+        d = self.s.nlp_root / "sentiment_app" / "artifacts" / "telugu_only_improve"
+        rows = []
+        for rid, sub, tag, name in (("H", "hybrid", "telugu_hybrid", "Char TF-IDF + E5 embeddings + LR"),
+                                    ("TE", "ensemble", "telugu_ensemble", "XLM-R + char TF-IDF blend")):
+            if (d / sub / f"metrics_{tag}.json").exists():
+                rows.append({"id": rid, "name": name, "input": "cleaned_text", "metrics": d / sub / f"metrics_{tag}.json",
+                             "tag": tag, "dir": d / sub, "pending_note": None})
+        return rows
 
     def _production_row(self) -> list[dict]:
         """The language-aware ensemble promoted on 2026-10-27 (experiments/final/lang_aware_v2)."""

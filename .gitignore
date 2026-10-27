@@ -96,3 +96,7 @@ sentiment_app/artifacts/multilingual/experiments/data_centric/train_quality_scor
 # fitted CPU models (embed dataset vocabulary; regenerable)
 sentiment_app/artifacts/multilingual/experiments/lang_aware_v2/lang_detector.joblib
 sentiment_app/artifacts/telugu_only_refine/model.joblib
+sentiment_app/artifacts/multilingual/experiments/improve_all/*.npy
+sentiment_app/artifacts/multilingual/experiments/improve_all/tel_embed/
+sentiment_app/artifacts/multilingual/experiments/improve_all/tel_models/
+sentiment_app/artifacts/telugu_only_improve/models.joblib

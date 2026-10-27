@@ -1,0 +1,12 @@
+{
+  "validation": {
+    "rows": 3168,
+    "in_multilingual_train": 2233,
+    "share": 0.7048611111111112
+  },
+  "test": {
+    "rows": 3168,
+    "in_multilingual_train": 2211,
+    "share": 0.6979166666666666
+  }
+}

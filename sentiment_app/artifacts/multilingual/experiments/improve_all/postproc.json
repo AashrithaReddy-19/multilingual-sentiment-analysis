@@ -1,0 +1,149 @@
+{
+  "A": {
+    "val_macro_f1": 0.660939516801886,
+    "bias_full_val": [
+      -0.1,
+      0.1,
+      0.0
+    ],
+    "bias_cv_gain": 0.0038721064151152175,
+    "bias_cv_wins": 3,
+    "bias_cv_folds": [
+      0.0074,
+      -0.0011,
+      0.0042,
+      0.0093,
+      -0.0004
+    ],
+    "bias_passes": false,
+    "temperature": 0.8675663407412976,
+    "ece_raw": 0.024255222803506216,
+    "ece_temperature": 0.010726468555297502
+  },
+  "A+": {
+    "val_macro_f1": 0.6968827261398595,
+    "bias_full_val": [
+      -0.2,
+      -0.1,
+      0.0
+    ],
+    "bias_cv_gain": -0.002975300135362913,
+    "bias_cv_wins": 0,
+    "bias_cv_folds": [
+      -0.0019,
+      -0.0036,
+      -0.0042,
+      -0.0036,
+      -0.0016
+    ],
+    "bias_passes": false,
+    "temperature": 0.9590457363847055,
+    "ece_raw": 0.014832372746511446,
+    "ece_temperature": 0.01189208548442128
+  },
+  "E5": {
+    "val_macro_f1": 0.7390153086587471,
+    "bias_full_val": [
+      0.15,
+      0.05,
+      0.0
+    ],
+    "bias_cv_gain": -0.001919243506885504,
+    "bias_cv_wins": 1,
+    "bias_cv_folds": [
+      0.0003,
+      -0.0011,
+      -0.0026,
+      -0.0005,
+      -0.0056
+    ],
+    "bias_passes": false,
+    "temperature": 1.2624509766020195,
+    "ece_raw": 0.0498364288426691,
+    "ece_temperature": 0.01973755256699713
+  },
+  "E5new": {
+    "val_macro_f1": 0.7431470281465172,
+    "bias_full_val": [
+      0.25,
+      0.25,
+      0.0
+    ],
+    "bias_cv_gain": -0.0028470102406001007,
+    "bias_cv_wins": 1,
+    "bias_cv_folds": [
+      -0.0034,
+      0.0007,
+      -0.0031,
+      -0.0029,
+      -0.0055
+    ],
+    "bias_passes": false,
+    "temperature": 1.1963315327446256,
+    "ece_raw": 0.03667314527610611,
+    "ece_temperature": 0.01515920243000437
+  },
+  "TelA": {
+    "val_macro_f1": 0.6076879928424243,
+    "bias_full_val": [
+      0.3,
+      0.35,
+      0.0
+    ],
+    "bias_cv_gain": 0.004004755435430418,
+    "bias_cv_wins": 4,
+    "bias_cv_folds": [
+      0.0054,
+      0.0069,
+      -0.0011,
+      0.0004,
+      0.0085
+    ],
+    "bias_passes": true,
+    "temperature": 0.798569834744153,
+    "ece_raw": 0.03504742921771249,
+    "ece_temperature": 0.016828422263633565
+  },
+  "TelA+": {
+    "val_macro_f1": 0.6684446645004373,
+    "bias_full_val": [
+      -0.05,
+      -0.0,
+      0.0
+    ],
+    "bias_cv_gain": -0.004077325551685673,
+    "bias_cv_wins": 1,
+    "bias_cv_folds": [
+      -0.0028,
+      -0.0016,
+      -0.0057,
+      0.0013,
+      -0.0115
+    ],
+    "bias_passes": false,
+    "temperature": 0.6789114299870191,
+    "ece_raw": 0.07601228310564412,
+    "ece_temperature": 0.018789637296880508
+  },
+  "TelB": {
+    "val_macro_f1": 0.7126334974381244,
+    "bias_full_val": [
+      0.4,
+      0.4,
+      0.0
+    ],
+    "bias_cv_gain": 0.0001290927799306063,
+    "bias_cv_wins": 3,
+    "bias_cv_folds": [
+      0.006,
+      0.0016,
+      0.0019,
+      -0.007,
+      -0.0019
+    ],
+    "bias_passes": false,
+    "temperature": 1.9673442914620896,
+    "ece_raw": 0.1691396542392677,
+    "ece_temperature": 0.05266338850777573
+  }
+}

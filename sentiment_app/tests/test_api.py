@@ -193,7 +193,7 @@ def test_dashboard_shows_every_trained_model_and_no_placeholders(client):
     for mid in ("A", "A+"):                      # below-70% trained models stay visible
         if multi.get(mid, {}).get("status") == "trained":
             assert multi[mid]["dashboard_visible"]
-    for mid in ("A", "B"):
+    for mid in ("A", "B", "A+", "H", "TE"):     # originals and new variants side by side
         if tel.get(mid, {}).get("status") == "trained":
             assert tel[mid]["dashboard_visible"]
     for mid in ("B", "B2", "B-IndicBERT", "B-mDeBERTa", "C"):

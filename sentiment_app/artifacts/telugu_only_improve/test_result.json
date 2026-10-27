@@ -1,0 +1,72 @@
+{
+  "hybrid": {
+    "accuracy": 0.6840277777777778,
+    "macro_f1": 0.683527907033462,
+    "reference": "TelA+",
+    "reference_macro_f1": 0.6558374133999187,
+    "mcnemar": {
+      "a_right_b_wrong": 195,
+      "a_wrong_b_right": 272,
+      "test": "chi-square with continuity correction",
+      "statistic": 12.36830835117773,
+      "p_value": 0.000436683084684877
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.6388975505774133,
+        0.6729492172710294
+      ],
+      "macro_f1_ci95_model": [
+        0.6663304676629827,
+        0.6990612985468536
+      ],
+      "macro_f1_diff_ci95": [
+        0.013810390366093203,
+        0.040956636802540206
+      ],
+      "macro_f1_diff_mean": 0.02745388190111054,
+      "share_of_resamples_model_better": 1.0,
+      "accuracy_diff_ci95": [
+        0.01041666666666663,
+        0.03724747474747481
+      ],
+      "accuracy_diff_mean": 0.0240290404040404
+    }
+  },
+  "ensemble": {
+    "accuracy": 0.7010732323232324,
+    "macro_f1": 0.7015182279068886,
+    "reference": "TelB",
+    "reference_macro_f1": 0.6984973816952923,
+    "mcnemar": {
+      "a_right_b_wrong": 80,
+      "a_wrong_b_right": 90,
+      "test": "chi-square with continuity correction",
+      "statistic": 0.4764705882352941,
+      "p_value": 0.4900253595017988
+    },
+    "bootstrap": {
+      "resamples": 2000,
+      "macro_f1_ci95_reference": [
+        0.6822172479103571,
+        0.7141245175674039
+      ],
+      "macro_f1_ci95_model": [
+        0.6850262114055751,
+        0.7168727794915725
+      ],
+      "macro_f1_diff_ci95": [
+        -0.004552758745764096,
+        0.01130498057778413
+      ],
+      "macro_f1_diff_mean": 0.0030163307814341732,
+      "share_of_resamples_model_better": 0.7745,
+      "accuracy_diff_ci95": [
+        -0.004734848484848508,
+        0.011363636363636354
+      ],
+      "accuracy_diff_mean": 0.0031461489898989906
+    }
+  }
+}
