@@ -88,3 +88,8 @@ sentiment_app/artifacts/multilingual/experiments/cpu_classical/*/model.joblib
 sentiment_app/artifacts/multilingual/experiments/cpu_embed/
 sentiment_app/artifacts/multilingual/experiments/cpu_round4/_cache/
 sentiment_app/artifacts/multilingual/experiments/cpu_round3/*/model.joblib
+# data-centric study: row-level files contain dataset text
+sentiment_app/artifacts/multilingual/experiments/data_centric/training_quality_audit_v2.csv
+sentiment_app/artifacts/multilingual/experiments/data_centric/conflict_groups_v2.csv
+sentiment_app/artifacts/multilingual/experiments/data_centric/train_clean_v2.csv
+sentiment_app/artifacts/multilingual/experiments/data_centric/train_quality_scores.csv
